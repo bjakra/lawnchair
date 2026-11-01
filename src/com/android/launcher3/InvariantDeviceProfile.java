@@ -426,7 +426,8 @@ public class InvariantDeviceProfile {
         numRows = closestProfile.numRows;
         numColumns = closestProfile.numColumns;
         numSearchContainerColumns = closestProfile.numSearchContainerColumns;
-        dbFile = closestProfile.dbFile;
+        // Lawnchair: dbFile comes from applyLawnchairOverrides below. Lawnchair's grids have no
+        // dbFile, and briefly setting it to null lets a concurrent loader reset the database.
         gridType = closestProfile.gridType;
         defaultLayoutId = closestProfile.defaultLayoutId;
 
