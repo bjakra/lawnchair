@@ -15,6 +15,7 @@
  */
 package com.android.launcher3.uioverrides.states;
 
+import com.android.launcher3.util.Themes;
 import static com.android.launcher3.Utilities.shouldReduceWorkspaceBlurUsage;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_ALLAPPS;
 

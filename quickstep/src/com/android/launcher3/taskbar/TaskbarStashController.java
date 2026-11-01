@@ -1416,7 +1416,7 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
                         && mActivity.isDesktopFormFactor();
 
         long stashMask = SYSUI_STATE_DIALOG_SHOWING;
-        if (!ENABLE_TASKBAR_BEHIND_SHADE.isTrue() && !isDualShadeDesktop) {
+        if (!ENABLE_TASKBAR_BEHIND_SHADE && !isDualShadeDesktop) {
             // Stash when the notification panel is visible, UNLESS:
             // 1. The "Taskbar behind shade" flag is enabled.
             // 2. It is a dual-shade desktop environment.

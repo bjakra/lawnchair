@@ -15,6 +15,7 @@
  */
 package com.android.launcher3.uioverrides;
 
+import static android.os.Trace.TRACE_TAG_APP;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OPTIMIZE_MEASURE;
@@ -94,6 +95,7 @@ import android.graphics.RectF;
 import android.hardware.display.DisplayManager;
 import android.media.permission.SafeCloseable;
 import android.os.Build;
+import android.os.Trace;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.os.SystemProperties;

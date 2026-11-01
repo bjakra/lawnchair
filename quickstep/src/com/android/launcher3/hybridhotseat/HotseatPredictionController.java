@@ -15,6 +15,7 @@
  */
 package com.android.launcher3.hybridhotseat;
 
+import android.content.Context;
 import app.lawnchair.ui.preferences.navigation.Predictions;
 import app.lawnchair.ui.preferences.PreferenceActivity;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
@@ -128,6 +129,20 @@ public class HotseatPredictionController implements
      */
     public void setPredictedItems(PredictedContainerInfo items) {
         mHotseatOrganizer.setPredictedItems(items.getContents());
+    }
+
+    private CellLayout getPageForRank(int rank) {
+        return mHotseat.getPageAt(mHotseat.getPageFromOrder(rank));
+    }
+
+    private View getChildAtRank(int rank) {
+        CellLayout page = getPageForRank(rank);
+        if (page == null) {
+            return null;
+        }
+        return page.getChildAt(
+                mHotseat.getCellXFromOrder(rank),
+                mHotseat.getCellYFromOrder(rank));
     }
 
     /**

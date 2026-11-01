@@ -40,6 +40,18 @@ class LauncherDepthController(
         blurWorkspaceDepthTargets()
     }
 
+    /** Lawnchair: clears a stuck workspace icon blur after resume when settled on home. */
+    fun clearStuckBlurOnResumeIfHome() {
+        val stateManager = launcher.stateManager
+        if (stateManager.state == LauncherState.NORMAL && !stateManager.isInTransition) {
+            launcher.depthBlurTargets.forEach {
+                it.setRenderEffect(null)
+                it.invalidate()
+            }
+            applyDepthAndBlur()
+        }
+    }
+
     /** Returns `true` if the workspace should be blurred. This return value is only for tests. */
     @VisibleForTesting
     fun blurWorkspaceDepthTargets(): Boolean {

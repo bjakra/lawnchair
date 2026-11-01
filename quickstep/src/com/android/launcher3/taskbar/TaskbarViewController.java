@@ -1217,14 +1217,15 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
                                     ? Interpolators.clampToProgress(LINEAR, 0f, 0.07f)
                                     : Interpolators.clampToProgress(LINEAR, 0.93f, 1f));
                 }
-            } else if (((!isRtl && mTaskbarView.getChildCount() - i <= ignoreCount)
-                    || (isRtl && i < ignoreCount))
+            } else if (((!isRtl && mTaskbarView.getChildCount() - i
+                            <= mTaskbarView.getIgnoreTaskbarIconCount())
+                    || (isRtl && i < mTaskbarView.getIgnoreTaskbarIconCount()))
                     && mIsHotseatIconOnTopWhenAligned
                     && !(child instanceof IconButtonView)) {
                 setter.addFloat(child, VIEW_ALPHA, 0f, 1f,
                         isToHome
                                 ? Interpolators.clampToProgress(LINEAR, 0f, 0.35f)
-                                : mActivity.getDeviceProfile().isQsbInline
+                                : mActivity.getDeviceProfile().getHotseatProfile().isQsbInline()
                                         ? Interpolators.clampToProgress(LINEAR, 0f, 1f)
                                         : Interpolators.clampToProgress(LINEAR, 0.84f, 1f));
                 setter.addOnFrameListener(animator -> AlphaUpdateListener.updateVisibility(child));

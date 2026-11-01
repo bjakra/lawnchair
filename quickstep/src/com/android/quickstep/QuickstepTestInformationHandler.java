@@ -145,7 +145,8 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
 
             case TestProtocol.REQUEST_GET_BUBBLE_BAR_DROP_TARGET_SIZE: {
                 int dimenResId = DeviceConfig.isSmallTablet(mContext)
-                        ? R.dimen.drag_zone_bubble_fold : R.dimen.drag_zone_bubble_tablet;
+                        ? com.android.wm.shell.R.dimen.drag_zone_bubble_fold
+                        : com.android.wm.shell.R.dimen.drag_zone_bubble_tablet;
                 response.putInt(TestProtocol.TEST_INFO_RESPONSE_FIELD,
                         mContext.getResources().getDimensionPixelSize(dimenResId));
                 return response;

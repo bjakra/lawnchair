@@ -15,6 +15,7 @@
  */
 package com.android.launcher3.allapps;
 
+import android.content.Context;
 import static android.view.View.GONE;
 
 import static com.android.launcher3.allapps.SectionDecorationInfo.ROUND_BOTTOM_LEFT;
@@ -312,7 +313,6 @@ public abstract class BaseAllAppsAdapter
                 icon.setOnFocusChangeListener(mIconFocusListener);
                 icon.configureMinimalPopup(
                         holder.getItemViewType() == VIEW_TYPE_PRIVATE_SPACE_APP_ICON);
-                PrivateProfileManager privateProfileManager = mApps.getPrivateProfileManager();
                 if (privateProfileManager != null) {
                     // Set the alpha of the private space icon to 0 upon expanding the header so the
                     // alpha can animate -> 1. This should only be in effect when doing a
@@ -387,7 +387,7 @@ public abstract class BaseAllAppsAdapter
                 container.removeAllViews();
                 // LC-Note: Implement long-press support for folder type for purposes like showing popup
                 FolderIcon folderIcon = FolderIcon.inflateFolderAndIcon(
-                        R.layout.all_apps_folder_icon, mActivityContext, container, folderInfo);
+                        R.layout.all_apps_folder_icon, (Context & ActivityContext) mActivityContext, container, folderInfo);
                 folderIcon.setOnLongClickListener(mOnIconLongClickListener);
                 container.addView(folderIcon);
                 break;

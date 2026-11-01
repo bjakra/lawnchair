@@ -108,7 +108,7 @@ public class ModelUtils {
         try (LauncherIcons li = LauncherIcons.obtain(context)) {
             Bitmap bitmap = (Bitmap) icon;
             if (bitmap != null) {
-                iconInfo = li.createIconBitmap(bitmap);
+                iconInfo = li.createIconBitmap(bitmap, false);
             } else {
                 Intent.ShortcutIconResource resource =
                         (Intent.ShortcutIconResource) iconResource;

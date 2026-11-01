@@ -37,9 +37,7 @@ import com.android.launcher3.Utilities;
 import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.statehandlers.BaseDepthController;
 import com.android.launcher3.statemanager.BaseState;
-import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StatefulContainer;
-import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.ListenableRef;
 import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.MultiPropertyFactory.MultiProperty;
@@ -238,32 +236,6 @@ public class BaseDepthControllerImpl<
             mWallpaperManager.setWallpaperZoomOut(windowToken, wallpaperZoom);
         }
 
-        boolean hasOpaqueBg = mLauncher.getScrimView().isFullyOpaque();
-        boolean isSurfaceOpaque = !mHasContentBehindLauncher && hasOpaqueBg && !mPauseBlurs;
-
-        float blurAmount;
-        if (enableScalingRevealHomeAnimation()) {
-            blurAmount = mapDepthToBlur(depth);
-        } else {
-            blurAmount = depth;
-        }
-
-        int previousBlur = mCurrentBlur;
-        int newBlur = BlurUtils.supportsBlursOnWindows() && mCrossWindowBlursEnabled
-                && !hasOpaqueBg && !mPauseBlurs
-                ? (int) (blurAmount * mMaxBlurRadius) : 0;
-        int delta = Math.abs(newBlur - previousBlur);
-        boolean skipUpdate = skipSimilarBlur && delta < Utilities.dpToPx(1) && newBlur != 0
-                && previousBlur != 0 && blurAmount != 1f;
-
-        // Always keep mCurrentBlur and workspace RenderEffects in sync with depth, even when the
-        // SurfaceControl is temporarily unavailable. Otherwise setDepth(0) can early-return later
-        // (same depth) and leave workspace/hotseat stuck blurred until the activity restarts.
-        if (!skipUpdate) {
-            mCurrentBlur = newBlur;
-            blurWorkspaceDepthTargets();
-        }
-
         if (!BlurUtils.supportsBlursOnWindows()) {
             return;
         }
@@ -360,7 +332,7 @@ public class BaseDepthControllerImpl<
             mContainer.getRootView().getViewRootImpl().notifyRendererOfExpensiveFrame("applyBlur");
             transaction.setEarlyWakeupStart(mEarlyWakeupInfo);
         } else {
-//            transaction.setEarlyWakeupEnd();
+            transaction.setEarlyWakeupEnd(mEarlyWakeupInfo);
         }
         mInEarlyWakeUp = start;
     }
@@ -380,11 +352,6 @@ public class BaseDepthControllerImpl<
             depthF = depthI / 256f;
         }
         if (Float.compare(mDepth, depthF) == 0) {
-            // Depth is unchanged, but a previous apply may have returned early (invalid surface)
-            // leaving blur stuck. Force a re-apply when clearing.
-            if (depthF == 0f && mCurrentBlur != 0) {
-                applyDepthAndBlur();
-            }
             return;
         }
         mDepth = depthF;

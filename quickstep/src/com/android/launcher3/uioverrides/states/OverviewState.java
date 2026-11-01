@@ -15,6 +15,7 @@
  */
 package com.android.launcher3.uioverrides.states;
 
+import app.lawnchair.LawnchairApp;
 import static com.android.app.animation.Interpolators.DECELERATE_2;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_OVERVIEW;
 import static com.android.launcher3.util.OverviewReleaseFlags.enablePredictiveBackInOverview;

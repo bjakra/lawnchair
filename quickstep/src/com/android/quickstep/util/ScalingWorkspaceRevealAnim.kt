@@ -68,6 +68,29 @@ class ScalingWorkspaceRevealAnim(
         private const val FADE_DURATION_MS = 200L
         private const val SCALE_DURATION_MS = 1000L
         private const val MAX_ALPHA = 1f
+
+        /**
+         * Ensures workspace and hotseat are visible after swipe-to-home when a reveal animation
+         * was cancelled or interrupted before restoring alpha.
+         */
+        @JvmStatic
+        fun ensureHomeContentVisible(launcher: QuickstepLauncher) {
+            if (!launcher.isInState(LauncherState.NORMAL)) {
+                return
+            }
+            val workspace = launcher.workspace
+            val hotseat = launcher.hotseat
+            if (
+                workspace.alpha < MAX_ALPHA ||
+                    hotseat.alpha < MAX_ALPHA ||
+                    !workspace.isVisible ||
+                    !hotseat.isVisible
+            ) {
+                workspace.alpha = MAX_ALPHA
+                hotseat.alpha = MAX_ALPHA
+                launcher.stateManager.reapplyState()
+            }
+        }
         private const val MIN_ALPHA = 0f
         internal const val MAX_SIZE = 1f
         internal const val MIN_SIZE = 0.85f

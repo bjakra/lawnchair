@@ -252,7 +252,7 @@ public final class OverviewComponentObserver {
             unregisterOtherHomeAppUpdateReceiver();
         } else {
             // The default home app is a different launcher. Use the fallback Overview instead.
-            if (enableFallbackOverviewInWindow) {
+            if (enableFallbackOverviewInWindow.isTrue()) {
                 RecentsWindowManager recentsWindowManager = mRecentsWindowManagerRepository.get(
                         DEFAULT_DISPLAY);
                 mDefaultDisplayContainerInterface =

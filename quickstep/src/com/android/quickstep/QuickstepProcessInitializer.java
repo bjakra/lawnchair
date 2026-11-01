@@ -15,6 +15,7 @@
  */
 package com.android.quickstep;
 
+import com.android.launcher3.BuildConfig;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.ImageDecoder;

@@ -58,6 +58,7 @@ import com.android.launcher3.logging.FileLog
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.IconRequestInfo
 import com.android.launcher3.model.data.ItemInfoWithIcon
+import com.android.launcher3.icons.cache.CacheLookupFlag.Companion.DEFAULT_LOOKUP_FLAG
 import com.android.launcher3.model.data.PackageItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.pm.InstallSessionHelper
@@ -280,6 +281,13 @@ constructor(
     }
 
     /** Returns the badging info for the shortcut */
+    /** Lawnchair: the badge for legacy shortcuts, which have no [ShortcutInfo]. */
+    fun getShortcutInfoBadge(packageName: String, user: UserHandle): BitmapInfo {
+        val pkgInfo = PackageItemInfo(packageName, user)
+        getTitleAndIconForApp(pkgInfo, DEFAULT_LOOKUP_FLAG)
+        return pkgInfo.bitmap
+    }
+
     fun getShortcutInfoBadge(shortcutInfo: ShortcutInfo, lookupFlags: CacheLookupFlag): BitmapInfo =
         getShortcutInfoBadgeItem(shortcutInfo, lookupFlags).bitmap
 

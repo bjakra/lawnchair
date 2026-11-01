@@ -16,6 +16,8 @@
 
 package com.android.launcher3.statehandlers;
 
+import app.lawnchair.preferences2.PreferenceManager2;
+import app.lawnchair.preferences2.PreferenceCacheExtensionsKt;
 import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.launcher3.states.StateAnimationConfig.ANIM_DEPTH;
 import static com.android.launcher3.states.StateAnimationConfig.SKIP_DEPTH_CONTROLLER;
@@ -28,23 +30,15 @@ import android.view.ViewTreeObserver;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.android.launcher3.BaseActivity;
-import com.android.launcher3.LauncherState;
-import com.android.launcher3.Utilities;
 import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.statemanager.BaseState;
 import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.statemanager.StatefulContainer;
 import com.android.launcher3.states.StateAnimationConfig;
-import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.ListenableRef;
 import com.android.quickstep.util.BaseDepthControllerImpl;
 
 import java.io.PrintWriter;
-
-import app.lawnchair.preferences2.PreferenceCacheExtensionsKt;
-import app.lawnchair.compat.LawnchairQuickstepCompat;
-import app.lawnchair.preferences2.PreferenceManager2;
 
 /**
  * Controls blur and wallpaper zoom.
@@ -56,6 +50,8 @@ public class DepthController<
         CONTAINER extends Context & StatefulContainer<STATE>>
         extends BaseDepthControllerImpl<STATE, CONTAINER>
         implements StateHandler<STATE> {
+    private final boolean mEnableDepth;
+
     public static final float DEPTH_0_PERCENT = 0f;
     public static final float DEPTH_70_PERCENT = 0.7f;
 
@@ -73,18 +69,15 @@ public class DepthController<
 
     public DepthController(CONTAINER container, ListenableRef<Boolean> blurState) {
         super(container, blurState);
+        // Lawnchair: the wallpaper depth setting
+        mEnableDepth = PreferenceCacheExtensionsKt.firstCached(
+                PreferenceManager2.getInstance(mContainer.asContext()).getWallpaperDepthEffect());
     }
 
     private void onContainerDraw() {
         View view = mContainer.getDragLayer();
         ViewRootImpl viewRootImpl = view.getViewRootImpl();
-        try {
-            if (Utilities.ATLEAST_Q) {
-                setBaseSurface(viewRootImpl != null ? viewRootImpl.getSurfaceControl() : null);
-            }
-        } catch (Throwable t) {
-            // LC-Ignored
-        }
+        setBaseSurface(viewRootImpl != null ? viewRootImpl.getSurfaceControl() : null);
         mRemoveOnDrawListenerCancelled = false;
         view.post(() -> {
             if (!mRemoveOnDrawListenerCancelled) {
@@ -138,12 +131,6 @@ public class DepthController<
         if (toState == mContainer.getBackgroundAppState()) {
             addOnDrawListener();
         }
-        // Re-apply even when depth is already 0 so an interrupted All Apps / depth transition
-        // cannot leave workspace RenderEffect or surface blur stuck until the next resume.
-        if (toState == LauncherState.NORMAL) {
-            clearWorkspaceRenderEffects();
-            applyDepthAndBlur();
-        }
     }
 
     @Override
@@ -156,47 +143,15 @@ public class DepthController<
         float toDepth = toState.getDepth(mContainer);
         animation.setFloat(stateDepth, MULTI_PROPERTY_VALUE, toDepth,
                 config.getInterpolator(ANIM_DEPTH, LINEAR));
-        if (toState == LauncherState.NORMAL) {
-            animation.addEndListener(success -> {
-                if (mLauncher.getStateManager().getState() == LauncherState.NORMAL) {
-                    clearWorkspaceRenderEffects();
-                    applyDepthAndBlur();
-                }
-            });
-        }
-    }
-
-    /**
-     * Clears a stuck workspace icon blur after resume when settled on home.
-     */
-    public void clearStuckBlurOnResumeIfHome() {
-        if (mLauncher.getStateManager().getState() == LauncherState.NORMAL
-                && !mLauncher.getStateManager().isInTransition()) {
-            clearWorkspaceRenderEffects();
-            applyDepthAndBlur();
-        }
     }
 
     @Override
     protected void applyDepthAndBlur() {
-        try {
-            if (LawnchairQuickstepCompat.ATLEAST_R && mEnableDepth) {
-                ensureDependencies();
-                super.applyDepthAndBlur();
-            } else if (mLauncher.getStateManager().getState() == LauncherState.NORMAL
-                    && !mLauncher.getStateManager().isInTransition()) {
-                clearWorkspaceRenderEffects();
-            }
-        } catch (Throwable t) {
-            // LC-Ignored
-            if (mLauncher.getStateManager().getState() == LauncherState.NORMAL) {
-                try {
-                    clearWorkspaceRenderEffects();
-                } catch (Throwable ignored) {
-                    // LC-Ignored
-                }
-            }
+        if (!mEnableDepth) {
+            return;
         }
+        ensureDependencies();
+        super.applyDepthAndBlur();
     }
 
     @Override

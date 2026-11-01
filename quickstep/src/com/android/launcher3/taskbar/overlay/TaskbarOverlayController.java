@@ -146,7 +146,7 @@ public final class TaskbarOverlayController
     /**
      * Token for early wakeup requests to SurfaceFlinger.
      */
-//    private EarlyWakeupInfo mEarlyWakeupInfo = new EarlyWakeupInfo(); // pE-TODO(QuickSwitch-Baklava): Investigate
+    private EarlyWakeupInfo mEarlyWakeupInfo = new EarlyWakeupInfo(); // pE-TODO(QuickSwitch-Baklava): Investigate
 
     public TaskbarOverlayController(
             TaskbarActivityContext taskbarContext, DeviceProfile launcherDeviceProfile) {
@@ -375,20 +375,12 @@ public final class TaskbarOverlayController
 //                                                    + mEarlyWakeupInfo);
                 Trace.instantForTrack(TRACE_TAG_APP, TAG, "notifyRendererForGpuLoadUp");
                 dragLayerViewRoot.notifyRendererForGpuLoadUp("setBackgroundBlurRadius");
-                try {
-//                    transaction.setEarlyWakeupStart(mEarlyWakeupInfo);
-                } catch (NoSuchMethodError e) {
-                    // LC-Ignored: wtf?
-                }
+                transaction.setEarlyWakeupStart(mEarlyWakeupInfo);
                 mInEarlyWakeUp = true;
             } else if (!wantsEarlyWakeUp && mInEarlyWakeUp) {
 //                Log.d(TAG, "setBackgroundBlurRadius: clearing early wakeup with token "
 //                                                    + mEarlyWakeupInfo);
-                try {
-//                    transaction.setEarlyWakeupEnd(mEarlyWakeupInfo);
-                } catch (NoSuchMethodError e) {
-                    // LC-Ignored: wtf?
-                }
+                transaction.setEarlyWakeupEnd(mEarlyWakeupInfo);
                 mInEarlyWakeUp = false;
             }
 

@@ -16,6 +16,7 @@
 
 package com.android.launcher3.folder;
 
+import com.android.launcher3.model.IModelWriter;
 import static android.text.TextUtils.isEmpty;
 
 import static com.android.launcher3.Flags.blurOnMoreSurfaces;
@@ -543,7 +544,7 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
      * Returns null for drawer folders so callers only update the in-memory state.
      */
     @Nullable
-    private ModelWriter getModelWriter() {
+    private IModelWriter getModelWriter() {
         return isInAppDrawer() ? null : mActivityContext.getModelWriter();
     }
 

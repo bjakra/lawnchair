@@ -16,6 +16,8 @@
 
 package app.lawnchair;
 
+import com.android.launcher3.widget.ColorsOverride;
+import android.appwidget.AppWidgetHostView;
 import android.app.WallpaperColors;
 import android.content.Context;
 import android.os.Build;
@@ -71,12 +73,28 @@ public class AccentColorExtractor extends LocalColorExtractor implements ThemePr
     }
 
     @Override
-    public void applyColorsOverride(Context base, WallpaperColors colors) {
-        RemoteViews.ColorResources res =
-                RemoteViews.ColorResources.create(base, generateColorsOverride(colors));
-        if (res != null) {
-            res.apply(base);
+    public ColorsOverride applyColorsOverride(Context base, WallpaperColors colors) {
+        return applyColorsOverride(base, generateColorsOverride(colors));
+    }
+
+    @Override
+    public ColorsOverride applyColorsOverride(Context base, SparseIntArray override) {
+        RemoteViews.ColorResources res = RemoteViews.ColorResources.create(base, override);
+        if (res == null) {
+            return null;
         }
+        res.apply(base);
+        return new ColorsOverride() {
+            @Override
+            public void applyTo(Context context) {
+                res.apply(context);
+            }
+
+            @Override
+            public void applyTo(AppWidgetHostView widget) {
+                widget.setColorResources(override);
+            }
+        };
     }
 
     @Override

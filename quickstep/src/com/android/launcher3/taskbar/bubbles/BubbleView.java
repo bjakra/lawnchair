@@ -41,7 +41,6 @@ import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
 import com.android.wm.shell.shared.bubbles.BubbleInfo;
 
 import app.lawnchair.preferences2.PreferenceCacheExtensionsKt;
-import app.lawnchair.preferences2.PreferenceManager2;
 import app.lawnchair.theme.color.ColorOption;
 
 import java.util.EnumSet;
@@ -107,8 +106,6 @@ public class BubbleView extends ConstraintLayout {
         LayoutInflater.from(context).inflate(R.layout.bubble_view, this);
         mBubbleIcon = findViewById(R.id.icon_view);
         mAppIcon = findViewById(R.id.app_icon_view);
-
-        preferenceManager2 = PreferenceManager2.INSTANCE.get(context);
 
         mDrawParams = new DotRenderer.DrawParams();
         // TODO: (b/273310265) handle RTL

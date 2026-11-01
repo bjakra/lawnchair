@@ -214,9 +214,6 @@ public class LauncherAnimationRunner extends RemoteAnimationRunnerCompat {
                         finish();
                     }
                 });
-                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.TIRAMISU) {
-                    mAnimator.start();
-                }
 
                 if (skipFirstFrame) {
                     // Because t=0 has the app icon in its original spot, we can skip the

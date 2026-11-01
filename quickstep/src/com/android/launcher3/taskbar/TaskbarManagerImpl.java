@@ -222,7 +222,7 @@ public class TaskbarManagerImpl {
                         // Only Handles Special Exit Cases for Desktop Mode Taskbar Recreation.
                         if (!taskbarActivityContext.showDesktopTaskbarForFreeformDisplay()) {
                             int recreateDuration = taskbarActivityContext.getResources().getInteger(
-                                    R.integer.to_desktop_animation_duration_ms);
+                                    com.android.wm.shell.R.integer.to_desktop_animation_duration_ms);
                             AnimatorSet animatorSet = taskbarActivityContext.onDestroyAnimation(
                                     TASKBAR_DESTROY_DURATION);
                             animatorSet.addListener(AnimatorListeners.forEndCallback(
