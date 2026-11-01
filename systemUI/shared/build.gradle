@@ -39,6 +39,7 @@ dependencies {
     compileOnly projects.log
 
     implementation libs.dagger.hilt.android
+    implementation projects.tracinglib
     ksp libs.dagger.hilt.compiler
 
     implementation libs.androidx.concurrent.futures

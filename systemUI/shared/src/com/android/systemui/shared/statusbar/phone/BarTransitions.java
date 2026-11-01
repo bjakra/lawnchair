@@ -30,7 +30,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import android.util.Log;
@@ -206,21 +205,10 @@ public class BarTransitions {
                 mOpaqueLight = SYSTEM_BAR_BACKGROUND_OPAQUE_LIGHT;
                 mSemiTransparent = context.getColor(
                         com.android.internal.R.color.system_bar_background_semi_transparent);
-            } catch (Resources.NotFoundException e) {
-                return 0x66000000;
+                mTransparent = SYSTEM_BAR_BACKGROUND_TRANSPARENT;
+                mWarning = getColorAttrDefaultColor(context, android.R.attr.colorError, 0);
             }
-        }
-
-        private static Drawable loadGradientDrawable(Context context, int gradientResourceId) {
-            if (gradientResourceId == 0) {
-                return new ColorDrawable(Color.TRANSPARENT);
-            }
-            try {
-                Drawable d = context.getDrawable(gradientResourceId);
-                return d != null ? d : new ColorDrawable(Color.TRANSPARENT);
-            } catch (Resources.NotFoundException e) {
-                return new ColorDrawable(Color.TRANSPARENT);
-            }
+            mGradient = context.getDrawable(gradientResourceId);
         }
 
         public void setFrame(Rect frame) {
