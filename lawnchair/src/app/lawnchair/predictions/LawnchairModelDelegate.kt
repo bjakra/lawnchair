@@ -88,7 +88,6 @@ class LawnchairModelDelegate @Inject constructor(
         when (currentPredictionMode()) {
             SystemPredictor -> {
                 mAllPredictionAppsState.requestPredictionUpdate()
-                mWidgetsRecommendationState.requestPredictionUpdate()
             }
 
             LawnchairPredictor -> if (Utilities.ATLEAST_Q) {
@@ -112,7 +111,6 @@ class LawnchairModelDelegate @Inject constructor(
     private fun destroyPredictors() {
         mAllPredictionAppsState.destroyPredictor()
         mHotseatPredictionState.destroyPredictor()
-        mWidgetsRecommendationState.destroyPredictor()
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -125,7 +123,6 @@ class LawnchairModelDelegate @Inject constructor(
             dataModel = mDataModel,
             allAppsState = mAllPredictionAppsState,
             hotseatState = mHotseatPredictionState,
-            widgetsState = mWidgetsRecommendationState,
             idp = idp,
         )
         updateLawnchairPredictions()
@@ -138,7 +135,6 @@ class LawnchairModelDelegate @Inject constructor(
             dataModel = mDataModel,
             allAppsState = mAllPredictionAppsState,
             hotseatState = mHotseatPredictionState,
-            widgetsState = mWidgetsRecommendationState,
             idp = idp,
         )
     }
@@ -149,7 +145,6 @@ class LawnchairModelDelegate @Inject constructor(
             model = mModel,
             allAppsState = mAllPredictionAppsState,
             hotseatState = mHotseatPredictionState,
-            widgetsState = mWidgetsRecommendationState,
         )
     }
 

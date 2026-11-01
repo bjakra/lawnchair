@@ -17,9 +17,11 @@
 package com.android.launcher3.dagger
 
 import app.lawnchair.LawnchairProcessInitializer
+import app.lawnchair.overview.TaskOverlayFactoryImpl
 import app.lawnchair.predictions.LawnchairModelDelegate
 import com.android.launcher3.MainProcessInitializer
 import com.android.launcher3.model.ModelDelegate
+import com.android.quickstep.TaskOverlayFactory
 import com.android.launcher3.model.QuickstepModelDelegate
 import com.android.launcher3.util.BaseDefaultsValueProvider
 import com.android.launcher3.util.DefaultsValueProvider
@@ -44,6 +46,8 @@ abstract class AppModule {
     abstract fun bindMainProcessInitializer(
         impl: LawnchairProcessInitializer
     ): MainProcessInitializer
+
+    @Binds abstract fun bindTaskOverlayFactory(impl: TaskOverlayFactoryImpl): TaskOverlayFactory
 }
 
 @Module abstract class ProductionAppModule

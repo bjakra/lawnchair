@@ -65,7 +65,7 @@ fun HomeScreenGridPreferences(
         val hotseatColumnsAdapter = prefs.hotseatColumns.getAdapter()
         val hotseatColumnsUnfoldedAdapter = prefs.hotseatColumnsUnfolded.getAdapter()
         val increaseMaxGridSize = prefs.workspaceIncreaseMaxGridSize.getAdapter()
-        val isFoldable = InvariantDeviceProfile.deviceType == InvariantDeviceProfile.TYPE_MULTI_DISPLAY
+        val isFoldable = InvariantDeviceProfile.INSTANCE.get(LocalContext.current).deviceType == InvariantDeviceProfile.TYPE_MULTI_DISPLAY
 
         val originalColumns = remember { columnsAdapter.state.value }
         val originalRows = remember { rowsAdapter.state.value }

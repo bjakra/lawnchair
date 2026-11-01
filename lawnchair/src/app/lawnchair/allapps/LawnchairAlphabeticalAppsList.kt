@@ -28,15 +28,16 @@ import com.patrykmichalik.opto.core.onEach
 import java.util.function.Predicate
 
 @Suppress("SYNTHETIC_PROPERTY_WITHOUT_JAVA_ORIGIN")
-class LawnchairAlphabeticalAppsList<T>(
-    private val context: T,
-    private val appsStore: AllAppsStore<T>,
+class LawnchairAlphabeticalAppsList(
+    activityContext: ActivityContext,
+    private val appsStore: AllAppsStore?,
     workProfileManager: WorkProfileManager?,
     privateProfileManager: PrivateProfileManager?,
-) : AlphabeticalAppsList<T>(context, appsStore, workProfileManager, privateProfileManager),
+) : AlphabeticalAppsList(activityContext, appsStore, workProfileManager, privateProfileManager),
     OnIDPChangeListener,
-    DefaultLifecycleObserver
-    where T : Context, T : ActivityContext {
+    DefaultLifecycleObserver {
+
+    private val context: Context = activityContext.asContext()
 
     private var hiddenApps: Set<String> = setOf()
     private val prefs2 = PreferenceManager2.getInstance(context)
@@ -57,7 +58,7 @@ class LawnchairAlphabeticalAppsList<T>(
                 onAppsUpdated()
             }
         } catch (t: Throwable) {
-            Log.w(TAG, "Failed to initialize hidden apps", t)
+            Log.w(AlphabeticalAppsList.TAG, "Failed to initialize hidden apps", t)
         }
         observeFolders()
     }
@@ -114,7 +115,7 @@ class LawnchairAlphabeticalAppsList<T>(
             folderList.forEach { folderEntry ->
                 val resolvedApps = folderEntry.itemComponentKeys.mapNotNull { keyString ->
                     val componentKey = ComponentKey.fromString(keyString) ?: return@mapNotNull null
-                    appsStore.getApp(componentKey) as? AppInfo
+                    appsStore?.getApp(componentKey) as? AppInfo
                 }
 
                 if (resolvedApps.size > 1) {

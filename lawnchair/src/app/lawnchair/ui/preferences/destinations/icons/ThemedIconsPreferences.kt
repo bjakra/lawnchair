@@ -47,7 +47,7 @@ import app.lawnchair.ui.preferences.components.layout.PreferenceLayout
 import app.lawnchair.ui.preferences.components.layout.PreferenceTemplate
 import app.lawnchair.ui.util.addIf
 import com.android.launcher3.R
-import com.android.launcher3.util.painterResource
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
 enum class ThemedIconsState(
     @StringRes val labelResourceId: Int,
@@ -155,7 +155,7 @@ fun ThemedIconsPreferences(
                             .let {
                                 if (it?.icon !== null) {
                                     Image(
-                                        painter = painterResource(it.icon),
+                                        painter = rememberDrawablePainter(it.icon),
                                         contentDescription = null,
                                         modifier = Modifier
                                             .size(42.dp)

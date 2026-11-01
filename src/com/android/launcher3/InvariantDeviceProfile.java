@@ -146,6 +146,9 @@ public class InvariantDeviceProfile {
     public int iconBitmapSize;
     public int fillResIconDpi;
     public @DeviceType int deviceType;
+
+    private DeviceProfileOverrides.DBGridInfo mPreviewGridInfo;
+    private DeviceProfileOverrides.PreviewOverrides mPreviewOverrides;
     public LauncherDisplayInfo displayInfo;
 
     public PointF[] minCellSize;
@@ -316,6 +319,23 @@ public class InvariantDeviceProfile {
         lifeCycle.addCloseable(localeReceiver);
     }
 
+    /**
+     * Lawnchair: an unregistered copy with its own grid, for previews. Leaves the saved grid alone.
+     */
+    public InvariantDeviceProfile(Context context, DeviceProfileOverrides.DBGridInfo gridInfo,
+            DeviceProfileOverrides.PreviewOverrides previewOverrides) {
+        InvariantDeviceProfile current = INSTANCE.get(context);
+        mDisplayController = current.mDisplayController;
+        mWMProxy = current.mWMProxy;
+        taskbarModeUtil = current.taskbarModeUtil;
+        mPrefs = current.mPrefs;
+        mThemeManager = current.mThemeManager;
+        mMainExecutor = current.mMainExecutor;
+        mPreviewGridInfo = gridInfo;
+        mPreviewOverrides = previewOverrides;
+        initGrid(DeviceProfileOverrides.INSTANCE.get(context).getGridName(gridInfo));
+    }
+
     private void initGrid(String gridName) {
         LauncherDisplayInfo displayInfo = mDisplayController.getInfo();
         List<DisplayOption> allOptions = getPredefinedDeviceProfiles(
@@ -336,7 +356,8 @@ public class InvariantDeviceProfile {
         // Filter out options that don't have the same number of columns as the grid
         DeviceGridState deviceGridState = new DeviceGridState(mPrefs);
         List<DisplayOption> allOptionsFilteredByColCount =
-                filterByColumnCount(allOptions, deviceGridState.getColumns());
+                filterByColumnCount(allOptions, mPreviewGridInfo != null
+                        ? mPreviewGridInfo.getNumColumns() : deviceGridState.getColumns());
 
         DisplayOption displayOption =
                 invDistWeightedInterpolate(displayInfo, allOptionsFilteredByColCount.isEmpty()
@@ -344,7 +365,7 @@ public class InvariantDeviceProfile {
                                 : new ArrayList<>(allOptionsFilteredByColCount),
                         displayInfo.getDeviceType());
 
-        if (!displayOption.grid.name.equals(gridName)) {
+        if (mPreviewGridInfo == null && !displayOption.grid.name.equals(gridName)) {
             mPrefs.put(GRID_NAME, displayOption.grid.name);
         }
 
@@ -380,7 +401,8 @@ public class InvariantDeviceProfile {
     /** Lawnchair: applies the user's home screen grid and icon settings on top of the grid. */
     private void applyLawnchairOverrides(Context context, GridOption grid) {
         DeviceProfileOverrides overrides = DeviceProfileOverrides.INSTANCE.get(context);
-        DeviceProfileOverrides.DBGridInfo gridInfo = overrides.getGridInfo();
+        DeviceProfileOverrides.DBGridInfo gridInfo =
+                mPreviewGridInfo != null ? mPreviewGridInfo : overrides.getGridInfo();
         numRows = gridInfo.getNumRows();
         numColumns = gridInfo.getNumColumns();
         dbFile = gridInfo.getDbFile();
@@ -388,7 +410,7 @@ public class InvariantDeviceProfile {
             numShownHotseatIcons = gridInfo.getNumHotseatColumns();
             numDatabaseHotseatIcons = numShownHotseatIcons;
         }
-        overrides.getOverrides(grid, deviceType, null).applyUi(this);
+        overrides.getOverrides(grid, deviceType, mPreviewOverrides).applyUi(this);
     }
 
     private void initGridForDisplayOption(

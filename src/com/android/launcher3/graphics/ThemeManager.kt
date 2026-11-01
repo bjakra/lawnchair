@@ -240,7 +240,7 @@ constructor(
         val CONFIG_ICON_MASK_RES_ID: Int =
             Resources.getSystem().getIdentifier("config_icon_mask", "string", "android")
 
-        private fun ShapeDelegate.createIconShape(size: Int) =
+        fun ShapeDelegate.createIconShape(size: Int) =
             generateIconShape(size, getPath(size.toFloat()))
 
         const val ICON_FACTORY_DAGGER_KEY = "ICON_FACTORIES"

@@ -25,7 +25,6 @@ import com.android.launcher3.util.MSDLPlayerWrapper
 import com.android.launcher3.util.OnboardingPrefs.ALL_APPS_VISITED_COUNT
 import com.android.launcher3.util.OnboardingPrefs.HOME_BOUNCE_COUNT
 import com.android.launcher3.util.OnboardingPrefs.HOME_BOUNCE_SEEN
-import com.android.launcher3.util.OnboardingPrefs.HOTSEAT_DISCOVERY_TIP_COUNT
 import com.android.launcher3.util.OnboardingPrefs.HOTSEAT_LONGPRESS_TIP_SEEN
 import com.android.launcher3.util.OnboardingPrefs.TASKBAR_EDU_TOOLTIP_STEP
 import com.google.android.msdl.data.model.MSDLToken
@@ -113,7 +112,7 @@ private val onboardingPrefs = listOf(
     ),
     OnboardingPref(
         "Hybrid Hotseat Education",
-        listOf(HOTSEAT_DISCOVERY_TIP_COUNT.sharedPrefKey, HOTSEAT_LONGPRESS_TIP_SEEN.sharedPrefKey),
+        listOf(HOTSEAT_LONGPRESS_TIP_SEEN.sharedPrefKey),
     ),
     OnboardingPref("Taskbar Education", listOf(TASKBAR_EDU_TOOLTIP_STEP.sharedPrefKey)),
     OnboardingPref("All Apps Visited Count", listOf(ALL_APPS_VISITED_COUNT.sharedPrefKey)),

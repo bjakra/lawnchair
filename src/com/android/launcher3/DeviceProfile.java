@@ -486,6 +486,11 @@ public class DeviceProfile {
         return mDeviceProperties;
     }
 
+    /** Lawnchair: whether all apps is shown on a bottom sheet. */
+    public boolean shouldShowAllAppsOnSheet() {
+        return mDeviceProperties.isLargeScreen();
+    }
+
     public OverviewProfile getOverviewProfile() {
         return overviewProfile;
     }

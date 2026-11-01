@@ -13,7 +13,7 @@ suspend fun Launcher.animateToAllApps() {
     suspendCancellableCoroutine { cont ->
         val duration = LauncherState.ALL_APPS.getTransitionDuration(this, true).toLong()
         val config = StateAnimationConfig()
-        AllAppsSwipeController.applyNormalToAllAppsAnimConfig(this, config)
+        AllAppsSwipeController.applyNormalToAllAppsAnimConfig(config)
         config.duration = duration
 
         val animation = stateManager

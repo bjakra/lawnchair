@@ -56,10 +56,8 @@ class IconPackProvider @Inject constructor(
             if (user == Process.myUserHandle()) iconPack.getClock(iconEntry) else null
         try {
             if (clockMetadata != null) {
-                val clockDrawable: ClockDrawableWrapper =
-                    ClockDrawableWrapper.forMeta(Build.VERSION.SDK_INT, clockMetadata) {
-                        drawable
-                    }
+                val clockDrawable = ClockDrawableWrapper.forMeta(clockMetadata) { drawable }
+                    ?: return drawable
 
                 return if (context.shouldTransparentBGIcons()) {
                     clockDrawable.foreground

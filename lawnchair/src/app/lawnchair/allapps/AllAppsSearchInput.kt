@@ -98,7 +98,7 @@ class AllAppsSearchInput(context: Context, attrs: AttributeSet?) :
         Selection.setSelection(this, 0)
     }
 
-    private lateinit var apps: LawnchairAlphabeticalAppsList<*>
+    private lateinit var apps: LawnchairAlphabeticalAppsList
     private lateinit var appsView: ActivityAllAppsContainerView<*>
     private var searchAlgorithm: LawnchairSearchAlgorithm? = null
 
@@ -450,7 +450,7 @@ class AllAppsSearchInput(context: Context, attrs: AttributeSet?) :
     }
 
     override fun initializeSearch(appsView: ActivityAllAppsContainerView<*>) {
-        apps = appsView.searchResultList as LawnchairAlphabeticalAppsList<*>
+        apps = appsView.searchResultList as LawnchairAlphabeticalAppsList
         this.appsView = appsView
         val algorithm = LawnchairSearchAlgorithm.create(context)
         this.searchAlgorithm = algorithm
@@ -487,6 +487,8 @@ class AllAppsSearchInput(context: Context, attrs: AttributeSet?) :
             }
         }
     }
+
+    override fun isSearchQueryEmpty(): Boolean = input.text.isNullOrEmpty()
 
     override fun onSearchResult(query: String, items: ArrayList<AdapterItem>?) {
         if (items != null) {

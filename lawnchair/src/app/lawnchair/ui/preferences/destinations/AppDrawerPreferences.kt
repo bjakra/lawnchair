@@ -67,7 +67,7 @@ fun AppDrawerPreferences(
     val prefs2 = preferenceManager2()
     val context = LocalContext.current
     val resources = context.resources
-    val isFoldable = InvariantDeviceProfile.deviceType == InvariantDeviceProfile.TYPE_MULTI_DISPLAY
+    val isFoldable = InvariantDeviceProfile.INSTANCE.get(context).deviceType == InvariantDeviceProfile.TYPE_MULTI_DISPLAY
 
     PreferenceLayout(
         label = stringResource(id = R.string.app_drawer_label),

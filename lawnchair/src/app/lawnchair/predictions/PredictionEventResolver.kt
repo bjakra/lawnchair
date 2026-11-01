@@ -17,10 +17,7 @@ import com.android.launcher3.logger.LauncherAtom.ItemInfo
 import com.android.launcher3.logger.LauncherAtom.ItemInfo.ItemCase.APPLICATION
 import com.android.launcher3.logger.LauncherAtom.ItemInfo.ItemCase.TASK
 import com.android.launcher3.pm.UserCache
-import com.android.launcher3.util.UserIconInfo
-import com.android.launcher3.util.UserIconInfo.TYPE_CLONED
-import com.android.launcher3.util.UserIconInfo.TYPE_PRIVATE
-import com.android.launcher3.util.UserIconInfo.TYPE_WORK
+import com.android.users.UserType
 import com.android.systemui.shared.system.SysUiStatsLog.LAUNCHER_UICHANGED__USER_TYPE__TYPE_CLONED
 import com.android.systemui.shared.system.SysUiStatsLog.LAUNCHER_UICHANGED__USER_TYPE__TYPE_PRIVATE
 import com.android.systemui.shared.system.SysUiStatsLog.LAUNCHER_UICHANGED__USER_TYPE__TYPE_WORK
@@ -71,10 +68,10 @@ class PredictionEventResolver(private val userCache: UserCache) {
 
     private fun resolveUser(atomInfo: ItemInfo): UserHandle {
         val userType = when (atomInfo.userType) {
-            LAUNCHER_UICHANGED__USER_TYPE__TYPE_WORK -> TYPE_WORK
-            LAUNCHER_UICHANGED__USER_TYPE__TYPE_CLONED -> TYPE_CLONED
-            LAUNCHER_UICHANGED__USER_TYPE__TYPE_PRIVATE -> TYPE_PRIVATE
-            else -> UserIconInfo.TYPE_MAIN
+            LAUNCHER_UICHANGED__USER_TYPE__TYPE_WORK -> UserType.WORK
+            LAUNCHER_UICHANGED__USER_TYPE__TYPE_CLONED -> UserType.CLONED
+            LAUNCHER_UICHANGED__USER_TYPE__TYPE_PRIVATE -> UserType.PRIVATE
+            else -> UserType.MAIN
         }
 
         return userCache.userProfiles.firstOrNull { userCache.getUserInfo(it).type == userType }

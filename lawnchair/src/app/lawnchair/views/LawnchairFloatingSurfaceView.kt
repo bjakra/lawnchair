@@ -36,7 +36,7 @@ import com.android.launcher3.LauncherAnimUtils
 import com.android.launcher3.QuickstepTransitionManager.CONTENT_SCALE_DURATION
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
-import com.android.launcher3.statehandlers.DepthController
+import com.android.launcher3.statehandlers.BaseDepthController
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.MultiPropertyFactory
 import com.android.launcher3.util.window.RefreshRateTracker.Companion.getSingleFrameMs
@@ -131,7 +131,7 @@ class LawnchairFloatingSurfaceView @JvmOverloads constructor(
         val launcherAnimator = AnimatorSet()
         val endListener: Runnable?
 
-        val scales = floatArrayOf(mDeviceProfile.workspaceContentScale, 1f)
+        val scales = floatArrayOf(mDeviceProfile.workspaceProfile.workspaceContentScale, 1f)
 
         mLauncher.pauseExpensiveViewUpdates()
 
@@ -167,46 +167,13 @@ class LawnchairFloatingSurfaceView @JvmOverloads constructor(
     }
 
     private fun getBackgroundAnimator(): ObjectAnimator {
-        val depthController = DepthController(mLauncher)
-        val targetDepth = mLauncher.stateManager.state.getDepth<LawnchairLauncher?>(mLauncher)
-
-        val backgroundRadiusAnim = createDepthAnimator(
-            depthController,
-            targetDepth,
-            onEnd = {
-                if (Utilities.ATLEAST_R) {
-                    val viewRootImpl = mLauncher.dragLayer.getViewRootImpl()
-                    val parent = viewRootImpl?.surfaceControl
-                    val dimLayer: SurfaceControl = SurfaceControl.Builder()
-                        .setName("Blur layer")
-                        .setParent(parent)
-                        .setOpaque(false)
-                        .setEffectLayer()
-                        .build()
-
-                    createDepthAnimator(
-                        depthController,
-                        mLauncher.depthController.stateDepth.value,
-                    ) {
-                        depthController.dispose()
-                        SurfaceControl.Transaction().remove(dimLayer).apply()
-                    }.start()
-                } else {
-                    createDepthAnimator(
-                        depthController,
-                        mLauncher.depthController.stateDepth.value,
-                    ) {
-                        depthController.dispose()
-                    }.start()
-                }
-            },
-        )
-
-        return backgroundRadiusAnim
+        val depthController = mLauncher.depthController
+        val targetDepth = mLauncher.stateManager.state.getDepth(mLauncher)
+        return createDepthAnimator(depthController, targetDepth)
     }
 
     private fun createDepthAnimator(
-        depthController: DepthController,
+        depthController: BaseDepthController,
         targetDepth: Float,
         onEnd: (() -> Unit)? = null,
     ): ObjectAnimator {

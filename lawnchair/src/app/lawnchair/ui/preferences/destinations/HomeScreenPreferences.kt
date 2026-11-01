@@ -51,7 +51,7 @@ import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherSettings
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
-import com.android.launcher3.celllayout.CellPosMapper
+import com.android.launcher3.util.Executors
 import kotlinx.coroutines.launch
 
 object HomeScreenRoutes {
@@ -266,19 +266,18 @@ fun HomeScreenPreferences(
 
 private fun clearAllViewsFromHomeScreen(context: Context, type: Int) {
     val launcherModel = LauncherAppState.getInstance(context).model
-    val modelWriter = launcherModel.getWriter(
-        verifyChanges = false,
-        cellPosMapper = CellPosMapper.DEFAULT,
-        owner = null,
-    )
-    val isViewsRemoved = modelWriter.clearAllHomeScreenViewsByType(type)
-    if (isViewsRemoved) {
+    launcherModel.enqueueModelUpdateTask { taskController, dataModel, _ ->
+        val items = synchronized(dataModel) { dataModel.itemsIdMap.filter { it.container == type } }
+        if (items.isEmpty()) return@enqueueModelUpdateTask
+        taskController.getModelWriter().deleteItemsFromDatabase(items, "Lawnchair: cleared home screen")
         launcherModel.forceReload("Lawnchair")
-        Toast.makeText(
-            context,
-            R.string.home_screen_all_views_removed_msg,
-            Toast.LENGTH_SHORT,
-        ).show()
+        Executors.MAIN_EXECUTOR.execute {
+            Toast.makeText(
+                context,
+                R.string.home_screen_all_views_removed_msg,
+                Toast.LENGTH_SHORT,
+            ).show()
+        }
     }
 }
 

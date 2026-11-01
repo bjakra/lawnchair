@@ -27,7 +27,6 @@ import com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_WIDG
 import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.PredictionUpdateTask
 import com.android.launcher3.model.PredictorState
-import com.android.launcher3.model.WidgetsPredictionUpdateTask
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.quickstep.logging.StatsLogCompatManager
@@ -63,7 +62,6 @@ class LawnchairAppPredictor(private val context: Context) : StatsLogCompatManage
     private var activeDataModel: BgDataModel? = null
     private var activeAllAppsState: PredictorState? = null
     private var activeHotseatState: PredictorState? = null
-    private var activeWidgetsState: PredictorState? = null
     private var activeIdp: InvariantDeviceProfile? = null
 
     fun register(
@@ -71,14 +69,12 @@ class LawnchairAppPredictor(private val context: Context) : StatsLogCompatManage
         dataModel: BgDataModel,
         allAppsState: PredictorState,
         hotseatState: PredictorState,
-        widgetsState: PredictorState,
         idp: InvariantDeviceProfile,
     ) {
         activeModel = model
         activeDataModel = dataModel
         activeAllAppsState = allAppsState
         activeHotseatState = hotseatState
-        activeWidgetsState = widgetsState
         activeIdp = idp
         StatsLogCompatManager.LOGS_CONSUMER.add(this)
     }
@@ -89,7 +85,6 @@ class LawnchairAppPredictor(private val context: Context) : StatsLogCompatManage
         activeDataModel = null
         activeAllAppsState = null
         activeHotseatState = null
-        activeWidgetsState = null
         activeIdp = null
     }
 
@@ -118,7 +113,6 @@ class LawnchairAppPredictor(private val context: Context) : StatsLogCompatManage
                     dataModel = state.dataModel,
                     allAppsState = state.allAppsState,
                     hotseatState = state.hotseatState,
-                    widgetsState = state.widgetsState,
                     idp = state.idp,
                 )
             }
@@ -132,7 +126,6 @@ class LawnchairAppPredictor(private val context: Context) : StatsLogCompatManage
         dataModel: BgDataModel,
         allAppsState: PredictorState,
         hotseatState: PredictorState,
-        widgetsState: PredictorState,
         idp: InvariantDeviceProfile,
     ) {
         val pm = context.packageManager
@@ -149,7 +142,6 @@ class LawnchairAppPredictor(private val context: Context) : StatsLogCompatManage
         val fallbackRanked = predictionEngine.getFallbackRanked()
         val allAppsCandidateRanked = predictionEngine.mergeRanked(allAppsRanked, hotseatRanked, fallbackRanked)
         val hotseatCandidateRanked = predictionEngine.mergeRanked(hotseatRanked, allAppsRanked, fallbackRanked)
-        val widgetCandidateRanked = predictionEngine.mergeRanked(hotseatRanked, allAppsRanked, fallbackRanked)
         val currentDismissedApps = dismissedApps.toSet()
         val occupiedHotseatItems = predictionEngine.getOccupiedHotseatItems(dataModel)
         val excludedHotseatItems = occupiedHotseatItems + currentDismissedApps
@@ -164,14 +156,9 @@ class LawnchairAppPredictor(private val context: Context) : StatsLogCompatManage
             idp.numDatabaseHotseatIcons,
             excludedHotseatItems,
         )
-        val widgetTargets = predictionEngine.compileWidgetTargets(
-            widgetCandidateRanked,
-            dataModel,
-        )
 
         model.enqueueModelUpdateTask(PredictionUpdateTask(allAppsState, allAppsTargets))
         model.enqueueModelUpdateTask(PredictionUpdateTask(hotseatState, hotseatTargets))
-        model.enqueueModelUpdateTask(WidgetsPredictionUpdateTask(widgetsState, widgetTargets))
     }
 
     @WorkerThread
@@ -179,11 +166,9 @@ class LawnchairAppPredictor(private val context: Context) : StatsLogCompatManage
         model: LauncherModel,
         allAppsState: PredictorState,
         hotseatState: PredictorState,
-        widgetsState: PredictorState,
     ) {
         model.enqueueModelUpdateTask(PredictionUpdateTask(allAppsState, emptyList()))
         model.enqueueModelUpdateTask(PredictionUpdateTask(hotseatState, emptyList()))
-        model.enqueueModelUpdateTask(WidgetsPredictionUpdateTask(widgetsState, emptyList()))
     }
 
     private fun recordDismissEvent(
@@ -235,14 +220,12 @@ class LawnchairAppPredictor(private val context: Context) : StatsLogCompatManage
         val dataModel = activeDataModel ?: return null
         val allAppsState = activeAllAppsState ?: return null
         val hotseatState = activeHotseatState ?: return null
-        val widgetsState = activeWidgetsState ?: return null
         val idp = activeIdp ?: return null
         return ActivePredictionState(
             model,
             dataModel,
             allAppsState,
             hotseatState,
-            widgetsState,
             idp,
         )
     }
@@ -283,7 +266,6 @@ class LawnchairAppPredictor(private val context: Context) : StatsLogCompatManage
         val dataModel: BgDataModel,
         val allAppsState: PredictorState,
         val hotseatState: PredictorState,
-        val widgetsState: PredictorState,
         val idp: InvariantDeviceProfile,
     )
 }

@@ -22,15 +22,12 @@ import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.graphics.ThemeManager
 import com.android.launcher3.util.Executors
-import com.android.quickstep.TouchInteractionService
-import com.android.quickstep.util.TISBindHelper
+import com.android.quickstep.sysuiconnection.SysUIConnectionTracker
 
 class ReloadHelper(private val context: Context) {
 
     private val idp: InvariantDeviceProfile
         get() = InvariantDeviceProfile.INSTANCE.get(context)
-    private var tis: TouchInteractionService.TISBinder? = null
-    private val tisBinder = TISBindHelper(context) { tis = it }
 
     fun reloadGrid() {
         // The grid reads the preferences from the cache of PreferenceManager2, which may not have
@@ -59,8 +56,6 @@ class ReloadHelper(private val context: Context) {
     }
 
     fun reloadTaskbar() {
-        tisBinder.runOnBindToTouchInteractionService {
-            tis?.taskbarManager?.recreateTaskbars()
-        }
+        SysUIConnectionTracker.get(context).activeComponent.value?.taskbarManager?.recreateTaskbars()
     }
 }

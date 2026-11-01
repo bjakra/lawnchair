@@ -9,7 +9,7 @@ import app.lawnchair.LawnchairLauncher
 import app.lawnchair.preferences2.PreferenceManager2
 import app.lawnchair.preferences2.firstCached
 import com.android.launcher3.Launcher
-import com.android.launcher3.LauncherPrefs
+import com.android.launcher3.LauncherFiles
 import com.android.systemui.plugins.shared.LauncherOverlayManager
 import com.android.systemui.plugins.shared.LauncherOverlayManager.LauncherOverlay
 import com.android.systemui.plugins.shared.LauncherOverlayManager.LauncherOverlayCallbacks
@@ -139,7 +139,7 @@ class OverlayCallbackImpl(private val mLauncher: LawnchairLauncher) :
         if (newFlags != mFlags) {
             mFlagsChanged = true
             mFlags = newFlags
-            LauncherPrefs.getDevicePrefs(mLauncher).edit().putInt(PREF_PERSIST_FLAGS, newFlags).apply()
+            mLauncher.getSharedPreferences(LauncherFiles.DEVICE_PREFERENCES_KEY, Context.MODE_PRIVATE).edit().putInt(PREF_PERSIST_FLAGS, newFlags).apply()
         }
     }
 

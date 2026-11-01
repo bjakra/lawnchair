@@ -58,7 +58,6 @@ import com.android.launcher3.GestureNavContract
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS_PREDICTION
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION
-import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_WIDGETS_PREDICTION
 import com.android.launcher3.LauncherState
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
@@ -350,17 +349,8 @@ class LawnchairLauncher : QuickstepLauncher() {
     }
 
     override fun showDefaultOptions(x: Float, y: Float) {
-        val showWallpaperCarousel = "+carousel" in preferenceManager2.launcherPopupOrder.firstCached()
-
-        if (showWallpaperCarousel) {
-            show<LawnchairLauncher>(
-                this,
-                getPopupTarget(x, y),
-                WorkspaceLongPressOptions.getAll(this),
-            )
-        } else {
-            super.showDefaultOptions(x, y)
-        }
+        // TODO(graphite): restore the wallpaper carousel popup, see docs/lawnchair-port/TODO-reapply.md
+        super.showDefaultOptions(x, y)
     }
 
     private fun <T> show(
@@ -523,14 +513,13 @@ class LawnchairLauncher : QuickstepLauncher() {
     }
 
     private fun refreshPredictionContainersFromModel() {
-        LauncherAppState.getInstance(this).model.loadAsync { dataModel ->
-            if (dataModel == null || isDestroyed) return@loadAsync
+        LauncherAppState.getInstance(this).model.enqueueModelUpdateTask { _, dataModel, _ ->
+            if (isDestroyed) return@enqueueModelUpdateTask
 
             val predictedContainers = synchronized(dataModel) {
                 listOf(
                     dataModel.itemsIdMap[CONTAINER_ALL_APPS_PREDICTION] as? PredictedContainerInfo,
                     dataModel.itemsIdMap[CONTAINER_HOTSEAT_PREDICTION] as? PredictedContainerInfo,
-                    dataModel.itemsIdMap[CONTAINER_WIDGETS_PREDICTION] as? PredictedContainerInfo,
                 ).filterNotNull()
             }
 

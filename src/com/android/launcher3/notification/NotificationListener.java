@@ -70,6 +70,12 @@ public class NotificationListener extends NotificationListenerService {
     private final Ranking mTempRanking = new Ranking();
 
     private boolean mIsConnected = false;
+    private static volatile NotificationListener sConnectedInstance;
+
+    /** Lawnchair: the listener, while it is connected to the system. */
+    public static NotificationListener getInstanceIfConnected() {
+        return sConnectedInstance;
+    }
 
     /** Maps packages to their DotInfo's . */
     private final Map<PackageUserKey, DotInfo> mPackageUserToDotInfos = new HashMap<>();
@@ -210,6 +216,7 @@ public class NotificationListener extends NotificationListenerService {
         super.onListenerConnected();
         Log.i(TAG, "onListenerConnected");
         mIsConnected = true;
+        sConnectedInstance = this;
 
         // Register an observer to rebind the notification listener when dots are re-enabled.
         mSettingsCache = SettingsCache.INSTANCE.get(this);
@@ -238,6 +245,7 @@ public class NotificationListener extends NotificationListenerService {
         super.onListenerDisconnected();
         Log.i(TAG, "onListenerDisconnected");
         mIsConnected = false;
+        sConnectedInstance = null;
         if (mSettingCacheSafeCloseable != null) {
             mSettingCacheSafeCloseable.close();
             mSettingCacheSafeCloseable = null;

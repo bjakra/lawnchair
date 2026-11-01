@@ -22,13 +22,14 @@ package app.lawnchair.icons.shape
 import android.content.Context
 import android.graphics.Path
 import android.graphics.PointF
+import android.graphics.Rect
 import android.graphics.Region
+import android.graphics.RegionIterator
 import android.util.Log
 import android.util.PathParser
 import com.android.launcher3.Utilities
 import com.android.launcher3.graphics.PathWrapper
 import com.android.launcher3.graphics.ThemeManager
-import com.android.launcher3.icons.GraphicsUtils
 import com.android.launcher3.shapes.ShapesProvider
 import kotlin.apply
 
@@ -122,7 +123,7 @@ sealed class IconShape {
                     shapeR.setPath(shapePath, clip)
                     shapeR.op(iconR, Region.Op.XOR)
 
-                    GraphicsUtils.getArea(shapeR)
+                    shapeR.area()
                 }!!
         }
 
@@ -715,4 +716,14 @@ object CornerShapeCompat {
         if (x1 == x2 && y1 == y2) return
         path.lineTo(x2, y2)
     }
+}
+
+private fun Region.area(): Int {
+    val iterator = RegionIterator(this)
+    val rect = Rect()
+    var area = 0
+    while (iterator.next(rect)) {
+        area += rect.width() * rect.height()
+    }
+    return area
 }

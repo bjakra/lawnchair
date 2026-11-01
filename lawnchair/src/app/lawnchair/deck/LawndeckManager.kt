@@ -127,7 +127,7 @@ class LawndeckManager(private val context: Context) {
             if (categoryApps.size == 1) {
                 // Single app - add directly to workspace
                 val app = categoryApps.first()
-                ItemInstallQueue.INSTANCE.get(context).queueItem(SerializedItemItem(app.targetPackage, app.user))
+                app.targetPackage?.let { ItemInstallQueue.INSTANCE.get(context).queueItem(SerializedItemItem(it, app.user)) }
                 singleAppCount++
             } else {
                 // Multiple apps - create folder

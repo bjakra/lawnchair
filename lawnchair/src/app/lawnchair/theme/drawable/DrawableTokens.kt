@@ -26,14 +26,6 @@ object DrawableTokens {
         }
 
     @JvmField
-    val BgWidgetsFullSheet = ResourceDrawableToken<GradientDrawable>(R.drawable.bg_widgets_full_sheet)
-        .setColor(ColorTokens.ColorBackground)
-
-    @JvmField
-    val BgWidgetsSearchbox = ResourceDrawableToken<GradientDrawable>(R.drawable.bg_widgets_searchbox)
-        .setColor(ColorTokens.Surface)
-
-    @JvmField
     val DropTargetBackground = ResourceDrawableToken<Drawable>(R.drawable.drop_target_background)
         .setTint(ColorTokens.WorkspaceAccentColor)
 
@@ -69,56 +61,6 @@ object DrawableTokens {
     @JvmField
     val WidgetsBottomSheetBackground = ResourceDrawableToken<GradientDrawable>(R.drawable.bg_rounded_corner_bottom_sheet)
         .setColor(ColorTokens.Surface)
-
-    @JvmField
-    val WidgetsListBackground = NewDrawable { context, scheme, uiColorMode ->
-        val list = StateListDrawable()
-        list.setEnterFadeDuration(100)
-
-        val unselected = AppCompatResources.getDrawable(
-            context,
-            R.drawable.bg_widgets_header,
-        )
-        unselected?.setTint(ColorTokens.Surface.resolveColor(context, scheme, uiColorMode))
-
-        val selected = AppCompatResources.getDrawable(
-            context,
-            R.drawable.bg_widgets_header,
-        )
-        selected?.setTint(ColorTokens.WidgetListRowColor.resolveColor(context, scheme, uiColorMode))
-
-        list.addState(intArrayOf(-android.R.attr.state_selected), unselected)
-        list.addState(intArrayOf(android.R.attr.state_selected), selected)
-
-        list
-    }
-
-    @JvmField
-    val WidgetsContentBackground = NewDrawable { context, scheme, uiColorMode ->
-        val list = StateListDrawable()
-        list.setEnterFadeDuration(100)
-
-        val unselected = AppCompatResources.getDrawable(
-            context,
-            R.drawable.bg_widgets_content,
-        )
-        unselected?.setTint(ColorTokens.Surface.resolveColor(context, scheme, uiColorMode))
-
-        val selected = AppCompatResources.getDrawable(
-            context,
-            R.drawable.bg_widgets_content,
-        )
-        selected?.setTint(ColorTokens.WidgetListRowColor.resolveColor(context, scheme, uiColorMode))
-
-        list.addState(intArrayOf(-android.R.attr.state_selected), unselected)
-        list.addState(intArrayOf(android.R.attr.state_selected), selected)
-
-        list
-    }
-
-    @JvmField
-    val WidgetsRecommendationBackground = ResourceDrawableToken<GradientDrawable>(R.drawable.widgets_surface_background)
-        .setColor(ColorTokens.WidgetListRowColor)
 
     @JvmField
     val WidgetResizeFrame = ResourceDrawableToken<GradientDrawable>(R.drawable.widget_resize_frame)
@@ -208,8 +150,4 @@ object DrawableTokens {
             val background = findDrawableByLayerId(android.R.id.background) as? GradientDrawable
             background?.setStroke(strokeWidth, strokeColor)
         }
-
-    @JvmField
-    val WidgetAddButtonBackground = ResourceDrawableToken<InsetDrawable>(R.drawable.widget_cell_add_button_background)
-        .setTint(ColorTokens.WidgetAddButtonBackgroundColor)
 }

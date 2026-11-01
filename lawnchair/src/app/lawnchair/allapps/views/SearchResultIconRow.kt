@@ -43,7 +43,7 @@ class SearchResultIconRow(context: Context, attrs: AttributeSet?) :
             width = iconSize
             height = iconSize
         }
-        icon.setTextVisibility(false)
+        icon.setContainerTextVisibility(false)
         title = ViewCompat.requireViewById(this, R.id.title)
         subtitle = ViewCompat.requireViewById(this, R.id.subtitle)
         subtitle.isVisible = false
@@ -60,7 +60,7 @@ class SearchResultIconRow(context: Context, attrs: AttributeSet?) :
             .mapNotNull { findViewById<SearchResultIcon>(it) }
             .toTypedArray()
         shortcutIcons.forEach {
-            it.setTextVisibility(false)
+            it.setContainerTextVisibility(false)
             it.layoutParams.apply {
                 width = icon.iconSize
                 height = icon.iconSize

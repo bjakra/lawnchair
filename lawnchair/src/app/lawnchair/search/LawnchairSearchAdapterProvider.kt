@@ -71,8 +71,8 @@ class LawnchairSearchAdapterProvider(
     ): BaseAllAppsAdapter.ViewHolder {
         val view = layoutInflater.inflate(layoutIdMap[viewType], parent, false)
         val grid: DeviceProfile = mLauncher.deviceProfile
-        val leftMargin = grid.allAppsPadding.left
-        val rightMargin = grid.allAppsPadding.right
+        val leftMargin = grid.allAppsProfile.padding.left
+        val rightMargin = grid.allAppsProfile.padding.right
 
         if (viewType != SEARCH_RESULT_ICON) {
             val layoutParams = ViewGroup.MarginLayoutParams(view.layoutParams)
