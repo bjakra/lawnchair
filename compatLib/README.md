@@ -19,6 +19,7 @@ for Android 15 and below and the full codename starting from Android 16 onward.
 | compatLibVU       | 14              |
 | compatLibVV       | 15              |
 | compatLibVBaklava | 16              |
+| compatLibVCinnamonBun | 17           |
 
 This list does not guarantee Recents compatibility across all Android versions,
 as the implementation may be incomplete or not fully functional.

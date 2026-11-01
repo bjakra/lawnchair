@@ -3,32 +3,43 @@ package com.android.wm.shell;
 
 /** @hide */
 public final class Flags {
+
+    /** @hide */
+    public static final String FLAG_ADD_ONE_OFF_HANDLER_LEASHES = "com.android.wm.shell.add_one_off_handler_leashes";
+    /** @hide */
+    public static final String FLAG_BBEV_SQUARE_CORNERS_FIX = "com.android.wm.shell.bbev_square_corners_fix";
+    /** @hide */
+    public static final String FLAG_BUBBLE_DISMISS_MAGNETIZE_COLLISION_PREVENTION = "com.android.wm.shell.bubble_dismiss_magnetize_collision_prevention";
+    /** @hide */
+    public static final String FLAG_BUBBLES_FIX_ISSUES_WITH_REPEATED_FOLD_UNFOLD = "com.android.wm.shell.bubbles_fix_issues_with_repeated_fold_unfold";
+    /** @hide */
+    public static final String FLAG_BUG_DONT_REMOVE_TASK_BUBBLE = "com.android.wm.shell.bug_dont_remove_task_bubble";
+    /** @hide */
+    public static final String FLAG_CONSOLIDATE_SPLIT_KEYBOARD_SHORTCUT_CONTROLLERS = "com.android.wm.shell.consolidate_split_keyboard_shortcut_controllers";
+    /** @hide */
+    public static final String FLAG_DISABLE_BUBBLE_ANYTHING_DESKTOP_WINDOWING = "com.android.wm.shell.disable_bubble_anything_desktop_windowing";
+    /** @hide */
+    public static final String FLAG_DISABLE_BUBBLE_SCRIM_LARGE_SCREENS = "com.android.wm.shell.disable_bubble_scrim_large_screens";
+    /** @hide */
+    public static final String FLAG_ENABLE_2X1_SPLIT = "com.android.wm.shell.enable_2x1_split";
     /** @hide */
     public static final String FLAG_ENABLE_AUTO_TASK_STACK_CONTROLLER = "com.android.wm.shell.enable_auto_task_stack_controller";
     /** @hide */
     public static final String FLAG_ENABLE_BUBBLE_ANYTHING = "com.android.wm.shell.enable_bubble_anything";
     /** @hide */
-    public static final String FLAG_ENABLE_BUBBLE_APP_COMPAT_FIXES = "com.android.wm.shell.enable_bubble_app_compat_fixes";
-    /** @hide */
     public static final String FLAG_ENABLE_BUBBLE_BAR = "com.android.wm.shell.enable_bubble_bar";
     /** @hide */
     public static final String FLAG_ENABLE_BUBBLE_BAR_ON_PHONES = "com.android.wm.shell.enable_bubble_bar_on_phones";
     /** @hide */
+    public static final String FLAG_ENABLE_BUBBLE_PINNING = "com.android.wm.shell.enable_bubble_pinning";
+    /** @hide */
     public static final String FLAG_ENABLE_BUBBLE_STASHING = "com.android.wm.shell.enable_bubble_stashing";
-    /** @hide */
-    public static final String FLAG_ENABLE_BUBBLE_SWIPE_UP_CLEANUP = "com.android.wm.shell.enable_bubble_swipe_up_cleanup";
-    /** @hide */
-    public static final String FLAG_ENABLE_BUBBLE_TASK_VIEW_LISTENER = "com.android.wm.shell.enable_bubble_task_view_listener";
     /** @hide */
     public static final String FLAG_ENABLE_BUBBLE_TO_FULLSCREEN = "com.android.wm.shell.enable_bubble_to_fullscreen";
     /** @hide */
-    public static final String FLAG_ENABLE_BUBBLES_LONG_PRESS_NAV_HANDLE = "com.android.wm.shell.enable_bubbles_long_press_nav_handle";
+    public static final String FLAG_ENABLE_BUBBLE_TRANSITION_PLANNER = "com.android.wm.shell.enable_bubble_transition_planner";
     /** @hide */
     public static final String FLAG_ENABLE_CREATE_ANY_BUBBLE = "com.android.wm.shell.enable_create_any_bubble";
-    /** @hide */
-    public static final String FLAG_ENABLE_DYNAMIC_INSETS_FOR_APP_LAUNCH = "com.android.wm.shell.enable_dynamic_insets_for_app_launch";
-    /** @hide */
-    public static final String FLAG_ENABLE_ENTER_SPLIT_REMOVE_BUBBLE = "com.android.wm.shell.enable_enter_split_remove_bubble";
     /** @hide */
     public static final String FLAG_ENABLE_FLEXIBLE_SPLIT = "com.android.wm.shell.enable_flexible_split";
     /** @hide */
@@ -44,222 +55,254 @@ public final class Flags {
     /** @hide */
     public static final String FLAG_ENABLE_PIP2 = "com.android.wm.shell.enable_pip2";
     /** @hide */
-    public static final String FLAG_ENABLE_PIP_BOX_SHADOWS = "com.android.wm.shell.enable_pip_box_shadows";
+    public static final String FLAG_ENABLE_PIP2_ON_TV = "com.android.wm.shell.enable_pip2_on_tv";
+    /** @hide */
+    public static final String FLAG_ENABLE_PIP_BOX_SHADOWS_V2 = "com.android.wm.shell.enable_pip_box_shadows_v2";
     /** @hide */
     public static final String FLAG_ENABLE_PIP_UMO_EXPERIENCE = "com.android.wm.shell.enable_pip_umo_experience";
     /** @hide */
-    public static final String FLAG_ENABLE_RECENTS_BOOKEND_TRANSITION = "com.android.wm.shell.enable_recents_bookend_transition";
-    /** @hide */
-    public static final String FLAG_ENABLE_RETRIEVABLE_BUBBLES = "com.android.wm.shell.enable_retrievable_bubbles";
+    public static final String FLAG_ENABLE_SHELL_MODES = "com.android.wm.shell.enable_shell_modes";
     /** @hide */
     public static final String FLAG_ENABLE_SHELL_TOP_TASK_TRACKING = "com.android.wm.shell.enable_shell_top_task_tracking";
-    /** @hide */
-    public static final String FLAG_ENABLE_TASKBAR_NAVBAR_UNIFICATION = "com.android.wm.shell.enable_taskbar_navbar_unification";
     /** @hide */
     public static final String FLAG_ENABLE_TASKBAR_ON_PHONES = "com.android.wm.shell.enable_taskbar_on_phones";
     /** @hide */
     public static final String FLAG_ENABLE_TINY_TASKBAR = "com.android.wm.shell.enable_tiny_taskbar";
     /** @hide */
-    public static final String FLAG_FIX_MISSING_USER_CHANGE_CALLBACKS = "com.android.wm.shell.fix_missing_user_change_callbacks";
+    public static final String FLAG_FIX_ADJUST_ACCESSIBILITY_ACTIONS_FOR_STACK_VIEW_STATE = "com.android.wm.shell.fix_adjust_accessibility_actions_for_stack_view_state";
     /** @hide */
-    public static final String FLAG_ONLY_REUSE_BUBBLED_TASK_WHEN_LAUNCHED_FROM_BUBBLE = "com.android.wm.shell.only_reuse_bubbled_task_when_launched_from_bubble";
+    public static final String FLAG_FIX_BUBBLE_BAR_FLICK_ON_PINNING_ANIMATION = "com.android.wm.shell.fix_bubble_bar_flick_on_pinning_animation";
     /** @hide */
-    public static final String FLAG_TASK_VIEW_REPOSITORY = "com.android.wm.shell.task_view_repository";
+    public static final String FLAG_FIX_BUBBLE_BAR_NOT_COLLAPSED_IF_ANIMATING_BUBBLE = "com.android.wm.shell.fix_bubble_bar_not_collapsed_if_animating_bubble";
+    /** @hide */
+    public static final String FLAG_FIX_BUBBLE_BAR_STASHING_WITH_HARDWARE_KEYBOARD = "com.android.wm.shell.fix_bubble_bar_stashing_with_hardware_keyboard";
+    /** @hide */
+    public static final String FLAG_FIX_BUBBLE_BAR_VISIBILITY_UPDATE_DROPPED = "com.android.wm.shell.fix_bubble_bar_visibility_update_dropped";
+    /** @hide */
+    public static final String FLAG_FIX_BUBBLE_IME_CLIPPING = "com.android.wm.shell.fix_bubble_ime_clipping";
+    /** @hide */
+    public static final String FLAG_FIX_BUBBLE_INSETS_WHEN_INVISIBLE = "com.android.wm.shell.fix_bubble_insets_when_invisible";
+    /** @hide */
+    public static final String FLAG_FIX_BUBBLE_NOTIFICATION_SHOWING_IN_LOCK_SCREEN = "com.android.wm.shell.fix_bubble_notification_showing_in_lock_screen";
+    /** @hide */
+    public static final String FLAG_FIX_BUBBLE_SWIPE_UP_DISMISS_BUBBLE_BAR = "com.android.wm.shell.fix_bubble_swipe_up_dismiss_bubble_bar";
+    /** @hide */
+    public static final String FLAG_FIX_BUBBLED_TASK_HEIGHT = "com.android.wm.shell.fix_bubbled_task_height";
+    /** @hide */
+    public static final String FLAG_FIX_BUBBLES_HANDLE_USER_EDUCATION = "com.android.wm.shell.fix_bubbles_handle_user_education";
+    /** @hide */
+    public static final String FLAG_FIX_BUBBLES_STACK_VISIBLE_IN_IMMERSIVE = "com.android.wm.shell.fix_bubbles_stack_visible_in_immersive";
+    /** @hide */
+    public static final String FLAG_FIX_BUBBLES_STASH_INCORRECT_PROGRESS = "com.android.wm.shell.fix_bubbles_stash_incorrect_progress";
+    /** @hide */
+    public static final String FLAG_FIX_BUBBLES_STASHING_ON_HOME = "com.android.wm.shell.fix_bubbles_stashing_on_home";
+    /** @hide */
+    public static final String FLAG_FIX_DISMISS_FLYOUT_PERSISTENT_TASKBAR = "com.android.wm.shell.fix_dismiss_flyout_persistent_taskbar";
+    /** @hide */
+    public static final String FLAG_FIX_FLICKER_WHEN_APP_BUBBLE_FROM_OVERFLOW = "com.android.wm.shell.fix_flicker_when_app_bubble_from_overflow";
+    /** @hide */
+    public static final String FLAG_FIX_MARK_TASK_AS_TRIMMABLE = "com.android.wm.shell.fix_mark_task_as_trimmable";
+    /** @hide */
+    public static final String FLAG_FIX_PIP_TO_BUBBLE_RELAUNCH = "com.android.wm.shell.fix_pip_to_bubble_relaunch";
+    /** @hide */
+    public static final String FLAG_FIX_REDUCE_SHADOW_ALPHA = "com.android.wm.shell.fix_reduce_shadow_alpha";
+    /** @hide */
+    public static final String FLAG_FIX_SWIPE_UP_NOTIFICATION_SHADE_WITH_BUBBLE_BAR = "com.android.wm.shell.fix_swipe_up_notification_shade_with_bubble_bar";
+    /** @hide */
+    public static final String FLAG_FIX_TASKBAR_SCRIM_VIEW_ON_HOME = "com.android.wm.shell.fix_taskbar_scrim_view_on_home";
+    /** @hide */
+    public static final String FLAG_FIX_VERIFY_BUBBLE_TASK_ID_ON_REMOVAL = "com.android.wm.shell.fix_verify_bubble_task_id_on_removal";
+    /** @hide */
+    public static final String FLAG_LAUNCH_BUBBLE_ON_MAIN_DISPLAY = "com.android.wm.shell.launch_bubble_on_main_display";
+    /** @hide */
+    public static final String FLAG_RESOLVE_TRAMPOLINE_DESTINATION_PACKAGES = "com.android.wm.shell.resolve_trampoline_destination_packages";
     /** @hide */
     public static final String FLAG_TASK_VIEW_TRANSITIONS_REFACTOR = "com.android.wm.shell.task_view_transitions_refactor";
-
-
+    /** @hide */
+    public static final String FLAG_UPDATE_BUBBLE_BAR_TASKBAR_INTERSECTION = "com.android.wm.shell.update_bubble_bar_taskbar_intersection";
+    /** @hide */
+    public static final String FLAG_UPDATE_BUBBLE_BOUNDS_DURING_ROTATION = "com.android.wm.shell.update_bubble_bounds_during_rotation";
+    /** @hide */
+    public static final String FLAG_USE_BUBBLE_ICON_FROM_ACTIVITY_INFO = "com.android.wm.shell.use_bubble_icon_from_activity_info";
+    public static boolean addOneOffHandlerLeashes() {
+        return false;
+    }
+    public static boolean bbevSquareCornersFix() {
+        return true;
+    }
+    public static boolean bubbleDismissMagnetizeCollisionPrevention() {
+        return true;
+    }
+    public static boolean bubblesFixIssuesWithRepeatedFoldUnfold() {
+        return false;
+    }
+    public static boolean bugDontRemoveTaskBubble() {
+        return false;
+    }
+    public static boolean consolidateSplitKeyboardShortcutControllers() {
+        return false;
+    }
+    public static boolean disableBubbleAnythingDesktopWindowing() {
+        return true;
+    }
+    public static boolean disableBubbleScrimLargeScreens() {
+        return false;
+    }
+    public static boolean enable2x1Split() {
+        return false;
+    }
     public static boolean enableAutoTaskStackController() {
-        
-        return FEATURE_FLAGS.enableAutoTaskStackController();
+        return true;
     }
-
-
     public static boolean enableBubbleAnything() {
-        
-        return FEATURE_FLAGS.enableBubbleAnything();
+        return false;
     }
-
-
-    public static boolean enableBubbleAppCompatFixes() {
-        
-        return FEATURE_FLAGS.enableBubbleAppCompatFixes();
-    }
-
-
     public static boolean enableBubbleBar() {
-        
-        return FEATURE_FLAGS.enableBubbleBar();
+        return true;
     }
-
-
     public static boolean enableBubbleBarOnPhones() {
-        
-        return FEATURE_FLAGS.enableBubbleBarOnPhones();
+        return false;
     }
-
-
+    public static boolean enableBubblePinning() {
+        return false;
+    }
     public static boolean enableBubbleStashing() {
-        
-        return FEATURE_FLAGS.enableBubbleStashing();
+        return false;
     }
-
-
-    public static boolean enableBubbleSwipeUpCleanup() {
-        
-        return FEATURE_FLAGS.enableBubbleSwipeUpCleanup();
-    }
-
-
-    public static boolean enableBubbleTaskViewListener() {
-        
-        return FEATURE_FLAGS.enableBubbleTaskViewListener();
-    }
-
-
     public static boolean enableBubbleToFullscreen() {
-        
-        return FEATURE_FLAGS.enableBubbleToFullscreen();
+        return false;
     }
-
-
-    public static boolean enableBubblesLongPressNavHandle() {
-        
-        return FEATURE_FLAGS.enableBubblesLongPressNavHandle();
+    public static boolean enableBubbleTransitionPlanner() {
+        return false;
     }
-
-
     public static boolean enableCreateAnyBubble() {
-        
-        return FEATURE_FLAGS.enableCreateAnyBubble();
+        return true;
     }
-
-
-    public static boolean enableDynamicInsetsForAppLaunch() {
-        
-        return FEATURE_FLAGS.enableDynamicInsetsForAppLaunch();
-    }
-
-
-    public static boolean enableEnterSplitRemoveBubble() {
-        
-        return FEATURE_FLAGS.enableEnterSplitRemoveBubble();
-    }
-
-
     public static boolean enableFlexibleSplit() {
-        
-        return FEATURE_FLAGS.enableFlexibleSplit();
+        return false;
     }
-
-
     public static boolean enableFlexibleTwoAppSplit() {
-        
-        return FEATURE_FLAGS.enableFlexibleTwoAppSplit();
+        return true;
     }
-
-
     public static boolean enableGsf() {
-        
-        return FEATURE_FLAGS.enableGsf();
+        return true;
     }
-
-
     public static boolean enableMagneticSplitDivider() {
-        
-        return FEATURE_FLAGS.enableMagneticSplitDivider();
+        return false;
     }
-
-
     public static boolean enableNewBubbleAnimations() {
-        
-        return FEATURE_FLAGS.enableNewBubbleAnimations();
+        return false;
     }
-
-
     public static boolean enableOptionalBubbleOverflow() {
-        
-        return FEATURE_FLAGS.enableOptionalBubbleOverflow();
+        return false;
     }
-
-
     public static boolean enablePip2() {
-        
-        return FEATURE_FLAGS.enablePip2();
+        return true;
     }
-
-
-    public static boolean enablePipBoxShadows() {
-        
-        return FEATURE_FLAGS.enablePipBoxShadows();
+    public static boolean enablePip2OnTv() {
+        return false;
     }
-
-
+    public static boolean enablePipBoxShadowsV2() {
+        return false;
+    }
     public static boolean enablePipUmoExperience() {
-        
-        return FEATURE_FLAGS.enablePipUmoExperience();
+        return false;
     }
-
-
-    public static boolean enableRecentsBookendTransition() {
-        
-        return FEATURE_FLAGS.enableRecentsBookendTransition();
+    public static boolean enableShellModes() {
+        return false;
     }
-
-
-    public static boolean enableRetrievableBubbles() {
-        
-        return FEATURE_FLAGS.enableRetrievableBubbles();
-    }
-
-
     public static boolean enableShellTopTaskTracking() {
-        
-        return FEATURE_FLAGS.enableShellTopTaskTracking();
+        return false;
     }
-
-
-    public static boolean enableTaskbarNavbarUnification() {
-        
-        return FEATURE_FLAGS.enableTaskbarNavbarUnification();
-    }
-
-
     public static boolean enableTaskbarOnPhones() {
-        
-        return FEATURE_FLAGS.enableTaskbarOnPhones();
+        return true;
     }
-
-
     public static boolean enableTinyTaskbar() {
-        
-        return FEATURE_FLAGS.enableTinyTaskbar();
+        return false;
     }
-
-
-    public static boolean fixMissingUserChangeCallbacks() {
-        
-        return FEATURE_FLAGS.fixMissingUserChangeCallbacks();
+    public static boolean fixAdjustAccessibilityActionsForStackViewState() {
+        return true;
     }
-
-
-    public static boolean onlyReuseBubbledTaskWhenLaunchedFromBubble() {
-        
-        return FEATURE_FLAGS.onlyReuseBubbledTaskWhenLaunchedFromBubble();
+    public static boolean fixBubbleBarFlickOnPinningAnimation() {
+        return true;
     }
-
-
-    public static boolean taskViewRepository() {
-        
-        return FEATURE_FLAGS.taskViewRepository();
+    public static boolean fixBubbleBarNotCollapsedIfAnimatingBubble() {
+        return true;
     }
-
-
+    public static boolean fixBubbleBarStashingWithHardwareKeyboard() {
+        return false;
+    }
+    public static boolean fixBubbleBarVisibilityUpdateDropped() {
+        return false;
+    }
+    public static boolean fixBubbleImeClipping() {
+        return true;
+    }
+    public static boolean fixBubbleInsetsWhenInvisible() {
+        return true;
+    }
+    public static boolean fixBubbleNotificationShowingInLockScreen() {
+        return true;
+    }
+    public static boolean fixBubbleSwipeUpDismissBubbleBar() {
+        return true;
+    }
+    public static boolean fixBubbledTaskHeight() {
+        return true;
+    }
+    public static boolean fixBubblesHandleUserEducation() {
+        return false;
+    }
+    public static boolean fixBubblesStackVisibleInImmersive() {
+        return false;
+    }
+    public static boolean fixBubblesStashIncorrectProgress() {
+        return true;
+    }
+    public static boolean fixBubblesStashingOnHome() {
+        return true;
+    }
+    public static boolean fixDismissFlyoutPersistentTaskbar() {
+        return true;
+    }
+    public static boolean fixFlickerWhenAppBubbleFromOverflow() {
+        return true;
+    }
+    public static boolean fixMarkTaskAsTrimmable() {
+        return false;
+    }
+    public static boolean fixPipToBubbleRelaunch() {
+        return true;
+    }
+    public static boolean fixReduceShadowAlpha() {
+        return true;
+    }
+    public static boolean fixSwipeUpNotificationShadeWithBubbleBar() {
+        return true;
+    }
+    public static boolean fixTaskbarScrimViewOnHome() {
+        return true;
+    }
+    public static boolean fixVerifyBubbleTaskIdOnRemoval() {
+        return true;
+    }
+    public static boolean launchBubbleOnMainDisplay() {
+        return false;
+    }
+    public static boolean resolveTrampolineDestinationPackages() {
+        return true;
+    }
     public static boolean taskViewTransitionsRefactor() {
-        
-        return FEATURE_FLAGS.taskViewTransitionsRefactor();
+        return true;
     }
-
-    private static FeatureFlags FEATURE_FLAGS = new FeatureFlagsImpl();
+    public static boolean updateBubbleBarTaskbarIntersection() {
+        return true;
+    }
+    public static boolean updateBubbleBoundsDuringRotation() {
+        return true;
+    }
+    public static boolean useBubbleIconFromActivityInfo() {
+        return true;
+    }
 
 }

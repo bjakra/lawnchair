@@ -120,6 +120,7 @@ allprojects {
                 compileOnly projects.compatLib.compatLibVU
                 compileOnly projects.compatLib.compatLibVV
                 compileOnly projects.compatLib.compatLibVBaklava
+                compileOnly projects.compatLib.compatLibVCinnamonBun
             }
         }
     }
@@ -407,6 +408,7 @@ dependencies {
     withQuickstepImplementation projects.compatLib.compatLibVU
     withQuickstepImplementation projects.compatLib.compatLibVV
     withQuickstepImplementation projects.compatLib.compatLibVBaklava
+    withQuickstepImplementation projects.compatLib.compatLibVCinnamonBun
     withQuickstepImplementation projects.wmshell
     withQuickstepImplementation projects.flags
     withQuickstepImplementation projects.dagger

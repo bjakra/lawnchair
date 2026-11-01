@@ -3,22 +3,29 @@ package com.android.systemui.shared;
 
 /** @hide */
 public final class Flags {
+
     /** @hide */
-    public static final String FLAG_AMBIENT_AOD = "com.android.systemui.shared.ambient_aod";
+    public static final String FLAG_AOD_INACTIVITY_DETECTION = "com.android.systemui.shared.aod_inactivity_detection";
+    /** @hide */
+    public static final String FLAG_BLUEFLAX_FIRST_PHASE = "com.android.systemui.shared.blueflax_first_phase";
     /** @hide */
     public static final String FLAG_BOUNCER_AREA_EXCLUSION = "com.android.systemui.shared.bouncer_area_exclusion";
     /** @hide */
-    public static final String FLAG_CLOCK_REACTIVE_SMARTSPACE_LAYOUT = "com.android.systemui.shared.clock_reactive_smartspace_layout";
+    public static final String FLAG_BRIGHTNESS_DIALOG_ON_SYSTEM_USER = "com.android.systemui.shared.brightness_dialog_on_system_user";
     /** @hide */
-    public static final String FLAG_CLOCK_REACTIVE_VARIANTS = "com.android.systemui.shared.clock_reactive_variants";
+    public static final String FLAG_CUE_BAR_ACE_MIGRATION = "com.android.systemui.shared.cue_bar_ace_migration";
     /** @hide */
     public static final String FLAG_CURSOR_HOT_CORNER = "com.android.systemui.shared.cursor_hot_corner";
     /** @hide */
+    public static final String FLAG_ENABLE_AI_CLOCKS = "com.android.systemui.shared.enable_ai_clocks";
+    /** @hide */
     public static final String FLAG_ENABLE_HOME_DELAY = "com.android.systemui.shared.enable_home_delay";
     /** @hide */
-    public static final String FLAG_ENABLE_LPP_ASSIST_INVOCATION_EFFECT = "com.android.systemui.shared.enable_lpp_assist_invocation_effect";
+    public static final String FLAG_ENABLE_LPP_ASSIST_INVOCATION_INITIAL_RUMBLE = "com.android.systemui.shared.enable_lpp_assist_invocation_initial_rumble";
     /** @hide */
-    public static final String FLAG_ENABLE_LPP_ASSIST_INVOCATION_HAPTIC_EFFECT = "com.android.systemui.shared.enable_lpp_assist_invocation_haptic_effect";
+    public static final String FLAG_ENABLE_RECENTS_IN_TASKBAR = "com.android.systemui.shared.enable_recents_in_taskbar";
+    /** @hide */
+    public static final String FLAG_ENABLE_SAGE = "com.android.systemui.shared.enable_sage";
     /** @hide */
     public static final String FLAG_EXAMPLE_SHARED_FLAG = "com.android.systemui.shared.example_shared_flag";
     /** @hide */
@@ -26,192 +33,101 @@ public final class Flags {
     /** @hide */
     public static final String FLAG_EXTENDIBLE_THEME_MANAGER = "com.android.systemui.shared.extendible_theme_manager";
     /** @hide */
-    public static final String FLAG_LOCKSCREEN_CUSTOM_CLOCKS = "com.android.systemui.shared.lockscreen_custom_clocks";
+    public static final String FLAG_LAUNCHER_ANIMATION_SHELL_MIGRATION = "com.android.systemui.shared.launcher_animation_shell_migration";
     /** @hide */
-    public static final String FLAG_NEW_CUSTOMIZATION_PICKER_UI = "com.android.systemui.shared.new_customization_picker_ui";
+    public static final String FLAG_PAN_AND_ZOOM_IN_EXTENDED_WALLPAPER_EFFECTS = "com.android.systemui.shared.pan_and_zoom_in_extended_wallpaper_effects";
     /** @hide */
-    public static final String FLAG_NEW_TOUCHPAD_GESTURES_TUTORIAL = "com.android.systemui.shared.new_touchpad_gestures_tutorial";
-    /** @hide */
-    public static final String FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY = "com.android.systemui.shared.return_animation_framework_library";
-    /** @hide */
-    public static final String FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED = "com.android.systemui.shared.return_animation_framework_long_lived";
-    /** @hide */
-    public static final String FLAG_SCREENSHOT_CONTEXT_URL = "com.android.systemui.shared.screenshot_context_url";
+    public static final String FLAG_PHOTO_SHUFFLE_FLAG = "com.android.systemui.shared.photo_shuffle_flag";
     /** @hide */
     public static final String FLAG_SHADE_ALLOW_BACK_GESTURE = "com.android.systemui.shared.shade_allow_back_gesture";
     /** @hide */
     public static final String FLAG_SIDEFPS_CONTROLLER_REFACTOR = "com.android.systemui.shared.sidefps_controller_refactor";
     /** @hide */
+    public static final String FLAG_SMARTSPACE_AQI_UPDATED_DESIGN = "com.android.systemui.shared.smartspace_aqi_updated_design";
+    /** @hide */
+    public static final String FLAG_SMARTSPACE_SEMANTIC_WEATHER_DATA = "com.android.systemui.shared.smartspace_semantic_weather_data";
+    /** @hide */
     public static final String FLAG_SMARTSPACE_SPORTS_CARD_BACKGROUND = "com.android.systemui.shared.smartspace_sports_card_background";
-    /** @hide */
-    public static final String FLAG_SMARTSPACE_UI_UPDATE = "com.android.systemui.shared.smartspace_ui_update";
-    /** @hide */
-    public static final String FLAG_SMARTSPACE_UI_UPDATE_RESOURCES = "com.android.systemui.shared.smartspace_ui_update_resources";
     /** @hide */
     public static final String FLAG_SMARTSPACE_WEATHER_USE_MONOCHROME_FONT_ICONS = "com.android.systemui.shared.smartspace_weather_use_monochrome_font_icons";
     /** @hide */
-    public static final String FLAG_STATUS_BAR_CONNECTED_DISPLAYS = "com.android.systemui.shared.status_bar_connected_displays";
-    /** @hide */
     public static final String FLAG_THREE_BUTTON_CORNER_SWIPE = "com.android.systemui.shared.three_button_corner_swipe";
     /** @hide */
-    public static final String FLAG_USE_PREFERRED_IMAGE_EDITOR = "com.android.systemui.shared.use_preferred_image_editor";
-
-
-    public static boolean ambientAod() {
-        
-        return FEATURE_FLAGS.ambientAod();
+    public static final String FLAG_WORKSPACE_ITEMS_LABEL_HIDDEN = "com.android.systemui.shared.workspace_items_label_hidden";
+    public static boolean aodInactivityDetection() {
+        return false;
     }
-
-
+    public static boolean blueflaxFirstPhase() {
+        return false;
+    }
     public static boolean bouncerAreaExclusion() {
-        
-        return FEATURE_FLAGS.bouncerAreaExclusion();
+        return true;
     }
-
-
-    public static boolean clockReactiveSmartspaceLayout() {
-        
-        return FEATURE_FLAGS.clockReactiveSmartspaceLayout();
+    public static boolean brightnessDialogOnSystemUser() {
+        return true;
     }
-
-
-    public static boolean clockReactiveVariants() {
-        
-        return FEATURE_FLAGS.clockReactiveVariants();
+    public static boolean cueBarAceMigration() {
+        return true;
     }
-
-
     public static boolean cursorHotCorner() {
-        
-        return FEATURE_FLAGS.cursorHotCorner();
+        return true;
     }
-
-
+    public static boolean enableAiClocks() {
+        return false;
+    }
     public static boolean enableHomeDelay() {
-        
-        return FEATURE_FLAGS.enableHomeDelay();
+        return false;
     }
-
-
-    public static boolean enableLppAssistInvocationEffect() {
-        
-        return FEATURE_FLAGS.enableLppAssistInvocationEffect();
+    public static boolean enableLppAssistInvocationInitialRumble() {
+        return true;
     }
-
-
-    public static boolean enableLppAssistInvocationHapticEffect() {
-        
-        return FEATURE_FLAGS.enableLppAssistInvocationHapticEffect();
+    public static boolean enableRecentsInTaskbar() {
+        return false;
     }
-
-
+    public static boolean enableSage() {
+        return false;
+    }
     public static boolean exampleSharedFlag() {
-        
-        return FEATURE_FLAGS.exampleSharedFlag();
+        return false;
     }
-
-
     public static boolean extendedWallpaperEffects() {
-        
-        return FEATURE_FLAGS.extendedWallpaperEffects();
+        return true;
     }
-
-
     public static boolean extendibleThemeManager() {
-        
-        return FEATURE_FLAGS.extendibleThemeManager();
+        return true;
     }
-
-
-    public static boolean lockscreenCustomClocks() {
-        
-        return FEATURE_FLAGS.lockscreenCustomClocks();
+    public static boolean launcherAnimationShellMigration() {
+        return false;
     }
-
-
-    public static boolean newCustomizationPickerUi() {
-        
-        return FEATURE_FLAGS.newCustomizationPickerUi();
+    public static boolean panAndZoomInExtendedWallpaperEffects() {
+        return true;
     }
-
-
-    public static boolean newTouchpadGesturesTutorial() {
-        
-        return FEATURE_FLAGS.newTouchpadGesturesTutorial();
+    public static boolean photoShuffleFlag() {
+        return false;
     }
-
-
-    public static boolean returnAnimationFrameworkLibrary() {
-        
-        return FEATURE_FLAGS.returnAnimationFrameworkLibrary();
-    }
-
-
-    public static boolean returnAnimationFrameworkLongLived() {
-        
-        return FEATURE_FLAGS.returnAnimationFrameworkLongLived();
-    }
-
-
-    public static boolean screenshotContextUrl() {
-        
-        return FEATURE_FLAGS.screenshotContextUrl();
-    }
-
-
     public static boolean shadeAllowBackGesture() {
-        
-        return FEATURE_FLAGS.shadeAllowBackGesture();
+        return false;
     }
-
-
     public static boolean sidefpsControllerRefactor() {
-        
-        return FEATURE_FLAGS.sidefpsControllerRefactor();
+        return true;
     }
-
-
+    public static boolean smartspaceAqiUpdatedDesign() {
+        return false;
+    }
+    public static boolean smartspaceSemanticWeatherData() {
+        return false;
+    }
     public static boolean smartspaceSportsCardBackground() {
-        
-        return FEATURE_FLAGS.smartspaceSportsCardBackground();
+        return false;
     }
-
-
-    public static boolean smartspaceUiUpdate() {
-        
-        return FEATURE_FLAGS.smartspaceUiUpdate();
-    }
-
-
-    public static boolean smartspaceUiUpdateResources() {
-        
-        return FEATURE_FLAGS.smartspaceUiUpdateResources();
-    }
-
-
     public static boolean smartspaceWeatherUseMonochromeFontIcons() {
-        
-        return FEATURE_FLAGS.smartspaceWeatherUseMonochromeFontIcons();
+        return false;
     }
-
-
-    public static boolean statusBarConnectedDisplays() {
-        
-        return FEATURE_FLAGS.statusBarConnectedDisplays();
-    }
-
-
     public static boolean threeButtonCornerSwipe() {
-        
-        return FEATURE_FLAGS.threeButtonCornerSwipe();
+        return false;
     }
-
-
-    public static boolean usePreferredImageEditor() {
-        
-        return FEATURE_FLAGS.usePreferredImageEditor();
+    public static boolean workspaceItemsLabelHidden() {
+        return true;
     }
-
-    private static FeatureFlags FEATURE_FLAGS = new FeatureFlagsImpl();
 
 }

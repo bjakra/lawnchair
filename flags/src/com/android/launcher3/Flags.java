@@ -3,72 +3,83 @@ package com.android.launcher3;
 
 /** @hide */
 public final class Flags {
+
     /** @hide */
-    public static final String FLAG_ACCESSIBILITY_SCROLL_ON_ALLAPPS = "com.android.launcher3.accessibility_scroll_on_allapps";
+    public static final String FLAG_ALL_APPS_SURFACE = "com.android.launcher3.all_apps_surface";
     /** @hide */
-    public static final String FLAG_ALL_APPS_BLUR = "com.android.launcher3.all_apps_blur";
+    public static final String FLAG_APP_LAUNCH_BLUR = "com.android.launcher3.app_launch_blur";
     /** @hide */
-    public static final String FLAG_ALL_APPS_SHEET_FOR_HANDHELD = "com.android.launcher3.all_apps_sheet_for_handheld";
+    public static final String FLAG_AVOID_DISPLAY_CUTOUT_BUBBLE_BAR = "com.android.launcher3.avoid_display_cutout_bubble_bar";
     /** @hide */
-    public static final String FLAG_ENABLE_ADD_APP_WIDGET_VIA_CONFIG_ACTIVITY_V2 = "com.android.launcher3.enable_add_app_widget_via_config_activity_v2";
+    public static final String FLAG_BIND_MODEL_USING_REPOSITORY = "com.android.launcher3.bind_model_using_repository";
+    /** @hide */
+    public static final String FLAG_BLUR_ON_MORE_SURFACES = "com.android.launcher3.blur_on_more_surfaces";
+    /** @hide */
+    public static final String FLAG_BLURRED_HOME_ANIMATION = "com.android.launcher3.blurred_home_animation";
+    /** @hide */
+    public static final String FLAG_CENTER_SPRING_LOADED_STATE_VERTICALLY = "com.android.launcher3.center_spring_loaded_state_vertically";
+    /** @hide */
+    public static final String FLAG_CONDO_PLANNER = "com.android.launcher3.condo_planner";
+    /** @hide */
+    public static final String FLAG_DISABLE_APP_AUTOMATION_BLUR = "com.android.launcher3.disable_app_automation_blur";
+    /** @hide */
+    public static final String FLAG_DOUBLE_TAP_TO_SLEEP = "com.android.launcher3.double_tap_to_sleep";
     /** @hide */
     public static final String FLAG_ENABLE_ALL_APPS_BUTTON_IN_HOTSEAT = "com.android.launcher3.enable_all_apps_button_in_hotseat";
     /** @hide */
+    public static final String FLAG_ENABLE_ALL_APPS_EDU_FOR_OVERSWIPE = "com.android.launcher3.enable_all_apps_edu_for_overswipe";
+    /** @hide */
     public static final String FLAG_ENABLE_ALT_TAB_KQS_FLATENNING = "com.android.launcher3.enable_alt_tab_kqs_flatenning";
     /** @hide */
-    public static final String FLAG_ENABLE_ALT_TAB_KQS_ON_CONNECTED_DISPLAYS = "com.android.launcher3.enable_alt_tab_kqs_on_connected_displays";
+    public static final String FLAG_ENABLE_APP_AUTOMATION_INDICATOR = "com.android.launcher3.enable_app_automation_indicator";
     /** @hide */
-    public static final String FLAG_ENABLE_CATEGORIZED_WIDGET_SUGGESTIONS = "com.android.launcher3.enable_categorized_widget_suggestions";
+    public static final String FLAG_ENABLE_APP_LOCK_SHORTCUT = "com.android.launcher3.enable_app_lock_shortcut";
     /** @hide */
-    public static final String FLAG_ENABLE_CONTAINER_RETURN_ANIMATIONS = "com.android.launcher3.enable_container_return_animations";
+    public static final String FLAG_ENABLE_COLLAPSE_SYSUI_PANELS_ON_TASKBAR_CLICK = "com.android.launcher3.enable_collapse_sysui_panels_on_taskbar_click";
+    /** @hide */
+    public static final String FLAG_ENABLE_COMPOSE_FOR_OPTIONS_POPUP_MENU_DIALOG = "com.android.launcher3.enable_compose_for_options_popup_menu_dialog";
     /** @hide */
     public static final String FLAG_ENABLE_CONTRAST_TILES = "com.android.launcher3.enable_contrast_tiles";
     /** @hide */
-    public static final String FLAG_ENABLE_COROUTINE_THREADING_IMPROVEMENTS = "com.android.launcher3.enable_coroutine_threading_improvements";
+    public static final String FLAG_ENABLE_CUE_BAR_DESKTOP_FORM_FACTOR = "com.android.launcher3.enable_cue_bar_desktop_form_factor";
     /** @hide */
-    public static final String FLAG_ENABLE_CURSOR_HOVER_STATES = "com.android.launcher3.enable_cursor_hover_states";
+    public static final String FLAG_ENABLE_CURSOR_DRIVEN_WORKFLOWS = "com.android.launcher3.enable_cursor_driven_workflows";
     /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_EXPLODED_VIEW = "com.android.launcher3.enable_desktop_exploded_view";
+    public static final String FLAG_ENABLE_CUSTOM_HEIGHT_FOR_ALL_APPS_ON_CD = "com.android.launcher3.enable_custom_height_for_all_apps_on_cd";
     /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_MENU_ON_SECONDARY_DISPLAY_BUGFIX = "com.android.launcher3.enable_desktop_menu_on_secondary_display_bugfix";
-    /** @hide */
-    public static final String FLAG_ENABLE_DISMISS_PREDICTION_UNDO = "com.android.launcher3.enable_dismiss_prediction_undo";
+    public static final String FLAG_ENABLE_DRAG_START_END_MULTI_DISPATCH = "com.android.launcher3.enable_drag_start_end_multi_dispatch";
     /** @hide */
     public static final String FLAG_ENABLE_EXPANDING_PAUSE_WORK_BUTTON = "com.android.launcher3.enable_expanding_pause_work_button";
-    /** @hide */
-    public static final String FLAG_ENABLE_EXPRESSIVE_DISMISS_TASK_MOTION = "com.android.launcher3.enable_expressive_dismiss_task_motion";
     /** @hide */
     public static final String FLAG_ENABLE_EXPRESSIVE_FOLDER_EXPANSION = "com.android.launcher3.enable_expressive_folder_expansion";
     /** @hide */
     public static final String FLAG_ENABLE_FALLBACK_OVERVIEW_IN_WINDOW = "com.android.launcher3.enable_fallback_overview_in_window";
     /** @hide */
-    public static final String FLAG_ENABLE_FIRST_SCREEN_BROADCAST_ARCHIVING_EXTRAS = "com.android.launcher3.enable_first_screen_broadcast_archiving_extras";
+    public static final String FLAG_ENABLE_FILE_SYSTEM_FOLDERS_AS_DROP_TARGETS = "com.android.launcher3.enable_file_system_folders_as_drop_targets";
+    /** @hide */
+    public static final String FLAG_ENABLE_FIXED_QSB_AT_BOTTOM = "com.android.launcher3.enable_fixed_qsb_at_bottom";
     /** @hide */
     public static final String FLAG_ENABLE_FOCUS_OUTLINE = "com.android.launcher3.enable_focus_outline";
     /** @hide */
-    public static final String FLAG_ENABLE_GENERATED_PREVIEWS = "com.android.launcher3.enable_generated_previews";
-    /** @hide */
-    public static final String FLAG_ENABLE_GESTURE_NAV_HORIZONTAL_TOUCH_SLOP = "com.android.launcher3.enable_gesture_nav_horizontal_touch_slop";
-    /** @hide */
-    public static final String FLAG_ENABLE_GESTURE_NAV_ON_CONNECTED_DISPLAYS = "com.android.launcher3.enable_gesture_nav_on_connected_displays";
-    /** @hide */
-    public static final String FLAG_ENABLE_GRID_ONLY_OVERVIEW = "com.android.launcher3.enable_grid_only_overview";
+    public static final String FLAG_ENABLE_FOLDER_REFACTOR = "com.android.launcher3.enable_folder_refactor";
     /** @hide */
     public static final String FLAG_ENABLE_GROWTH_NUDGE = "com.android.launcher3.enable_growth_nudge";
     /** @hide */
-    public static final String FLAG_ENABLE_HOME_TRANSITION_LISTENER = "com.android.launcher3.enable_home_transition_listener";
+    public static final String FLAG_ENABLE_HOME_SCREEN_FILES_COPY_PASTE = "com.android.launcher3.enable_home_screen_files_copy_paste";
     /** @hide */
-    public static final String FLAG_ENABLE_LARGE_DESKTOP_WINDOWING_TILE = "com.android.launcher3.enable_large_desktop_windowing_tile";
+    public static final String FLAG_ENABLE_HOME_SCREEN_FILES_RENAMING = "com.android.launcher3.enable_home_screen_files_renaming";
     /** @hide */
-    public static final String FLAG_ENABLE_LAUNCHER_BR_METRICS_FIXED = "com.android.launcher3.enable_launcher_br_metrics_fixed";
+    public static final String FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING = "com.android.launcher3.enable_home_screen_files_trashing";
+    /** @hide */
+    public static final String FLAG_ENABLE_KQS_FORCE_TAKE_RUNNING_TASK_THUMBNAIL = "com.android.launcher3.enable_kqs_force_take_running_task_thumbnail";
+    /** @hide */
+    public static final String FLAG_ENABLE_LATER_IS_LOCKED_CHECK = "com.android.launcher3.enable_later_is_locked_check";
     /** @hide */
     public static final String FLAG_ENABLE_LAUNCHER_ICON_SHAPES = "com.android.launcher3.enable_launcher_icon_shapes";
     /** @hide */
     public static final String FLAG_ENABLE_LAUNCHER_OVERVIEW_IN_WINDOW = "com.android.launcher3.enable_launcher_overview_in_window";
     /** @hide */
-    public static final String FLAG_ENABLE_LAUNCHER_VISUAL_REFRESH = "com.android.launcher3.enable_launcher_visual_refresh";
-    /** @hide */
-    public static final String FLAG_ENABLE_LONG_PRESS_REMOVE_SHORTCUT = "com.android.launcher3.enable_long_press_remove_shortcut";
+    public static final String FLAG_ENABLE_LOW_RES_THUMBNAIL_PRELOADING = "com.android.launcher3.enable_low_res_thumbnail_preloading";
     /** @hide */
     public static final String FLAG_ENABLE_MOUSE_INTERACTION_CHANGES = "com.android.launcher3.enable_mouse_interaction_changes";
     /** @hide */
@@ -76,41 +87,37 @@ public final class Flags {
     /** @hide */
     public static final String FLAG_ENABLE_NARROW_GRID_RESTORE = "com.android.launcher3.enable_narrow_grid_restore";
     /** @hide */
-    public static final String FLAG_ENABLE_OVERVIEW_BACKGROUND_WALLPAPER_BLUR = "com.android.launcher3.enable_overview_background_wallpaper_blur";
+    public static final String FLAG_ENABLE_NEW_TOUCHPAD_GESTURES = "com.android.launcher3.enable_new_touchpad_gestures";
     /** @hide */
     public static final String FLAG_ENABLE_OVERVIEW_DESKTOP_TILE_WALLPAPER_BACKGROUND = "com.android.launcher3.enable_overview_desktop_tile_wallpaper_background";
     /** @hide */
-    public static final String FLAG_ENABLE_OVERVIEW_ICON_MENU = "com.android.launcher3.enable_overview_icon_menu";
+    public static final String FLAG_ENABLE_OVERVIEW_PAGINATION = "com.android.launcher3.enable_overview_pagination";
     /** @hide */
-    public static final String FLAG_ENABLE_OVERVIEW_ON_CONNECTED_DISPLAYS = "com.android.launcher3.enable_overview_on_connected_displays";
+    public static final String FLAG_ENABLE_OVERVIEW_SELECT_TEXT_VIEW = "com.android.launcher3.enable_overview_select_text_view";
     /** @hide */
-    public static final String FLAG_ENABLE_PREDICTIVE_BACK_GESTURE = "com.android.launcher3.enable_predictive_back_gesture";
+    public static final String FLAG_ENABLE_PREDICTIVE_BACK_IN_OVERVIEW = "com.android.launcher3.enable_predictive_back_in_overview";
     /** @hide */
     public static final String FLAG_ENABLE_PRIVATE_SPACE = "com.android.launcher3.enable_private_space";
-    /** @hide */
-    public static final String FLAG_ENABLE_PRIVATE_SPACE_INSTALL_SHORTCUT = "com.android.launcher3.enable_private_space_install_shortcut";
     /** @hide */
     public static final String FLAG_ENABLE_QSB_ON_HOTSEAT = "com.android.launcher3.enable_qsb_on_hotseat";
     /** @hide */
     public static final String FLAG_ENABLE_REBOOT_UNLOCK_ANIMATION = "com.android.launcher3.enable_reboot_unlock_animation";
     /** @hide */
-    public static final String FLAG_ENABLE_RECENTS_IN_TASKBAR = "com.android.launcher3.enable_recents_in_taskbar";
+    public static final String FLAG_ENABLE_RECENTS_WINDOW_BLUR = "com.android.launcher3.enable_recents_window_blur";
     /** @hide */
     public static final String FLAG_ENABLE_RECENTS_WINDOW_PROTO_LOG = "com.android.launcher3.enable_recents_window_proto_log";
     /** @hide */
     public static final String FLAG_ENABLE_REFACTOR_DIGITAL_WELLBEING_TOAST = "com.android.launcher3.enable_refactor_digital_wellbeing_toast";
     /** @hide */
-    public static final String FLAG_ENABLE_REFACTOR_TASK_CONTENT_VIEW = "com.android.launcher3.enable_refactor_task_content_view";
-    /** @hide */
-    public static final String FLAG_ENABLE_REFACTOR_TASK_THUMBNAIL = "com.android.launcher3.enable_refactor_task_thumbnail";
-    /** @hide */
     public static final String FLAG_ENABLE_RESPONSIVE_WORKSPACE = "com.android.launcher3.enable_responsive_workspace";
+    /** @hide */
+    public static final String FLAG_ENABLE_RESTOREDBTASK_MODELWRITER_REFACTOR = "com.android.launcher3.enable_restoredbtask_modelwriter_refactor";
     /** @hide */
     public static final String FLAG_ENABLE_REVERSIBLE_HOME_ACTION_CORNER = "com.android.launcher3.enable_reversible_home_action_corner";
     /** @hide */
-    public static final String FLAG_ENABLE_SCALABILITY_FOR_DESKTOP_EXPERIENCE = "com.android.launcher3.enable_scalability_for_desktop_experience";
+    public static final String FLAG_ENABLE_SAVE_ACTION_IN_OVERVIEW_SHARE = "com.android.launcher3.enable_save_action_in_overview_share";
     /** @hide */
-    public static final String FLAG_ENABLE_SCALING_REVEAL_HOME_ANIMATION = "com.android.launcher3.enable_scaling_reveal_home_animation";
+    public static final String FLAG_ENABLE_SCALABILITY_FOR_DESKTOP_EXPERIENCE = "com.android.launcher3.enable_scalability_for_desktop_experience";
     /** @hide */
     public static final String FLAG_ENABLE_SIMULTANEOUS_OVERVIEW_TRIGGER_ON_EXTENDED_DESKTOP = "com.android.launcher3.enable_simultaneous_overview_trigger_on_extended_desktop";
     /** @hide */
@@ -120,13 +127,25 @@ public final class Flags {
     /** @hide */
     public static final String FLAG_ENABLE_SUPPORT_FOR_ARCHIVING = "com.android.launcher3.enable_support_for_archiving";
     /** @hide */
-    public static final String FLAG_ENABLE_TABLET_TWO_PANE_PICKER_V2 = "com.android.launcher3.enable_tablet_two_pane_picker_v2";
+    public static final String FLAG_ENABLE_SWIPE_UP_MAGNETIC_DETACH = "com.android.launcher3.enable_swipe_up_magnetic_detach";
+    /** @hide */
+    public static final String FLAG_ENABLE_SYSTEM_DRAG = "com.android.launcher3.enable_system_drag";
+    /** @hide */
+    public static final String FLAG_ENABLE_SYSTEM_DRAG_TO_OTHER_APPS = "com.android.launcher3.enable_system_drag_to_other_apps";
+    /** @hide */
+    public static final String FLAG_ENABLE_TASKBAR_A11Y_MORE_OPTIONS_BUTTON = "com.android.launcher3.enable_taskbar_a11y_more_options_button";
     /** @hide */
     public static final String FLAG_ENABLE_TASKBAR_BEHIND_SHADE = "com.android.launcher3.enable_taskbar_behind_shade";
     /** @hide */
     public static final String FLAG_ENABLE_TASKBAR_CUSTOMIZATION = "com.android.launcher3.enable_taskbar_customization";
     /** @hide */
-    public static final String FLAG_ENABLE_TASKBAR_FOR_DIRECT_BOOT = "com.android.launcher3.enable_taskbar_for_direct_boot";
+    public static final String FLAG_ENABLE_TASKBAR_DRAG_AND_DROP = "com.android.launcher3.enable_taskbar_drag_and_drop";
+    /** @hide */
+    public static final String FLAG_ENABLE_TASKBAR_DRAG_TO_REMOVE = "com.android.launcher3.enable_taskbar_drag_to_remove";
+    /** @hide */
+    public static final String FLAG_ENABLE_TASKBAR_ICON_CONTAINER = "com.android.launcher3.enable_taskbar_icon_container";
+    /** @hide */
+    public static final String FLAG_ENABLE_TASKBAR_ICON_DESKTOP_CLICKS = "com.android.launcher3.enable_taskbar_icon_desktop_clicks";
     /** @hide */
     public static final String FLAG_ENABLE_TASKBAR_NO_RECREATE = "com.android.launcher3.enable_taskbar_no_recreate";
     /** @hide */
@@ -134,7 +153,9 @@ public final class Flags {
     /** @hide */
     public static final String FLAG_ENABLE_TASKBAR_UI_THREAD = "com.android.launcher3.enable_taskbar_ui_thread";
     /** @hide */
-    public static final String FLAG_ENABLE_TIERED_WIDGETS_BY_DEFAULT_IN_PICKER = "com.android.launcher3.enable_tiered_widgets_by_default_in_picker";
+    public static final String FLAG_ENABLE_TASKS_DRAG_AND_DROP_IN_OVERVIEW = "com.android.launcher3.enable_tasks_drag_and_drop_in_overview";
+    /** @hide */
+    public static final String FLAG_ENABLE_TRANSACTIONAL_MODEL_WRITER = "com.android.launcher3.enable_transactional_model_writer";
     /** @hide */
     public static final String FLAG_ENABLE_TWO_PANE_LAUNCHER_SETTINGS = "com.android.launcher3.enable_two_pane_launcher_settings";
     /** @hide */
@@ -144,25 +165,31 @@ public final class Flags {
     /** @hide */
     public static final String FLAG_ENABLE_UNFOLD_STATE_ANIMATION = "com.android.launcher3.enable_unfold_state_animation";
     /** @hide */
-    public static final String FLAG_ENABLE_WIDGET_PICKER_REFACTOR = "com.android.launcher3.enable_widget_picker_refactor";
+    public static final String FLAG_ENABLE_WIDGET_PICKER_BLUR = "com.android.launcher3.enable_widget_picker_blur";
     /** @hide */
-    public static final String FLAG_ENABLE_WIDGET_TAP_TO_ADD = "com.android.launcher3.enable_widget_tap_to_add";
+    public static final String FLAG_ENABLE_WIDGETS_SECTION_IN_OPTIONS_MENU = "com.android.launcher3.enable_widgets_section_in_options_menu";
     /** @hide */
-    public static final String FLAG_ENABLE_WORKSPACE_INFLATION = "com.android.launcher3.enable_workspace_inflation";
+    public static final String FLAG_ENABLE_WORKSPACE_PAGE_ANIMATION = "com.android.launcher3.enable_workspace_page_animation";
+    /** @hide */
+    public static final String FLAG_ENABLE_WORKSPACE_SELECTION = "com.android.launcher3.enable_workspace_selection";
     /** @hide */
     public static final String FLAG_ENABLED_FOLDERS_IN_ALL_APPS = "com.android.launcher3.enabled_folders_in_all_apps";
     /** @hide */
-    public static final String FLAG_EXPRESSIVE_THEME_IN_TASKBAR_AND_NAVIGATION = "com.android.launcher3.expressive_theme_in_taskbar_and_navigation";
+    public static final String FLAG_EXPANDABLE_LONG_PRESS_MENU = "com.android.launcher3.expandable_long_press_menu";
     /** @hide */
-    public static final String FLAG_EXTERNAL_DATA_ACCESS = "com.android.launcher3.external_data_access";
+    public static final String FLAG_FALLBACK_REVEAL_ANIMATION = "com.android.launcher3.fallback_reveal_animation";
+    /** @hide */
+    public static final String FLAG_FIX_WIDGET_SINGLE_PTR_RESIZE = "com.android.launcher3.fix_widget_single_ptr_resize";
     /** @hide */
     public static final String FLAG_FLOATING_SEARCH_BAR = "com.android.launcher3.floating_search_bar";
     /** @hide */
     public static final String FLAG_FORCE_MONOCHROME_APP_ICONS = "com.android.launcher3.force_monochrome_app_icons";
     /** @hide */
-    public static final String FLAG_GRID_MIGRATION_REFACTOR = "com.android.launcher3.grid_migration_refactor";
+    public static final String FLAG_FORCE_MONOCHROME_APP_ICONS_ADAPT_COLORS = "com.android.launcher3.force_monochrome_app_icons_adapt_colors";
     /** @hide */
-    public static final String FLAG_GSF_RES = "com.android.launcher3.gsf_res";
+    public static final String FLAG_GESTURE_NAV_TOUCH_INPUT_OPTIMIZATIONS = "com.android.launcher3.gesture_nav_touch_input_optimizations";
+    /** @hide */
+    public static final String FLAG_HIDE_AUTOMATED_TASKS_IN_OVERVIEW = "com.android.launcher3.hide_automated_tasks_in_overview";
     /** @hide */
     public static final String FLAG_HOME_SCREEN_EDIT_IMPROVEMENTS = "com.android.launcher3.home_screen_edit_improvements";
     /** @hide */
@@ -172,678 +199,385 @@ public final class Flags {
     /** @hide */
     public static final String FLAG_MODEL_REPOSITORY = "com.android.launcher3.model_repository";
     /** @hide */
+    public static final String FLAG_MOVE_TO_REST_STATE_FOR_BACKGROUND_APP = "com.android.launcher3.move_to_rest_state_for_background_app";
+    /** @hide */
     public static final String FLAG_MSDL_FEEDBACK = "com.android.launcher3.msdl_feedback";
     /** @hide */
     public static final String FLAG_NUDGE_PILL = "com.android.launcher3.nudge_pill";
     /** @hide */
-    public static final String FLAG_ONE_GRID_MOUNTED_MODE = "com.android.launcher3.one_grid_mounted_mode";
-    /** @hide */
     public static final String FLAG_ONE_GRID_ROTATION_HANDLING = "com.android.launcher3.one_grid_rotation_handling";
     /** @hide */
-    public static final String FLAG_ONE_GRID_SPECS = "com.android.launcher3.one_grid_specs";
-    /** @hide */
-    public static final String FLAG_PREDICTIVE_BACK_TO_HOME_BLUR = "com.android.launcher3.predictive_back_to_home_blur";
-    /** @hide */
-    public static final String FLAG_PREDICTIVE_BACK_TO_HOME_POLISH = "com.android.launcher3.predictive_back_to_home_polish";
+    public static final String FLAG_ORIENTATION_FRIENDLY_DESKTOP_GRID_SPEC = "com.android.launcher3.orientation_friendly_desktop_grid_spec";
     /** @hide */
     public static final String FLAG_PRIVATE_SPACE_ADD_FLOATING_MASK_VIEW = "com.android.launcher3.private_space_add_floating_mask_view";
     /** @hide */
     public static final String FLAG_PRIVATE_SPACE_ANIMATION = "com.android.launcher3.private_space_animation";
     /** @hide */
-    public static final String FLAG_PRIVATE_SPACE_RESTRICT_ACCESSIBILITY_DRAG = "com.android.launcher3.private_space_restrict_accessibility_drag";
+    public static final String FLAG_QSB_ANIMATION_MINOR_FIXES = "com.android.launcher3.qsb_animation_minor_fixes";
     /** @hide */
-    public static final String FLAG_PRIVATE_SPACE_RESTRICT_ITEM_DRAG = "com.android.launcher3.private_space_restrict_item_drag";
-    /** @hide */
-    public static final String FLAG_PRIVATE_SPACE_SYS_APPS_SEPARATION = "com.android.launcher3.private_space_sys_apps_separation";
-    /** @hide */
-    public static final String FLAG_REMOVE_APPS_REFRESH_ON_RIGHT_CLICK = "com.android.launcher3.remove_apps_refresh_on_right_click";
+    public static final String FLAG_REDUCE_WORKSPACE_BLUR_USAGE = "com.android.launcher3.reduce_workspace_blur_usage";
     /** @hide */
     public static final String FLAG_RESTORE_ARCHIVED_APP_ICONS_FROM_DB = "com.android.launcher3.restore_archived_app_icons_from_db";
     /** @hide */
-    public static final String FLAG_RESTORE_ARCHIVED_SHORTCUTS = "com.android.launcher3.restore_archived_shortcuts";
+    public static final String FLAG_SHOW_CREATE_WIDGET_BTN_IN_PICKER = "com.android.launcher3.show_create_widget_btn_in_picker";
     /** @hide */
-    public static final String FLAG_SHOW_TASKBAR_PINNING_POPUP_FROM_ANYWHERE = "com.android.launcher3.show_taskbar_pinning_popup_from_anywhere";
+    public static final String FLAG_SHOW_FILES_ON_HOME_SCREEN = "com.android.launcher3.show_files_on_home_screen";
     /** @hide */
-    public static final String FLAG_SYNC_APP_LAUNCH_WITH_TASKBAR_STASH = "com.android.launcher3.sync_app_launch_with_taskbar_stash";
+    public static final String FLAG_SIMPLIFIED_LAUNCHER_MODEL_BINDING = "com.android.launcher3.simplified_launcher_model_binding";
     /** @hide */
     public static final String FLAG_TASKBAR_QUIET_MODE_CHANGE_SUPPORT = "com.android.launcher3.taskbar_quiet_mode_change_support";
     /** @hide */
-    public static final String FLAG_USE_NEW_ICON_FOR_ARCHIVED_APPS = "com.android.launcher3.use_new_icon_for_archived_apps";
+    public static final String FLAG_TOOLTIP_EDU_COMBINATOR = "com.android.launcher3.tooltip_edu_combinator";
     /** @hide */
-    public static final String FLAG_USE_SYSTEM_RADIUS_FOR_APP_WIDGETS = "com.android.launcher3.use_system_radius_for_app_widgets";
+    public static final String FLAG_TRANSLATE_IMESWITCHER_3BUTTONS_WITH_BUBBLE = "com.android.launcher3.translate_imeswitcher_3buttons_with_bubble";
     /** @hide */
-    public static final String FLAG_WORK_SCHEDULER_IN_WORK_PROFILE = "com.android.launcher3.work_scheduler_in_work_profile";
-
-
-    public static boolean accessibilityScrollOnAllapps() {
-        
-        return FEATURE_FLAGS.accessibilityScrollOnAllapps();
+    public static final String FLAG_UPDATE_RECENTS_WM_WWM_CONFIGURATION = "com.android.launcher3.update_recents_wm_wwm_configuration";
+    /** @hide */
+    public static final String FLAG_WIDGET_RETURN_ANIMATION_MINOR_FIXES = "com.android.launcher3.widget_return_animation_minor_fixes";
+    public static boolean allAppsSurface() {
+        return false;
     }
-
-
-    public static boolean allAppsBlur() {
-        
-        return FEATURE_FLAGS.allAppsBlur();
+    public static boolean appLaunchBlur() {
+        return true;
     }
-
-
-    public static boolean allAppsSheetForHandheld() {
-        
-        return FEATURE_FLAGS.allAppsSheetForHandheld();
+    public static boolean avoidDisplayCutoutBubbleBar() {
+        return true;
     }
-
-
-    public static boolean enableAddAppWidgetViaConfigActivityV2() {
-        
-        return FEATURE_FLAGS.enableAddAppWidgetViaConfigActivityV2();
+    public static boolean bindModelUsingRepository() {
+        return false;
     }
-
-
+    public static boolean blurOnMoreSurfaces() {
+        return false;
+    }
+    public static boolean blurredHomeAnimation() {
+        return false;
+    }
+    public static boolean centerSpringLoadedStateVertically() {
+        return false;
+    }
+    public static boolean condoPlanner() {
+        return false;
+    }
+    public static boolean disableAppAutomationBlur() {
+        return false;
+    }
+    public static boolean doubleTapToSleep() {
+        return false;
+    }
     public static boolean enableAllAppsButtonInHotseat() {
-        
-        return FEATURE_FLAGS.enableAllAppsButtonInHotseat();
+        return false;
     }
-
-
+    public static boolean enableAllAppsEduForOverswipe() {
+        return false;
+    }
     public static boolean enableAltTabKqsFlatenning() {
-        
-        return FEATURE_FLAGS.enableAltTabKqsFlatenning();
+        return true;
     }
-
-
-    public static boolean enableAltTabKqsOnConnectedDisplays() {
-        
-        return FEATURE_FLAGS.enableAltTabKqsOnConnectedDisplays();
+    public static boolean enableAppAutomationIndicator() {
+        return true;
     }
-
-
-    public static boolean enableCategorizedWidgetSuggestions() {
-        
-        return FEATURE_FLAGS.enableCategorizedWidgetSuggestions();
+    public static boolean enableAppLockShortcut() {
+        return false;
     }
-
-
-    public static boolean enableContainerReturnAnimations() {
-        
-        return FEATURE_FLAGS.enableContainerReturnAnimations();
+    public static boolean enableCollapseSysuiPanelsOnTaskbarClick() {
+        return false;
     }
-
-
+    public static boolean enableComposeForOptionsPopupMenuDialog() {
+        return false;
+    }
     public static boolean enableContrastTiles() {
-        
-        return FEATURE_FLAGS.enableContrastTiles();
+        return false;
     }
-
-
-    public static boolean enableCoroutineThreadingImprovements() {
-        
-        return FEATURE_FLAGS.enableCoroutineThreadingImprovements();
+    public static boolean enableCueBarDesktopFormFactor() {
+        return false;
     }
-
-
-    public static boolean enableCursorHoverStates() {
-        
-        return FEATURE_FLAGS.enableCursorHoverStates();
+    public static boolean enableCursorDrivenWorkflows() {
+        return false;
     }
-
-
-    public static boolean enableDesktopExplodedView() {
-        
-        return FEATURE_FLAGS.enableDesktopExplodedView();
+    public static boolean enableCustomHeightForAllAppsOnCd() {
+        return true;
     }
-
-
-    public static boolean enableDesktopMenuOnSecondaryDisplayBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopMenuOnSecondaryDisplayBugfix();
+    public static boolean enableDragStartEndMultiDispatch() {
+        return false;
     }
-
-
-    public static boolean enableDismissPredictionUndo() {
-        
-        return FEATURE_FLAGS.enableDismissPredictionUndo();
-    }
-
-
     public static boolean enableExpandingPauseWorkButton() {
-        
-        return FEATURE_FLAGS.enableExpandingPauseWorkButton();
+        return true;
     }
-
-
-    public static boolean enableExpressiveDismissTaskMotion() {
-        
-        return FEATURE_FLAGS.enableExpressiveDismissTaskMotion();
-    }
-
-
     public static boolean enableExpressiveFolderExpansion() {
-        
-        return FEATURE_FLAGS.enableExpressiveFolderExpansion();
+        return true;
     }
-
-
     public static boolean enableFallbackOverviewInWindow() {
-        
-        return FEATURE_FLAGS.enableFallbackOverviewInWindow();
+        return false;
     }
-
-
-    public static boolean enableFirstScreenBroadcastArchivingExtras() {
-        
-        return FEATURE_FLAGS.enableFirstScreenBroadcastArchivingExtras();
+    public static boolean enableFileSystemFoldersAsDropTargets() {
+        return false;
     }
-
-
+    public static boolean enableFixedQsbAtBottom() {
+        return false;
+    }
     public static boolean enableFocusOutline() {
-        
-        return FEATURE_FLAGS.enableFocusOutline();
+        return true;
     }
-
-
-    public static boolean enableGeneratedPreviews() {
-        
-        return FEATURE_FLAGS.enableGeneratedPreviews();
+    public static boolean enableFolderRefactor() {
+        return false;
     }
-
-
-    public static boolean enableGestureNavHorizontalTouchSlop() {
-        
-        return FEATURE_FLAGS.enableGestureNavHorizontalTouchSlop();
-    }
-
-
-    public static boolean enableGestureNavOnConnectedDisplays() {
-        
-        return FEATURE_FLAGS.enableGestureNavOnConnectedDisplays();
-    }
-
-
-    public static boolean enableGridOnlyOverview() {
-        
-        return FEATURE_FLAGS.enableGridOnlyOverview();
-    }
-
-
     public static boolean enableGrowthNudge() {
-        
-        return FEATURE_FLAGS.enableGrowthNudge();
+        return false;
     }
-
-
-    public static boolean enableHomeTransitionListener() {
-        
-        return FEATURE_FLAGS.enableHomeTransitionListener();
+    public static boolean enableHomeScreenFilesCopyPaste() {
+        return false;
     }
-
-
-    public static boolean enableLargeDesktopWindowingTile() {
-        
-        return FEATURE_FLAGS.enableLargeDesktopWindowingTile();
+    public static boolean enableHomeScreenFilesRenaming() {
+        return false;
     }
-
-
-    public static boolean enableLauncherBrMetricsFixed() {
-        
-        return FEATURE_FLAGS.enableLauncherBrMetricsFixed();
+    public static boolean enableHomeScreenFilesTrashing() {
+        return false;
     }
-
-
+    public static boolean enableKqsForceTakeRunningTaskThumbnail() {
+        return false;
+    }
+    public static boolean enableLaterIsLockedCheck() {
+        return false;
+    }
     public static boolean enableLauncherIconShapes() {
-        
-        return FEATURE_FLAGS.enableLauncherIconShapes();
+        return true;
     }
-
-
     public static boolean enableLauncherOverviewInWindow() {
-        
-        return FEATURE_FLAGS.enableLauncherOverviewInWindow();
+        return false;
     }
-
-
-    public static boolean enableLauncherVisualRefresh() {
-        
-        return FEATURE_FLAGS.enableLauncherVisualRefresh();
+    public static boolean enableLowResThumbnailPreloading() {
+        return true;
     }
-
-
-    public static boolean enableLongPressRemoveShortcut() {
-        
-        return FEATURE_FLAGS.enableLongPressRemoveShortcut();
-    }
-
-
     public static boolean enableMouseInteractionChanges() {
-        
-        return FEATURE_FLAGS.enableMouseInteractionChanges();
+        return false;
     }
-
-
     public static boolean enableMultiInstanceMenuTaskbar() {
-        
-        return FEATURE_FLAGS.enableMultiInstanceMenuTaskbar();
+        return true;
     }
-
-
     public static boolean enableNarrowGridRestore() {
-        
-        return FEATURE_FLAGS.enableNarrowGridRestore();
+        return true;
     }
-
-
-    public static boolean enableOverviewBackgroundWallpaperBlur() {
-        
-        return FEATURE_FLAGS.enableOverviewBackgroundWallpaperBlur();
+    public static boolean enableNewTouchpadGestures() {
+        return true;
     }
-
-
     public static boolean enableOverviewDesktopTileWallpaperBackground() {
-        
-        return FEATURE_FLAGS.enableOverviewDesktopTileWallpaperBackground();
+        return false;
     }
-
-
-    public static boolean enableOverviewIconMenu() {
-        
-        return FEATURE_FLAGS.enableOverviewIconMenu();
+    public static boolean enableOverviewPagination() {
+        return false;
     }
-
-
-    public static boolean enableOverviewOnConnectedDisplays() {
-        
-        return FEATURE_FLAGS.enableOverviewOnConnectedDisplays();
+    public static boolean enableOverviewSelectTextView() {
+        return false;
     }
-
-
-    public static boolean enablePredictiveBackGesture() {
-        
-        return FEATURE_FLAGS.enablePredictiveBackGesture();
+    public static boolean enablePredictiveBackInOverview() {
+        return false;
     }
-
-
     public static boolean enablePrivateSpace() {
-        
-        return FEATURE_FLAGS.enablePrivateSpace();
+        return true;
     }
-
-
-    public static boolean enablePrivateSpaceInstallShortcut() {
-        
-        return FEATURE_FLAGS.enablePrivateSpaceInstallShortcut();
-    }
-
-
     public static boolean enableQsbOnHotseat() {
-        
-        return FEATURE_FLAGS.enableQsbOnHotseat();
+        return false;
     }
-
-
     public static boolean enableRebootUnlockAnimation() {
-        
-        return FEATURE_FLAGS.enableRebootUnlockAnimation();
+        return false;
     }
-
-
-    public static boolean enableRecentsInTaskbar() {
-        
-        return FEATURE_FLAGS.enableRecentsInTaskbar();
+    public static boolean enableRecentsWindowBlur() {
+        return false;
     }
-
-
     public static boolean enableRecentsWindowProtoLog() {
-        
-        return FEATURE_FLAGS.enableRecentsWindowProtoLog();
+        return false;
     }
-
-
     public static boolean enableRefactorDigitalWellbeingToast() {
-        
-        return FEATURE_FLAGS.enableRefactorDigitalWellbeingToast();
+        return true;
     }
-
-
-    public static boolean enableRefactorTaskContentView() {
-        
-        return FEATURE_FLAGS.enableRefactorTaskContentView();
-    }
-
-
-    public static boolean enableRefactorTaskThumbnail() {
-        
-        return FEATURE_FLAGS.enableRefactorTaskThumbnail();
-    }
-
-
     public static boolean enableResponsiveWorkspace() {
-        
-        return FEATURE_FLAGS.enableResponsiveWorkspace();
+        return true;
     }
-
-
+    public static boolean enableRestoredbtaskModelwriterRefactor() {
+        return false;
+    }
     public static boolean enableReversibleHomeActionCorner() {
-        
-        return FEATURE_FLAGS.enableReversibleHomeActionCorner();
+        return false;
     }
-
-
+    public static boolean enableSaveActionInOverviewShare() {
+        return true;
+    }
     public static boolean enableScalabilityForDesktopExperience() {
-        
-        return FEATURE_FLAGS.enableScalabilityForDesktopExperience();
+        return false;
     }
-
-
-    public static boolean enableScalingRevealHomeAnimation() {
-        
-        return FEATURE_FLAGS.enableScalingRevealHomeAnimation();
-    }
-
-
     public static boolean enableSimultaneousOverviewTriggerOnExtendedDesktop() {
-        
-        return FEATURE_FLAGS.enableSimultaneousOverviewTriggerOnExtendedDesktop();
+        return false;
     }
-
-
     public static boolean enableStateManagerProtoLog() {
-        
-        return FEATURE_FLAGS.enableStateManagerProtoLog();
+        return false;
     }
-
-
     public static boolean enableStrictMode() {
-        
-        return FEATURE_FLAGS.enableStrictMode();
+        return false;
     }
-
-
     public static boolean enableSupportForArchiving() {
-        
-        return FEATURE_FLAGS.enableSupportForArchiving();
+        return true;
     }
-
-
-    public static boolean enableTabletTwoPanePickerV2() {
-        
-        return FEATURE_FLAGS.enableTabletTwoPanePickerV2();
+    public static boolean enableSwipeUpMagneticDetach() {
+        return false;
     }
-
-
+    public static boolean enableSystemDrag() {
+        return false;
+    }
+    public static boolean enableSystemDragToOtherApps() {
+        return false;
+    }
+    public static boolean enableTaskbarA11yMoreOptionsButton() {
+        return true;
+    }
     public static boolean enableTaskbarBehindShade() {
-        
-        return FEATURE_FLAGS.enableTaskbarBehindShade();
+        return false;
     }
-
-
     public static boolean enableTaskbarCustomization() {
-        
-        return FEATURE_FLAGS.enableTaskbarCustomization();
+        return false;
     }
-
-
-    public static boolean enableTaskbarForDirectBoot() {
-        
-        return FEATURE_FLAGS.enableTaskbarForDirectBoot();
+    public static boolean enableTaskbarDragAndDrop() {
+        return false;
     }
-
-
+    public static boolean enableTaskbarDragToRemove() {
+        return false;
+    }
+    public static boolean enableTaskbarIconContainer() {
+        return true;
+    }
+    public static boolean enableTaskbarIconDesktopClicks() {
+        return false;
+    }
     public static boolean enableTaskbarNoRecreate() {
-        
-        return FEATURE_FLAGS.enableTaskbarNoRecreate();
+        return false;
     }
-
-
     public static boolean enableTaskbarPinning() {
-        
-        return FEATURE_FLAGS.enableTaskbarPinning();
+        return true;
     }
-
-
     public static boolean enableTaskbarUiThread() {
-        
-        return FEATURE_FLAGS.enableTaskbarUiThread();
+        return false;
     }
-
-
-    public static boolean enableTieredWidgetsByDefaultInPicker() {
-        
-        return FEATURE_FLAGS.enableTieredWidgetsByDefaultInPicker();
+    public static boolean enableTasksDragAndDropInOverview() {
+        return false;
     }
-
-
+    public static boolean enableTransactionalModelWriter() {
+        return false;
+    }
     public static boolean enableTwoPaneLauncherSettings() {
-        
-        return FEATURE_FLAGS.enableTwoPaneLauncherSettings();
+        return false;
     }
-
-
     public static boolean enableTwolineAllapps() {
-        
-        return FEATURE_FLAGS.enableTwolineAllapps();
+        return false;
     }
-
-
     public static boolean enableTwolineToggle() {
-        
-        return FEATURE_FLAGS.enableTwolineToggle();
+        return true;
     }
-
-
     public static boolean enableUnfoldStateAnimation() {
-        
-        return FEATURE_FLAGS.enableUnfoldStateAnimation();
+        return false;
     }
-
-
-    public static boolean enableWidgetPickerRefactor() {
-        
-        return FEATURE_FLAGS.enableWidgetPickerRefactor();
+    public static boolean enableWidgetPickerBlur() {
+        return true;
     }
-
-
-    public static boolean enableWidgetTapToAdd() {
-        
-        return FEATURE_FLAGS.enableWidgetTapToAdd();
+    public static boolean enableWidgetsSectionInOptionsMenu() {
+        return false;
     }
-
-
-    public static boolean enableWorkspaceInflation() {
-        
-        return FEATURE_FLAGS.enableWorkspaceInflation();
+    public static boolean enableWorkspacePageAnimation() {
+        return false;
     }
-
-
+    public static boolean enableWorkspaceSelection() {
+        return false;
+    }
     public static boolean enabledFoldersInAllApps() {
-        
-        return FEATURE_FLAGS.enabledFoldersInAllApps();
+        return false;
     }
-
-
-    public static boolean expressiveThemeInTaskbarAndNavigation() {
-        
-        return FEATURE_FLAGS.expressiveThemeInTaskbarAndNavigation();
+    public static boolean expandableLongPressMenu() {
+        return false;
     }
-
-
-    public static boolean externalDataAccess() {
-        
-        return FEATURE_FLAGS.externalDataAccess();
+    public static boolean fallbackRevealAnimation() {
+        return false;
     }
-
-
+    public static boolean fixWidgetSinglePtrResize() {
+        return true;
+    }
     public static boolean floatingSearchBar() {
-        
-        return FEATURE_FLAGS.floatingSearchBar();
+        return false;
     }
-
-
     public static boolean forceMonochromeAppIcons() {
-        
-        return FEATURE_FLAGS.forceMonochromeAppIcons();
+        return false;
     }
-
-
-    public static boolean gridMigrationRefactor() {
-        
-        return FEATURE_FLAGS.gridMigrationRefactor();
+    public static boolean forceMonochromeAppIconsAdaptColors() {
+        return false;
     }
-
-
-    public static boolean gsfRes() {
-        
-        return FEATURE_FLAGS.gsfRes();
+    public static boolean gestureNavTouchInputOptimizations() {
+        return false;
     }
-
-
+    public static boolean hideAutomatedTasksInOverview() {
+        return true;
+    }
     public static boolean homeScreenEditImprovements() {
-        
-        return FEATURE_FLAGS.homeScreenEditImprovements();
+        return false;
     }
-
-
     public static boolean ignoreThreeFingerTrackpadForNavHandleLongPress() {
-        
-        return FEATURE_FLAGS.ignoreThreeFingerTrackpadForNavHandleLongPress();
+        return true;
     }
-
-
     public static boolean letterFastScroller() {
-        
-        return FEATURE_FLAGS.letterFastScroller();
+        return false;
     }
-
-
     public static boolean modelRepository() {
-        
-        return FEATURE_FLAGS.modelRepository();
+        return true;
     }
-
-
+    public static boolean moveToRestStateForBackgroundApp() {
+        return true;
+    }
     public static boolean msdlFeedback() {
-        
-        return FEATURE_FLAGS.msdlFeedback();
+        return true;
     }
-
-
     public static boolean nudgePill() {
-        
-        return FEATURE_FLAGS.nudgePill();
+        return false;
     }
-
-
-    public static boolean oneGridMountedMode() {
-        
-        return FEATURE_FLAGS.oneGridMountedMode();
-    }
-
-
     public static boolean oneGridRotationHandling() {
-        
-        return FEATURE_FLAGS.oneGridRotationHandling();
+        return false;
     }
-
-
-    public static boolean oneGridSpecs() {
-        
-        return FEATURE_FLAGS.oneGridSpecs();
+    public static boolean orientationFriendlyDesktopGridSpec() {
+        return false;
     }
-
-
-    public static boolean predictiveBackToHomeBlur() {
-        
-        return FEATURE_FLAGS.predictiveBackToHomeBlur();
-    }
-
-
-    public static boolean predictiveBackToHomePolish() {
-        
-        return FEATURE_FLAGS.predictiveBackToHomePolish();
-    }
-
-
     public static boolean privateSpaceAddFloatingMaskView() {
-        
-        return FEATURE_FLAGS.privateSpaceAddFloatingMaskView();
+        return true;
     }
-
-
     public static boolean privateSpaceAnimation() {
-        
-        return FEATURE_FLAGS.privateSpaceAnimation();
+        return true;
     }
-
-
-    public static boolean privateSpaceRestrictAccessibilityDrag() {
-        
-        return FEATURE_FLAGS.privateSpaceRestrictAccessibilityDrag();
+    public static boolean qsbAnimationMinorFixes() {
+        return false;
     }
-
-
-    public static boolean privateSpaceRestrictItemDrag() {
-        
-        return FEATURE_FLAGS.privateSpaceRestrictItemDrag();
+    public static boolean reduceWorkspaceBlurUsage() {
+        return true;
     }
-
-
-    public static boolean privateSpaceSysAppsSeparation() {
-        
-        return FEATURE_FLAGS.privateSpaceSysAppsSeparation();
-    }
-
-
-    public static boolean removeAppsRefreshOnRightClick() {
-        
-        return FEATURE_FLAGS.removeAppsRefreshOnRightClick();
-    }
-
-
     public static boolean restoreArchivedAppIconsFromDb() {
-        
-        return FEATURE_FLAGS.restoreArchivedAppIconsFromDb();
+        return true;
     }
-
-
-    public static boolean restoreArchivedShortcuts() {
-        
-        return FEATURE_FLAGS.restoreArchivedShortcuts();
+    public static boolean showCreateWidgetBtnInPicker() {
+        return true;
     }
-
-
-    public static boolean showTaskbarPinningPopupFromAnywhere() {
-        
-        return FEATURE_FLAGS.showTaskbarPinningPopupFromAnywhere();
+    public static boolean showFilesOnHomeScreen() {
+        return false;
     }
-
-
-    public static boolean syncAppLaunchWithTaskbarStash() {
-        
-        return FEATURE_FLAGS.syncAppLaunchWithTaskbarStash();
+    public static boolean simplifiedLauncherModelBinding() {
+        return true;
     }
-
-
     public static boolean taskbarQuietModeChangeSupport() {
-        
-        return FEATURE_FLAGS.taskbarQuietModeChangeSupport();
+        return false;
     }
-
-
-    public static boolean useNewIconForArchivedApps() {
-        
-        return FEATURE_FLAGS.useNewIconForArchivedApps();
+    public static boolean tooltipEduCombinator() {
+        return true;
     }
-
-
-    public static boolean useSystemRadiusForAppWidgets() {
-        
-        return FEATURE_FLAGS.useSystemRadiusForAppWidgets();
+    public static boolean translateImeswitcher3buttonsWithBubble() {
+        return true;
     }
-
-
-    public static boolean workSchedulerInWorkProfile() {
-        
-        return FEATURE_FLAGS.workSchedulerInWorkProfile();
+    public static boolean updateRecentsWmWwmConfiguration() {
+        return false;
     }
-
-    private static FeatureFlags FEATURE_FLAGS = new FeatureFlagsImpl();
+    public static boolean widgetReturnAnimationMinorFixes() {
+        return true;
+    }
 
 }

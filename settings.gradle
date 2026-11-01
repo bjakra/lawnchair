@@ -69,6 +69,9 @@ project(':viewcapturelib').projectDir = new File(rootDir, 'platform_frameworks_l
 include ':displaylib'
 project(':displaylib').projectDir = new File(rootDir, 'platform_frameworks_libs_systemui/displaylib')
 
+include ':tracinglib'
+project(':tracinglib').projectDir = new File(rootDir, 'platform_frameworks_libs_systemui/tracinglib/core')
+
 include ':mechanics'
 project(':mechanics').projectDir = new File(rootDir, 'platform_frameworks_libs_systemui/mechanics')
 
@@ -107,6 +110,7 @@ include ':compatLib:compatLibVT'
 include ':compatLib:compatLibVU'
 include ':compatLib:compatLibVV'
 include ':compatLib:compatLibVBaklava'
+include ':compatLib:compatLibVCinnamonBun'
 
 include ':baseline-profile'
 
@@ -115,6 +119,7 @@ include ':flags'
 include ':wmshell'
 include ':dagger'
 include ':concurrent'
+project(':concurrent').projectDir = new File(rootDir, 'modules/concurrent')
 //include ':compose'
 include ':modules:widgetpicker'
 

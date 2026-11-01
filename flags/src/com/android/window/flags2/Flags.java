@@ -3,202 +3,203 @@ package com.android.window.flags2;
 
 /** @hide */
 public final class Flags {
-    /** @hide */
-    public static final String FLAG_ACTION_MODE_EDGE_TO_EDGE = "com.android.window.flags.action_mode_edge_to_edge";
-    /** @hide */
-    public static final String FLAG_ACTIVITY_EMBEDDING_DELAY_TASK_FRAGMENT_FINISH_FOR_ACTIVITY_LAUNCH = "com.android.window.flags.activity_embedding_delay_task_fragment_finish_for_activity_launch";
+
     /** @hide */
     public static final String FLAG_ACTIVITY_EMBEDDING_INTERACTIVE_DIVIDER_FLAG = "com.android.window.flags.activity_embedding_interactive_divider_flag";
     /** @hide */
     public static final String FLAG_ACTIVITY_EMBEDDING_METRICS = "com.android.window.flags.activity_embedding_metrics";
     /** @hide */
-    public static final String FLAG_ACTIVITY_EMBEDDING_SUPPORT_FOR_CONNECTED_DISPLAYS = "com.android.window.flags.activity_embedding_support_for_connected_displays";
+    public static final String FLAG_ACTIVITY_START_INTERCEPTOR_SPEEDBUMPS = "com.android.window.flags.activity_start_interceptor_speedbumps";
+    /** @hide */
+    public static final String FLAG_ADD_BG_COLOR_FOR_TRANSPARENT_BUBBLES = "com.android.window.flags.add_bg_color_for_transparent_bubbles";
+    /** @hide */
+    public static final String FLAG_AI_DESKS_PLATFORM = "com.android.window.flags.ai_desks_platform";
     /** @hide */
     public static final String FLAG_ALLOW_DISABLE_ACTIVITY_RECORD_INPUT_SINK = "com.android.window.flags.allow_disable_activity_record_input_sink";
     /** @hide */
-    public static final String FLAG_ALLOWS_SCREEN_SIZE_DECOUPLED_FROM_STATUS_BAR_AND_CUTOUT = "com.android.window.flags.allows_screen_size_decoupled_from_status_bar_and_cutout";
+    public static final String FLAG_ALLOW_DRAG_AND_DROP_WHEN_INTERACTIVE_BUGFIX = "com.android.window.flags.allow_drag_and_drop_when_interactive_bugfix";
     /** @hide */
-    public static final String FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER = "com.android.window.flags.always_draw_magnification_fullscreen_border";
+    public static final String FLAG_ALWAYS_MOVE_TASK_TO_BACK_ON_BACK_PRESSED_FEATURE_FLAG = "com.android.window.flags.always_move_task_to_back_on_back_pressed_feature_flag";
     /** @hide */
     public static final String FLAG_ALWAYS_SEQ_ID_LAYOUT = "com.android.window.flags.always_seq_id_layout";
+    /** @hide */
+    public static final String FLAG_ALWAYS_SEQ_ID_LAYOUT_WEAR = "com.android.window.flags.always_seq_id_layout_wear";
     /** @hide */
     public static final String FLAG_ALWAYS_UPDATE_WALLPAPER_PERMISSION = "com.android.window.flags.always_update_wallpaper_permission";
     /** @hide */
     public static final String FLAG_AOD_TRANSITION = "com.android.window.flags.aod_transition";
     /** @hide */
-    public static final String FLAG_APP_COMPAT_ASYNC_RELAYOUT = "com.android.window.flags.app_compat_async_relayout";
+    public static final String FLAG_APP_COMPAT_ENABLE_BLUR_WALLPAPER_IN_SHELL = "com.android.window.flags.app_compat_enable_blur_wallpaper_in_shell";
     /** @hide */
     public static final String FLAG_APP_COMPAT_PROPERTIES_API = "com.android.window.flags.app_compat_properties_api";
     /** @hide */
-    public static final String FLAG_APP_COMPAT_REFACTORING = "com.android.window.flags.app_compat_refactoring";
+    public static final String FLAG_APP_COMPAT_REFACTORING_ROUNDED_CORNERS_ANIMATION = "com.android.window.flags.app_compat_refactoring_rounded_corners_animation";
     /** @hide */
-    public static final String FLAG_APP_COMPAT_REFACTORING_ROUNDED_CORNERS = "com.android.window.flags.app_compat_refactoring_rounded_corners";
+    public static final String FLAG_APP_COMPAT_REFACTORING_USE_ACTIVITY_LEASH_FOR_LETTERBOXING = "com.android.window.flags.app_compat_refactoring_use_activity_leash_for_letterboxing";
     /** @hide */
     public static final String FLAG_APP_COMPAT_UI_FRAMEWORK = "com.android.window.flags.app_compat_ui_framework";
     /** @hide */
-    public static final String FLAG_APP_HANDLE_NO_RELAYOUT_ON_EXCLUSION_CHANGE = "com.android.window.flags.app_handle_no_relayout_on_exclusion_change";
+    public static final String FLAG_APPHEADER_LAUNCH_COLOR_BUGFIX = "com.android.window.flags.appheader_launch_color_bugfix";
     /** @hide */
     public static final String FLAG_APPLY_LIFECYCLE_ON_PIP_CHANGE = "com.android.window.flags.apply_lifecycle_on_pip_change";
     /** @hide */
-    public static final String FLAG_AVOID_REBINDING_INTENTIONALLY_DISCONNECTED_WALLPAPER = "com.android.window.flags.avoid_rebinding_intentionally_disconnected_wallpaper";
+    public static final String FLAG_ASSIST_DISPLAY_ID_PUBLIC = "com.android.window.flags.assist_display_id_public";
     /** @hide */
-    public static final String FLAG_BACKUP_AND_RESTORE_FOR_USER_ASPECT_RATIO_SETTINGS = "com.android.window.flags.backup_and_restore_for_user_aspect_ratio_settings";
-    /** @hide */
-    public static final String FLAG_BAL_ADDITIONAL_LOGGING = "com.android.window.flags.bal_additional_logging";
+    public static final String FLAG_AVOID_INTERMEDIATE_DESTROYING_STATE = "com.android.window.flags.avoid_intermediate_destroying_state";
     /** @hide */
     public static final String FLAG_BAL_ADDITIONAL_START_MODES = "com.android.window.flags.bal_additional_start_modes";
     /** @hide */
-    public static final String FLAG_BAL_CLEAR_ALLOWLIST_DURATION = "com.android.window.flags.bal_clear_allowlist_duration";
+    public static final String FLAG_BAL_ASM_OPT_IN_NULL_TOP_ACTIVITY = "com.android.window.flags.bal_asm_opt_in_null_top_activity";
     /** @hide */
     public static final String FLAG_BAL_COVER_INTENT_SENDER = "com.android.window.flags.bal_cover_intent_sender";
     /** @hide */
+    public static final String FLAG_BAL_DONT_ADD_BAL_TOKEN_IN_SET_ALLOW_BG_ACTIVITY_STARTS = "com.android.window.flags.bal_dont_add_bal_token_in_set_allow_bg_activity_starts";
+    /** @hide */
     public static final String FLAG_BAL_DONT_BRING_EXISTING_BACKGROUND_TASK_STACK_TO_FG = "com.android.window.flags.bal_dont_bring_existing_background_task_stack_to_fg";
     /** @hide */
+    public static final String FLAG_BAL_IGNORE_CALLBACK = "com.android.window.flags.bal_ignore_callback";
+    /** @hide */
     public static final String FLAG_BAL_REDUCE_GRACE_PERIOD = "com.android.window.flags.bal_reduce_grace_period";
+    /** @hide */
+    public static final String FLAG_BAL_REPORT_ABORTED_ACTIVITY_STARTS = "com.android.window.flags.bal_report_aborted_activity_starts";
     /** @hide */
     public static final String FLAG_BAL_RESPECT_APP_SWITCH_STATE_WHEN_CHECK_BOUND_BY_FOREGROUND_UID = "com.android.window.flags.bal_respect_app_switch_state_when_check_bound_by_foreground_uid";
     /** @hide */
     public static final String FLAG_BAL_SEND_INTENT_WITH_OPTIONS = "com.android.window.flags.bal_send_intent_with_options";
     /** @hide */
-    public static final String FLAG_BAL_SHOW_TOASTS_BLOCKED = "com.android.window.flags.bal_show_toasts_blocked";
-    /** @hide */
-    public static final String FLAG_BAL_STRICT_MODE_GRACE_PERIOD = "com.android.window.flags.bal_strict_mode_grace_period";
-    /** @hide */
     public static final String FLAG_BAL_STRICT_MODE_RO = "com.android.window.flags.bal_strict_mode_ro";
     /** @hide */
-    public static final String FLAG_BETTER_SUPPORT_NON_MATCH_PARENT_ACTIVITY = "com.android.window.flags.better_support_non_match_parent_activity";
+    public static final String FLAG_BETTER_DESK_DEACTIVATION_IN_RECENTS_TRANSITION = "com.android.window.flags.better_desk_deactivation_in_recents_transition";
     /** @hide */
-    public static final String FLAG_CAMERA_COMPAT_FOR_FREEFORM = "com.android.window.flags.camera_compat_for_freeform";
+    public static final String FLAG_CAMERA_COMPAT_IGNORE_REQUESTED_ORIENTATION_ALLOWED = "com.android.window.flags.camera_compat_ignore_requested_orientation_allowed";
     /** @hide */
-    public static final String FLAG_CAMERA_COMPAT_FULLSCREEN_PICK_SAME_TASK_ACTIVITY = "com.android.window.flags.camera_compat_fullscreen_pick_same_task_activity";
+    public static final String FLAG_CAMERA_COMPAT_LANDSCAPE_CAMERA_SUPPORT = "com.android.window.flags.camera_compat_landscape_camera_support";
+    /** @hide */
+    public static final String FLAG_CAMERA_COMPAT_UNIFY_CAMERA_POLICIES = "com.android.window.flags.camera_compat_unify_camera_policies";
+    /** @hide */
+    public static final String FLAG_CAMERA_COMPAT_UPDATE_TREATMENT_ON_ROTATION = "com.android.window.flags.camera_compat_update_treatment_on_rotation";
+    /** @hide */
+    public static final String FLAG_CHANGE_DISPLAY_FOCUS_ON_WALLPAPER_TOUCH = "com.android.window.flags.change_display_focus_on_wallpaper_touch";
+    /** @hide */
+    public static final String FLAG_CHANGE_MIN_ASPECT_RATIO_PERMISSION = "com.android.window.flags.change_min_aspect_ratio_permission";
+    /** @hide */
+    public static final String FLAG_CLOSE_FULLSCREEN_AND_SPLITSCREEN_KEYBOARD_SHORTCUT = "com.android.window.flags.close_fullscreen_and_splitscreen_keyboard_shortcut";
     /** @hide */
     public static final String FLAG_CLOSE_TO_SQUARE_CONFIG_INCLUDES_STATUS_BAR = "com.android.window.flags.close_to_square_config_includes_status_bar";
     /** @hide */
+    public static final String FLAG_COMMIT_KEYGUARD_OCCLUSION_BEFORE_WAKING_UP = "com.android.window.flags.commit_keyguard_occlusion_before_waking_up";
+    /** @hide */
+    public static final String FLAG_CONSOLIDATE_REMOVE_STARTING_WINDOW_FROM_TASK = "com.android.window.flags.consolidate_remove_starting_window_from_task";
+    /** @hide */
     public static final String FLAG_COVER_DISPLAY_OPT_IN = "com.android.window.flags.cover_display_opt_in";
+    /** @hide */
+    public static final String FLAG_CROSS_DISPLAY_TRANSITION_V2 = "com.android.window.flags.cross_display_transition_v2";
     /** @hide */
     public static final String FLAG_CURRENT_ANIMATOR_SCALE_USES_SHARED_MEMORY = "com.android.window.flags.current_animator_scale_uses_shared_memory";
     /** @hide */
+    public static final String FLAG_CURRENT_USER_ACCESS_UNASSIGNED_DISPLAYS = "com.android.window.flags.current_user_access_unassigned_displays";
+    /** @hide */
     public static final String FLAG_DEFAULT_DESK_WITHOUT_WARMUP_MIGRATION = "com.android.window.flags.default_desk_without_warmup_migration";
     /** @hide */
-    public static final String FLAG_DELEGATE_UNHANDLED_DRAGS = "com.android.window.flags.delegate_unhandled_drags";
+    public static final String FLAG_DEFER_RESUME_END_BEFORE_ENSURE_ACTIVITY_CONFIGURATION_BUGFIX = "com.android.window.flags.defer_resume_end_before_ensure_activity_configuration_bugfix";
+    /** @hide */
+    public static final String FLAG_DEFER_RESUME_FOCUS_IN_NON_FOCUSED_WINDOW = "com.android.window.flags.defer_resume_focus_in_non_focused_window";
+    /** @hide */
+    public static final String FLAG_DELEGATE_REQUEST_FULLSCREEN_HANDLING_TO_SHELL = "com.android.window.flags.delegate_request_fullscreen_handling_to_shell";
     /** @hide */
     public static final String FLAG_DENSITY_390_API = "com.android.window.flags.density_390_api";
     /** @hide */
-    public static final String FLAG_DISABLE_DESKTOP_LAUNCH_PARAMS_OUTSIDE_DESKTOP_BUG_FIX = "com.android.window.flags.disable_desktop_launch_params_outside_desktop_bug_fix";
+    public static final String FLAG_DEPRECATE_MAKE_TASK_LAUNCH_BEHIND = "com.android.window.flags.deprecate_make_task_launch_behind";
     /** @hide */
-    public static final String FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING = "com.android.window.flags.disable_non_resizable_app_snap_resizing";
+    public static final String FLAG_DEPRECATE_SURFACE_ANIMATION_FRAME_CALLBACK = "com.android.window.flags.deprecate_surface_animation_frame_callback";
     /** @hide */
-    public static final String FLAG_DISABLE_OPT_OUT_EDGE_TO_EDGE = "com.android.window.flags.disable_opt_out_edge_to_edge";
+    public static final String FLAG_DESKTOP_AI_PLATFORM = "com.android.window.flags.desktop_ai_platform";
     /** @hide */
-    public static final String FLAG_DISPATCH_FIRST_KEYGUARD_LOCKED_STATE = "com.android.window.flags.dispatch_first_keyguard_locked_state";
+    public static final String FLAG_DESKTOP_HOMESCREEN_ICONS_APPLAUNCH_TRANSITIONS = "com.android.window.flags.desktop_homescreen_icons_applaunch_transitions";
     /** @hide */
-    public static final String FLAG_ENABLE_ACCESSIBLE_CUSTOM_HEADERS = "com.android.window.flags.enable_accessible_custom_headers";
+    public static final String FLAG_DESKTOP_MINIMIZE_LAST_TASK_BUGFIX = "com.android.window.flags.desktop_minimize_last_task_bugfix";
     /** @hide */
-    public static final String FLAG_ENABLE_ACTIVITY_EMBEDDING_SUPPORT_FOR_CONNECTED_DISPLAYS = "com.android.window.flags.enable_activity_embedding_support_for_connected_displays";
+    public static final String FLAG_DESKTOP_OVERVIEW_ROTATION_TASK_RESIZE_BUGFIX = "com.android.window.flags.desktop_overview_rotation_task_resize_bugfix";
     /** @hide */
-    public static final String FLAG_ENABLE_APP_HANDLE_POSITION_REPORTING = "com.android.window.flags.enable_app_handle_position_reporting";
+    public static final String FLAG_DEVICE_ENGAGEMENT_MODE = "com.android.window.flags.device_engagement_mode";
     /** @hide */
-    public static final String FLAG_ENABLE_APP_HEADER_WITH_TASK_DENSITY = "com.android.window.flags.enable_app_header_with_task_density";
+    public static final String FLAG_DIFFERENT_DISPLAY_LAUNCH_FOCUS_RESTRICTION = "com.android.window.flags.different_display_launch_focus_restriction";
     /** @hide */
-    public static final String FLAG_ENABLE_BLOCK_NON_DESKTOP_DISPLAY_WINDOW_DRAG_BUGFIX = "com.android.window.flags.enable_block_non_desktop_display_window_drag_bugfix";
+    public static final String FLAG_DIMMING_WALLPAPER_FOR_MAXIMIZED_AND_TILED = "com.android.window.flags.dimming_wallpaper_for_maximized_and_tiled";
+    /** @hide */
+    public static final String FLAG_DISABLE_DISPLAY_FORCE_FREEFORM_ON_PC = "com.android.window.flags.disable_display_force_freeform_on_pc";
+    /** @hide */
+    public static final String FLAG_DISABLE_RESTORE_NON_FULLSCREEN_BOUNDS_ON_CONFIGURATION_CHANGE = "com.android.window.flags.disable_restore_non_fullscreen_bounds_on_configuration_change";
+    /** @hide */
+    public static final String FLAG_ENABLE_ADD_WINDOW_DECORATION_TO_ALL_TASKS = "com.android.window.flags.enable_add_window_decoration_to_all_tasks";
+    /** @hide */
+    public static final String FLAG_ENABLE_ANIMATION_ON_BACK_NAVIGATION_INTERCEPTION = "com.android.window.flags.enable_animation_on_back_navigation_interception";
+    /** @hide */
+    public static final String FLAG_ENABLE_APP_RESTART_AFTER_UPDATE = "com.android.window.flags.enable_app_restart_after_update";
+    /** @hide */
+    public static final String FLAG_ENABLE_APP_RESTART_AFTER_UPDATE_SPLIT_SCREEN = "com.android.window.flags.enable_app_restart_after_update_split_screen";
+    /** @hide */
+    public static final String FLAG_ENABLE_AUTO_RECOVERY_FROM_SELF_KILL = "com.android.window.flags.enable_auto_recovery_from_self_kill";
+    /** @hide */
+    public static final String FLAG_ENABLE_AUTO_ROTATE_ON_SLATE_STATE = "com.android.window.flags.enable_auto_rotate_on_slate_state";
+    /** @hide */
+    public static final String FLAG_ENABLE_BACK_NAVIGATION_DESKTOP_APP_NO_MINIMIZE = "com.android.window.flags.enable_back_navigation_desktop_app_no_minimize";
     /** @hide */
     public static final String FLAG_ENABLE_BORDER_SETTINGS = "com.android.window.flags.enable_border_settings";
     /** @hide */
+    public static final String FLAG_ENABLE_BOUNDS_RESTORING_ON_DRAG_EXIT = "com.android.window.flags.enable_bounds_restoring_on_drag_exit";
+    /** @hide */
     public static final String FLAG_ENABLE_BOX_SHADOW_SETTINGS = "com.android.window.flags.enable_box_shadow_settings";
+    /** @hide */
+    public static final String FLAG_ENABLE_BUBBLE_ROOT_TASK = "com.android.window.flags.enable_bubble_root_task";
     /** @hide */
     public static final String FLAG_ENABLE_BUG_FIXES_FOR_SECONDARY_DISPLAY = "com.android.window.flags.enable_bug_fixes_for_secondary_display";
     /** @hide */
-    public static final String FLAG_ENABLE_CAMERA_COMPAT_CHECK_DEVICE_ROTATION_BUGFIX = "com.android.window.flags.enable_camera_compat_check_device_rotation_bugfix";
-    /** @hide */
-    public static final String FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING = "com.android.window.flags.enable_camera_compat_for_desktop_windowing";
-    /** @hide */
-    public static final String FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING_OPT_OUT = "com.android.window.flags.enable_camera_compat_for_desktop_windowing_opt_out";
-    /** @hide */
-    public static final String FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING_OPT_OUT_API = "com.android.window.flags.enable_camera_compat_for_desktop_windowing_opt_out_api";
-    /** @hide */
-    public static final String FLAG_ENABLE_CAMERA_COMPAT_TRACK_TASK_AND_APP_BUGFIX = "com.android.window.flags.enable_camera_compat_track_task_and_app_bugfix";
-    /** @hide */
     public static final String FLAG_ENABLE_CAPTION_COMPAT_INSET_CONVERSION = "com.android.window.flags.enable_caption_compat_inset_conversion";
     /** @hide */
-    public static final String FLAG_ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION = "com.android.window.flags.enable_caption_compat_inset_force_consumption";
+    public static final String FLAG_ENABLE_CLOSE_LID_WM_SHELL_BUGFIX = "com.android.window.flags.enable_close_lid_wm_shell_bugfix";
     /** @hide */
-    public static final String FLAG_ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS = "com.android.window.flags.enable_caption_compat_inset_force_consumption_always";
+    public static final String FLAG_ENABLE_CONNECTED_DISPLAYS_WALLPAPER_PRESENTATIONS = "com.android.window.flags.enable_connected_displays_wallpaper_presentations";
     /** @hide */
-    public static final String FLAG_ENABLE_CASCADING_WINDOWS = "com.android.window.flags.enable_cascading_windows";
+    public static final String FLAG_ENABLE_CONSOLIDATED_WINDOW_OPTIONS = "com.android.window.flags.enable_consolidated_window_options";
     /** @hide */
-    public static final String FLAG_ENABLE_CLOSE_LID_INTERACTION = "com.android.window.flags.enable_close_lid_interaction";
+    public static final String FLAG_ENABLE_CROSS_DISPLAY_SNAP_SUPPORT = "com.android.window.flags.enable_cross_display_snap_support";
     /** @hide */
-    public static final String FLAG_ENABLE_COMPAT_UI_VISIBILITY_STATUS = "com.android.window.flags.enable_compat_ui_visibility_status";
-    /** @hide */
-    public static final String FLAG_ENABLE_COMPATUI_SYSUI_LAUNCHER = "com.android.window.flags.enable_compatui_sysui_launcher";
-    /** @hide */
-    public static final String FLAG_ENABLE_CONNECTED_DISPLAYS_DND = "com.android.window.flags.enable_connected_displays_dnd";
-    /** @hide */
-    public static final String FLAG_ENABLE_CONNECTED_DISPLAYS_PIP = "com.android.window.flags.enable_connected_displays_pip";
-    /** @hide */
-    public static final String FLAG_ENABLE_CONNECTED_DISPLAYS_WINDOW_DRAG = "com.android.window.flags.enable_connected_displays_window_drag";
+    public static final String FLAG_ENABLE_CROSS_DISPLAYS_APP_LAUNCH_TRANSITION = "com.android.window.flags.enable_cross_displays_app_launch_transition";
     /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_APP_HANDLE_ANIMATION = "com.android.window.flags.enable_desktop_app_handle_animation";
     /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_APP_HEADER_STATE_CHANGE_ANNOUNCEMENTS = "com.android.window.flags.enable_desktop_app_header_state_change_announcements";
-    /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_APP_LAUNCH_ALTTAB_TRANSITIONS = "com.android.window.flags.enable_desktop_app_launch_alttab_transitions";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_APP_LAUNCH_ALTTAB_TRANSITIONS_BUGFIX = "com.android.window.flags.enable_desktop_app_launch_alttab_transitions_bugfix";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_APP_LAUNCH_BUGFIX = "com.android.window.flags.enable_desktop_app_launch_bugfix";
     /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS = "com.android.window.flags.enable_desktop_app_launch_transitions";
     /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX = "com.android.window.flags.enable_desktop_app_launch_transitions_bugfix";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_CLOSE_SHORTCUT_BUGFIX = "com.android.window.flags.enable_desktop_close_shortcut_bugfix";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_CLOSE_TASK_ANIMATION_IN_DTC_BUGFIX = "com.android.window.flags.enable_desktop_close_task_animation_in_dtc_bugfix";
-    /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_FIRST_BASED_DEFAULT_TO_DESKTOP_BUGFIX = "com.android.window.flags.enable_desktop_first_based_default_to_desktop_bugfix";
     /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_FIRST_BASED_DRAG_TO_MAXIMIZE = "com.android.window.flags.enable_desktop_first_based_drag_to_maximize";
+    public static final String FLAG_ENABLE_DESKTOP_FIRST_EXEMPTED_SOURCE_BUGFIX = "com.android.window.flags.enable_desktop_first_exempted_source_bugfix";
     /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_FIRST_FULLSCREEN_REFOCUS_BUGFIX = "com.android.window.flags.enable_desktop_first_fullscreen_refocus_bugfix";
+    public static final String FLAG_ENABLE_DESKTOP_FIRST_LAPTOP_STATE_BUGFIX = "com.android.window.flags.enable_desktop_first_laptop_state_bugfix";
     /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_FIRST_LISTENER = "com.android.window.flags.enable_desktop_first_listener";
+    public static final String FLAG_ENABLE_DESKTOP_FIRST_MULTIPLE_LAUNCH_ROOT_BUGFIX = "com.android.window.flags.enable_desktop_first_multiple_launch_root_bugfix";
+    /** @hide */
+    public static final String FLAG_ENABLE_DESKTOP_FIRST_POLICY_IN_LPM = "com.android.window.flags.enable_desktop_first_policy_in_lpm";
+    /** @hide */
+    public static final String FLAG_ENABLE_DESKTOP_FIRST_TOP_FULLSCREEN_BUGFIX = "com.android.window.flags.enable_desktop_first_top_fullscreen_bugfix";
+    /** @hide */
+    public static final String FLAG_ENABLE_DESKTOP_FIRST_USER_CHANGE_BUGFIX = "com.android.window.flags.enable_desktop_first_user_change_bugfix";
     /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_IME_BUGFIX = "com.android.window.flags.enable_desktop_ime_bugfix";
     /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_IMMERSIVE_DRAG_BUGFIX = "com.android.window.flags.enable_desktop_immersive_drag_bugfix";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_INDICATOR_IN_SEPARATE_THREAD_BUGFIX = "com.android.window.flags.enable_desktop_indicator_in_separate_thread_bugfix";
-    /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_MODE_THROUGH_DEV_OPTION = "com.android.window.flags.enable_desktop_mode_through_dev_option";
     /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_OPENING_DEEPLINK_MINIMIZE_ANIMATION_BUGFIX = "com.android.window.flags.enable_desktop_opening_deeplink_minimize_animation_bugfix";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_RECENTS_TRANSITIONS_CORNERS_BUGFIX = "com.android.window.flags.enable_desktop_recents_transitions_corners_bugfix";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_SPLITSCREEN_TRANSITION_BUGFIX = "com.android.window.flags.enable_desktop_splitscreen_transition_bugfix";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_SYSTEM_DIALOGS_TRANSITIONS = "com.android.window.flags.enable_desktop_system_dialogs_transitions";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_TAB_TEARING_LAUNCH_ANIMATION = "com.android.window.flags.enable_desktop_tab_tearing_launch_animation";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_TAB_TEARING_MINIMIZE_ANIMATION_BUGFIX = "com.android.window.flags.enable_desktop_tab_tearing_minimize_animation_bugfix";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_TASK_LIMIT_SEPARATE_TRANSITION = "com.android.window.flags.enable_desktop_task_limit_separate_transition";
+    public static final String FLAG_ENABLE_DESKTOP_TASKBAR_IN_FULLSCREEN_MODE = "com.android.window.flags.enable_desktop_taskbar_in_fullscreen_mode";
     /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_TASKBAR_ON_FREEFORM_DISPLAYS = "com.android.window.flags.enable_desktop_taskbar_on_freeform_displays";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_TRAMPOLINE_CLOSE_ANIMATION_BUGFIX = "com.android.window.flags.enable_desktop_trampoline_close_animation_bugfix";
     /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER = "com.android.window.flags.enable_desktop_wallpaper_activity_for_system_user";
     /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION = "com.android.window.flags.enable_desktop_windowing_app_handle_education";
     /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB = "com.android.window.flags.enable_desktop_windowing_app_to_web";
-    /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB_EDUCATION = "com.android.window.flags.enable_desktop_windowing_app_to_web_education";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB_EDUCATION_INTEGRATION = "com.android.window.flags.enable_desktop_windowing_app_to_web_education_integration";
     /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION = "com.android.window.flags.enable_desktop_windowing_back_navigation";
     /** @hide */
@@ -206,161 +207,119 @@ public final class Flags {
     /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS = "com.android.window.flags.enable_desktop_windowing_enter_transitions";
     /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_WINDOWING_EXIT_BY_MINIMIZE_TRANSITION_BUGFIX = "com.android.window.flags.enable_desktop_windowing_exit_by_minimize_transition_bugfix";
-    /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS = "com.android.window.flags.enable_desktop_windowing_exit_transitions";
     /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS_BUGFIX = "com.android.window.flags.enable_desktop_windowing_exit_transitions_bugfix";
     /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_WINDOWING_HSUM = "com.android.window.flags.enable_desktop_windowing_hsum";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_WINDOWING_IMMERSIVE_HANDLE_HIDING = "com.android.window.flags.enable_desktop_windowing_immersive_handle_hiding";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY = "com.android.window.flags.enable_desktop_windowing_modals_policy";
+    public static final String FLAG_ENABLE_DESKTOP_WINDOWING_FREE_FLOATING_PIP = "com.android.window.flags.enable_desktop_windowing_free_floating_pip";
     /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_WINDOWING_MODE = "com.android.window.flags.enable_desktop_windowing_mode";
     /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_WINDOWING_MULTI_INSTANCE_FEATURES = "com.android.window.flags.enable_desktop_windowing_multi_instance_features";
-    /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE = "com.android.window.flags.enable_desktop_windowing_persistence";
     /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_WINDOWING_PIP = "com.android.window.flags.enable_desktop_windowing_pip";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_WINDOWING_PIP_IN_OVERVIEW_BUGFIX = "com.android.window.flags.enable_desktop_windowing_pip_in_overview_bugfix";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_WINDOWING_QUICK_SWITCH = "com.android.window.flags.enable_desktop_windowing_quick_switch";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_WINDOWING_SCVH_CACHE_BUG_FIX = "com.android.window.flags.enable_desktop_windowing_scvh_cache_bug_fix";
-    /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_WINDOWING_SIZE_CONSTRAINTS = "com.android.window.flags.enable_desktop_windowing_size_constraints";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_WINDOWING_TASK_LIMIT = "com.android.window.flags.enable_desktop_windowing_task_limit";
-    /** @hide */
-    public static final String FLAG_ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS = "com.android.window.flags.enable_desktop_windowing_taskbar_running_apps";
     /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_WINDOWING_TRANSITIONS = "com.android.window.flags.enable_desktop_windowing_transitions";
     /** @hide */
     public static final String FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY = "com.android.window.flags.enable_desktop_windowing_wallpaper_activity";
     /** @hide */
-    public static final String FLAG_ENABLE_DEVICE_STATE_AUTO_ROTATE_SETTING_LOGGING = "com.android.window.flags.enable_device_state_auto_rotate_setting_logging";
-    /** @hide */
-    public static final String FLAG_ENABLE_DEVICE_STATE_AUTO_ROTATE_SETTING_REFACTOR = "com.android.window.flags.enable_device_state_auto_rotate_setting_refactor";
-    /** @hide */
-    public static final String FLAG_ENABLE_DISPLAY_COMPAT_MODE = "com.android.window.flags.enable_display_compat_mode";
+    public static final String FLAG_ENABLE_DISPLAY_DISCONNECT_FULLSCREEN = "com.android.window.flags.enable_display_disconnect_fullscreen";
     /** @hide */
     public static final String FLAG_ENABLE_DISPLAY_DISCONNECT_INTERACTION = "com.android.window.flags.enable_display_disconnect_interaction";
     /** @hide */
-    public static final String FLAG_ENABLE_DISPLAY_FOCUS_IN_SHELL_TRANSITIONS = "com.android.window.flags.enable_display_focus_in_shell_transitions";
+    public static final String FLAG_ENABLE_DISPLAY_DISCONNECT_PIP = "com.android.window.flags.enable_display_disconnect_pip";
+    /** @hide */
+    public static final String FLAG_ENABLE_DISPLAY_DISCONNECT_SPLITSCREEN = "com.android.window.flags.enable_display_disconnect_splitscreen";
     /** @hide */
     public static final String FLAG_ENABLE_DISPLAY_RECONNECT_INTERACTION = "com.android.window.flags.enable_display_reconnect_interaction";
     /** @hide */
     public static final String FLAG_ENABLE_DISPLAY_WINDOWING_MODE_SWITCHING = "com.android.window.flags.enable_display_windowing_mode_switching";
     /** @hide */
-    public static final String FLAG_ENABLE_DRAG_RESIZE_SET_UP_IN_BG_THREAD = "com.android.window.flags.enable_drag_resize_set_up_in_bg_thread";
+    public static final String FLAG_ENABLE_DRAWING_APP_HANDLE = "com.android.window.flags.enable_drawing_app_handle";
     /** @hide */
-    public static final String FLAG_ENABLE_DRAG_TO_DESKTOP_INCOMING_TRANSITIONS_BUGFIX = "com.android.window.flags.enable_drag_to_desktop_incoming_transitions_bugfix";
-    /** @hide */
-    public static final String FLAG_ENABLE_DRAG_TO_MAXIMIZE = "com.android.window.flags.enable_drag_to_maximize";
-    /** @hide */
-    public static final String FLAG_ENABLE_DRAGGING_PIP_ACROSS_DISPLAYS = "com.android.window.flags.enable_dragging_pip_across_displays";
-    /** @hide */
-    public static final String FLAG_ENABLE_DYNAMIC_RADIUS_COMPUTATION_BUGFIX = "com.android.window.flags.enable_dynamic_radius_computation_bugfix";
-    /** @hide */
-    public static final String FLAG_ENABLE_EMPTY_DESK_ON_MINIMIZE = "com.android.window.flags.enable_empty_desk_on_minimize";
+    public static final String FLAG_ENABLE_ENHANCED_APP_TO_WEB_TRANSITION = "com.android.window.flags.enable_enhanced_app_to_web_transition";
     /** @hide */
     public static final String FLAG_ENABLE_EXPERIMENTAL_BUBBLES_CONTROLLER = "com.android.window.flags.enable_experimental_bubbles_controller";
     /** @hide */
-    public static final String FLAG_ENABLE_FREEFORM_BOX_SHADOWS = "com.android.window.flags.enable_freeform_box_shadows";
+    public static final String FLAG_ENABLE_FLUID_RESIZING_FOR_LISTED_APPS = "com.android.window.flags.enable_fluid_resizing_for_listed_apps";
     /** @hide */
-    public static final String FLAG_ENABLE_FREEFORM_DISPLAY_LAUNCH_PARAMS = "com.android.window.flags.enable_freeform_display_launch_params";
+    public static final String FLAG_ENABLE_FOCUS_RESET_ON_DISPLAY_REMOVAL = "com.android.window.flags.enable_focus_reset_on_display_removal";
     /** @hide */
-    public static final String FLAG_ENABLE_FULL_SCREEN_WINDOW_ON_REMOVING_SPLIT_SCREEN_STAGE_BUGFIX = "com.android.window.flags.enable_full_screen_window_on_removing_split_screen_stage_bugfix";
+    public static final String FLAG_ENABLE_FOCUS_TRANSITION_OBSERVER_CLEANUP = "com.android.window.flags.enable_focus_transition_observer_cleanup";
+    /** @hide */
+    public static final String FLAG_ENABLE_FREEFORM_BOX_SHADOWS_V2 = "com.android.window.flags.enable_freeform_box_shadows_v2";
+    /** @hide */
+    public static final String FLAG_ENABLE_FREEFORM_FALLBACK_TRANSITION_OBSERVER = "com.android.window.flags.enable_freeform_fallback_transition_observer";
+    /** @hide */
+    public static final String FLAG_ENABLE_FULLSCREEN_IN_NEW_TASK_PREFERENCE = "com.android.window.flags.enable_fullscreen_in_new_task_preference";
     /** @hide */
     public static final String FLAG_ENABLE_FULLSCREEN_WINDOW_CONTROLS = "com.android.window.flags.enable_fullscreen_window_controls";
     /** @hide */
-    public static final String FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP = "com.android.window.flags.enable_fully_immersive_in_desktop";
+    public static final String FLAG_ENABLE_GAME_CONTROLS_HANDLE_MENU_ENTRY = "com.android.window.flags.enable_game_controls_handle_menu_entry";
     /** @hide */
     public static final String FLAG_ENABLE_HANDLE_INPUT_FIX = "com.android.window.flags.enable_handle_input_fix";
     /** @hide */
     public static final String FLAG_ENABLE_HANDLERS_DEBUGGING_MODE = "com.android.window.flags.enable_handlers_debugging_mode";
     /** @hide */
-    public static final String FLAG_ENABLE_HOLD_TO_DRAG_APP_HANDLE = "com.android.window.flags.enable_hold_to_drag_app_handle";
+    public static final String FLAG_ENABLE_HOME_SCREEN_PEEKING = "com.android.window.flags.enable_home_screen_peeking";
     /** @hide */
-    public static final String FLAG_ENABLE_INDEPENDENT_BACK_IN_PROJECTED = "com.android.window.flags.enable_independent_back_in_projected";
+    public static final String FLAG_ENABLE_INPUT_DISPATCHER_LONG_METHOD_TRACING = "com.android.window.flags.enable_input_dispatcher_long_method_tracing";
     /** @hide */
-    public static final String FLAG_ENABLE_INORDER_TRANSITION_CALLBACKS_FOR_DESKTOP = "com.android.window.flags.enable_inorder_transition_callbacks_for_desktop";
+    public static final String FLAG_ENABLE_INTERACTION_DEPENDENT_TAB_TEARING_BOUNDS = "com.android.window.flags.enable_interaction_dependent_tab_tearing_bounds";
     /** @hide */
-    public static final String FLAG_ENABLE_INPUT_LAYER_TRANSITION_FIX = "com.android.window.flags.enable_input_layer_transition_fix";
+    public static final String FLAG_ENABLE_INTERACTIVE_PICTURE_IN_PICTURE = "com.android.window.flags.enable_interactive_picture_in_picture";
     /** @hide */
-    public static final String FLAG_ENABLE_KEY_GESTURE_HANDLER_FOR_SYSUI = "com.android.window.flags.enable_key_gesture_handler_for_sysui";
+    public static final String FLAG_ENABLE_LAUNCHER_HANDLE_GO_HOME_KEYBOARD_SHORTCUT = "com.android.window.flags.enable_launcher_handle_go_home_keyboard_shortcut";
     /** @hide */
-    public static final String FLAG_ENABLE_MINIMIZE_BUTTON = "com.android.window.flags.enable_minimize_button";
+    public static final String FLAG_ENABLE_LESS_ACTIVITY_RECREATION_ON_CONFIG_CHANGE = "com.android.window.flags.enable_less_activity_recreation_on_config_change";
     /** @hide */
-    public static final String FLAG_ENABLE_MODALS_FULLSCREEN_WITH_PERMISSION = "com.android.window.flags.enable_modals_fullscreen_with_permission";
-    /** @hide */
-    public static final String FLAG_ENABLE_MODALS_FULLSCREEN_WITH_PLATFORM_SIGNATURE = "com.android.window.flags.enable_modals_fullscreen_with_platform_signature";
-    /** @hide */
-    public static final String FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT = "com.android.window.flags.enable_move_to_next_display_shortcut";
+    public static final String FLAG_ENABLE_MERGE_ANIMATIONS = "com.android.window.flags.enable_merge_animations";
     /** @hide */
     public static final String FLAG_ENABLE_MULTI_DISPLAY_SPLIT = "com.android.window.flags.enable_multi_display_split";
     /** @hide */
-    public static final String FLAG_ENABLE_MULTIDISPLAY_TRACKPAD_BACK_GESTURE = "com.android.window.flags.enable_multidisplay_trackpad_back_gesture";
-    /** @hide */
-    public static final String FLAG_ENABLE_MULTIPLE_DESKTOPS_BACKEND = "com.android.window.flags.enable_multiple_desktops_backend";
-    /** @hide */
     public static final String FLAG_ENABLE_MULTIPLE_DESKTOPS_DEFAULT_ACTIVATION_IN_DESKTOP_FIRST_DISPLAYS = "com.android.window.flags.enable_multiple_desktops_default_activation_in_desktop_first_displays";
     /** @hide */
-    public static final String FLAG_ENABLE_MULTIPLE_DESKTOPS_FRONTEND = "com.android.window.flags.enable_multiple_desktops_frontend";
+    public static final String FLAG_ENABLE_NO_RESIZE_CURSOR = "com.android.window.flags.enable_no_resize_cursor";
     /** @hide */
-    public static final String FLAG_ENABLE_NO_WINDOW_DECORATION_FOR_DESKS = "com.android.window.flags.enable_no_window_decoration_for_desks";
+    public static final String FLAG_ENABLE_NON_DEFAULT_DISPLAY_SPLIT_BUGFIX = "com.android.window.flags.enable_non_default_display_split_bugfix";
     /** @hide */
-    public static final String FLAG_ENABLE_NON_DEFAULT_DISPLAY_SPLIT = "com.android.window.flags.enable_non_default_display_split";
-    /** @hide */
-    public static final String FLAG_ENABLE_OMIT_ACCELEROMETER_ROTATION_RESTORE = "com.android.window.flags.enable_omit_accelerometer_rotation_restore";
-    /** @hide */
-    public static final String FLAG_ENABLE_OPAQUE_BACKGROUND_FOR_TRANSPARENT_WINDOWS = "com.android.window.flags.enable_opaque_background_for_transparent_windows";
+    public static final String FLAG_ENABLE_OPEN_BY_DEFAULT_DIALOG_FOCUS_BUGFIX = "com.android.window.flags.enable_open_by_default_dialog_focus_bugfix";
     /** @hide */
     public static final String FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS = "com.android.window.flags.enable_overflow_button_for_taskbar_pinned_items";
     /** @hide */
     public static final String FLAG_ENABLE_PER_DISPLAY_DESKTOP_WALLPAPER_ACTIVITY = "com.android.window.flags.enable_per_display_desktop_wallpaper_activity";
     /** @hide */
-    public static final String FLAG_ENABLE_PER_DISPLAY_PACKAGE_CONTEXT_CACHE_IN_STATUSBAR_NOTIF = "com.android.window.flags.enable_per_display_package_context_cache_in_statusbar_notif";
-    /** @hide */
-    public static final String FLAG_ENABLE_PERSISTING_DISPLAY_SIZE_FOR_CONNECTED_DISPLAYS = "com.android.window.flags.enable_persisting_display_size_for_connected_displays";
-    /** @hide */
     public static final String FLAG_ENABLE_PINNING_APP_WITH_CONTEXT_MENU = "com.android.window.flags.enable_pinning_app_with_context_menu";
     /** @hide */
-    public static final String FLAG_ENABLE_PRESENTATION_FOR_CONNECTED_DISPLAYS = "com.android.window.flags.enable_presentation_for_connected_displays";
+    public static final String FLAG_ENABLE_PRESENTATION_STOPS_TOP_TASK_BUGFIX = "com.android.window.flags.enable_presentation_stops_top_task_bugfix";
+    /** @hide */
+    public static final String FLAG_ENABLE_PREVENT_DESKTOP_IN_LOCKTASKMODE_BUGFIX = "com.android.window.flags.enable_prevent_desktop_in_locktaskmode_bugfix";
+    /** @hide */
+    public static final String FLAG_ENABLE_PRIVILEGED_APP_TRANSPARENT_WINDOWING_EXEMPTIONS = "com.android.window.flags.enable_privileged_app_transparent_windowing_exemptions";
     /** @hide */
     public static final String FLAG_ENABLE_PROJECTED_DISPLAY_DESKTOP_MODE = "com.android.window.flags.enable_projected_display_desktop_mode";
     /** @hide */
-    public static final String FLAG_ENABLE_QUICKSWITCH_DESKTOP_SPLIT_BUGFIX = "com.android.window.flags.enable_quickswitch_desktop_split_bugfix";
-    /** @hide */
-    public static final String FLAG_ENABLE_REJECT_HOME_TRANSITION = "com.android.window.flags.enable_reject_home_transition";
-    /** @hide */
-    public static final String FLAG_ENABLE_REQUEST_FULLSCREEN_BUGFIX = "com.android.window.flags.enable_request_fullscreen_bugfix";
+    public static final String FLAG_ENABLE_REMEMBERED_BOUNDS = "com.android.window.flags.enable_remembered_bounds";
     /** @hide */
     public static final String FLAG_ENABLE_REQUEST_FULLSCREEN_REFACTOR = "com.android.window.flags.enable_request_fullscreen_refactor";
     /** @hide */
+    public static final String FLAG_ENABLE_REQUIRE_MOVABLE_TASK_API = "com.android.window.flags.enable_require_movable_task_api";
+    /** @hide */
     public static final String FLAG_ENABLE_RESIZING_METRICS = "com.android.window.flags.enable_resizing_metrics";
     /** @hide */
-    public static final String FLAG_ENABLE_RESTART_MENU_FOR_CONNECTED_DISPLAYS = "com.android.window.flags.enable_restart_menu_for_connected_displays";
+    public static final String FLAG_ENABLE_SHELL_THREAD_LINT_CHECK = "com.android.window.flags.enable_shell_thread_lint_check";
     /** @hide */
-    public static final String FLAG_ENABLE_RESTORE_TO_PREVIOUS_SIZE_FROM_DESKTOP_IMMERSIVE = "com.android.window.flags.enable_restore_to_previous_size_from_desktop_immersive";
+    public static final String FLAG_ENABLE_SPLIT_DISMISS_ANIMATION_V2 = "com.android.window.flags.enable_split_dismiss_animation_v2";
     /** @hide */
-    public static final String FLAG_ENABLE_SEE_THROUGH_TASK_FRAGMENTS = "com.android.window.flags.enable_see_through_task_fragments";
-    /** @hide */
-    public static final String FLAG_ENABLE_SHELL_INITIAL_BOUNDS_REGRESSION_BUG_FIX = "com.android.window.flags.enable_shell_initial_bounds_regression_bug_fix";
-    /** @hide */
-    public static final String FLAG_ENABLE_SIZE_COMPAT_MODE_IMPROVEMENTS_FOR_CONNECTED_DISPLAYS = "com.android.window.flags.enable_size_compat_mode_improvements_for_connected_displays";
-    /** @hide */
-    public static final String FLAG_ENABLE_START_LAUNCH_TRANSITION_FROM_TASKBAR_BUGFIX = "com.android.window.flags.enable_start_launch_transition_from_taskbar_bugfix";
+    public static final String FLAG_ENABLE_STEPPED_CASCADING = "com.android.window.flags.enable_stepped_cascading";
     /** @hide */
     public static final String FLAG_ENABLE_SYS_DECORS_CALLBACKS_VIA_WM = "com.android.window.flags.enable_sys_decors_callbacks_via_wm";
     /** @hide */
-    public static final String FLAG_ENABLE_TALL_APP_HEADERS = "com.android.window.flags.enable_tall_app_headers";
+    public static final String FLAG_ENABLE_TASK_POSITIONER_REFACTOR = "com.android.window.flags.enable_task_positioner_refactor";
     /** @hide */
-    public static final String FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS = "com.android.window.flags.enable_task_resizing_keyboard_shortcuts";
+    public static final String FLAG_ENABLE_TASK_POSITIONER_REFACTOR_CLANK = "com.android.window.flags.enable_task_positioner_refactor_clank";
+    /** @hide */
+    public static final String FLAG_ENABLE_TASK_POSITIONER_REFACTOR_FOR_LISTED_APPS = "com.android.window.flags.enable_task_positioner_refactor_for_listed_apps";
     /** @hide */
     public static final String FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL = "com.android.window.flags.enable_task_stack_observer_in_shell";
     /** @hide */
@@ -368,115 +327,101 @@ public final class Flags {
     /** @hide */
     public static final String FLAG_ENABLE_TASKBAR_OVERFLOW = "com.android.window.flags.enable_taskbar_overflow";
     /** @hide */
-    public static final String FLAG_ENABLE_TASKBAR_RECENT_TASKS_THROTTLE_BUGFIX = "com.android.window.flags.enable_taskbar_recent_tasks_throttle_bugfix";
+    public static final String FLAG_ENABLE_TRAMPOLINE_TASK_AFFINITY_BUGFIX = "com.android.window.flags.enable_trampoline_task_affinity_bugfix";
     /** @hide */
-    public static final String FLAG_ENABLE_TASKBAR_RECENTS_LAYOUT_TRANSITION = "com.android.window.flags.enable_taskbar_recents_layout_transition";
+    public static final String FLAG_ENABLE_TRANSIENT_GESTURE_IN_SYSTEM_UI = "com.android.window.flags.enable_transient_gesture_in_system_ui";
     /** @hide */
-    public static final String FLAG_ENABLE_THEMED_APP_HEADERS = "com.android.window.flags.enable_themed_app_headers";
+    public static final String FLAG_ENABLE_USER_PREFERRED_HDR_MODE = "com.android.window.flags.enable_user_preferred_hdr_mode";
     /** @hide */
-    public static final String FLAG_ENABLE_TILE_RESIZING = "com.android.window.flags.enable_tile_resizing";
-    /** @hide */
-    public static final String FLAG_ENABLE_TOP_VISIBLE_ROOT_TASK_PER_USER_TRACKING = "com.android.window.flags.enable_top_visible_root_task_per_user_tracking";
-    /** @hide */
-    public static final String FLAG_ENABLE_TRANSITION_ON_ACTIVITY_SET_REQUESTED_ORIENTATION = "com.android.window.flags.enable_transition_on_activity_set_requested_orientation";
-    /** @hide */
-    public static final String FLAG_ENABLE_VISUAL_INDICATOR_IN_TRANSITION_BUGFIX = "com.android.window.flags.enable_visual_indicator_in_transition_bugfix";
-    /** @hide */
-    public static final String FLAG_ENABLE_WINDOW_CONTEXT_OVERRIDE_TYPE = "com.android.window.flags.enable_window_context_override_type";
-    /** @hide */
-    public static final String FLAG_ENABLE_WINDOW_CONTEXT_RESOURCES_UPDATE_ON_CONFIG_CHANGE = "com.android.window.flags.enable_window_context_resources_update_on_config_change";
+    public static final String FLAG_ENABLE_VEIL_LESS_WINDOW_MAXIMIZATION_FOR_LISTED_APPS = "com.android.window.flags.enable_veil_less_window_maximization_for_listed_apps";
     /** @hide */
     public static final String FLAG_ENABLE_WINDOW_DECORATION_REFACTOR = "com.android.window.flags.enable_window_decoration_refactor";
     /** @hide */
     public static final String FLAG_ENABLE_WINDOW_REPOSITIONING_API = "com.android.window.flags.enable_window_repositioning_api";
     /** @hide */
-    public static final String FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS = "com.android.window.flags.enable_windowing_dynamic_initial_bounds";
-    /** @hide */
-    public static final String FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE = "com.android.window.flags.enable_windowing_edge_drag_resize";
-    /** @hide */
-    public static final String FLAG_ENABLE_WINDOWING_SCALED_RESIZING = "com.android.window.flags.enable_windowing_scaled_resizing";
-    /** @hide */
-    public static final String FLAG_ENABLE_WINDOWING_TASK_STACK_ORDER_BUGFIX = "com.android.window.flags.enable_windowing_task_stack_order_bugfix";
-    /** @hide */
-    public static final String FLAG_ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS = "com.android.window.flags.enable_windowing_transition_handlers_observers";
-    /** @hide */
     public static final String FLAG_ENFORCE_EDGE_TO_EDGE = "com.android.window.flags.enforce_edge_to_edge";
     /** @hide */
-    public static final String FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING = "com.android.window.flags.ensure_keyguard_does_transition_starting";
+    public static final String FLAG_ENGAGEMENT_CONTROL_API = "com.android.window.flags.engagement_control_api";
     /** @hide */
-    public static final String FLAG_ENTER_DESKTOP_BY_DEFAULT_ON_FREEFORM_DISPLAYS = "com.android.window.flags.enter_desktop_by_default_on_freeform_displays";
+    public static final String FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING_BUG_FIX = "com.android.window.flags.ensure_keyguard_does_transition_starting_bug_fix";
     /** @hide */
-    public static final String FLAG_EXCLUDE_CAPTION_FROM_APP_BOUNDS = "com.android.window.flags.exclude_caption_from_app_bounds";
+    public static final String FLAG_ENSURE_WALLPAPER_DRAWN_ON_DISPLAY_SWITCH = "com.android.window.flags.ensure_wallpaper_drawn_on_display_switch";
     /** @hide */
-    public static final String FLAG_EXCLUDE_DESK_ROOTS_FROM_DESKTOP_TASKS = "com.android.window.flags.exclude_desk_roots_from_desktop_tasks";
+    public static final String FLAG_EXCLUDE_CAPTION_INSETS_OPT_OUT_API = "com.android.window.flags.exclude_caption_insets_opt_out_api";
     /** @hide */
-    public static final String FLAG_EXCLUDE_NON_MAIN_WINDOW_FROM_SNAPSHOT = "com.android.window.flags.exclude_non_main_window_from_snapshot";
-    /** @hide */
-    public static final String FLAG_EXCLUDE_TASK_FROM_RECENTS = "com.android.window.flags.exclude_task_from_recents";
-    /** @hide */
-    public static final String FLAG_EXTENDING_PERSISTENCE_SNAPSHOT_QUEUE_DEPTH = "com.android.window.flags.extending_persistence_snapshot_queue_depth";
-    /** @hide */
-    public static final String FLAG_FALLBACK_TO_FOCUSED_DISPLAY = "com.android.window.flags.fallback_to_focused_display";
+    public static final String FLAG_FALLBACK_TRANSITION_PLAYER = "com.android.window.flags.fallback_transition_player";
     /** @hide */
     public static final String FLAG_FIFO_PRIORITY_FOR_MAJOR_UI_PROCESSES = "com.android.window.flags.fifo_priority_for_major_ui_processes";
     /** @hide */
-    public static final String FLAG_FIX_FULLSCREEN_IN_MULTI_WINDOW = "com.android.window.flags.fix_fullscreen_in_multi_window";
+    public static final String FLAG_FILTER_EVENTS_FROM_IRRELEVANT_DEVICES_IN_DRAG_MOVE_RESIZE = "com.android.window.flags.filter_events_from_irrelevant_devices_in_drag_move_resize";
+    /** @hide */
+    public static final String FLAG_FIX_CROSS_ACTIVITY_BACK_ANIMATION_IN_BUBBLES = "com.android.window.flags.fix_cross_activity_back_animation_in_bubbles";
     /** @hide */
     public static final String FLAG_FIX_HIDE_OVERLAY_API = "com.android.window.flags.fix_hide_overlay_api";
     /** @hide */
-    public static final String FLAG_FIX_LAYOUT_RESTORED_TASK = "com.android.window.flags.fix_layout_restored_task";
+    public static final String FLAG_FIX_MULTI_WINDOW_TASK_FOCUS_CHANGE = "com.android.window.flags.fix_multi_window_task_focus_change";
     /** @hide */
-    public static final String FLAG_FIX_MOVING_UNFOCUSED_TASK = "com.android.window.flags.fix_moving_unfocused_task";
+    public static final String FLAG_FIX_TF_ADJACENT_FOCUS = "com.android.window.flags.fix_tf_adjacent_focus";
     /** @hide */
-    public static final String FLAG_FIX_SET_ADJACENT_TASK_FRAGMENTS_WITH_PARAMS = "com.android.window.flags.fix_set_adjacent_task_fragments_with_params";
+    public static final String FLAG_FIX_WALLPAPER_DIM_ISSUES_26Q2 = "com.android.window.flags.fix_wallpaper_dim_issues_26q2";
     /** @hide */
-    public static final String FLAG_FIX_SHOW_WHEN_LOCKED_SYNC_TIMEOUT = "com.android.window.flags.fix_show_when_locked_sync_timeout";
-    /** @hide */
-    public static final String FLAG_FORCE_CLOSE_TOP_TRANSPARENT_FULLSCREEN_TASK = "com.android.window.flags.force_close_top_transparent_fullscreen_task";
-    /** @hide */
-    public static final String FLAG_FORCE_SHOW_SYSTEM_BAR_FOR_BUBBLE = "com.android.window.flags.force_show_system_bar_for_bubble";
-    /** @hide */
-    public static final String FLAG_FORM_FACTOR_BASED_DESKTOP_FIRST_SWITCH = "com.android.window.flags.form_factor_based_desktop_first_switch";
-    /** @hide */
-    public static final String FLAG_GET_DIMMER_ON_CLOSING = "com.android.window.flags.get_dimmer_on_closing";
+    public static final String FLAG_FULLSCREEN_KEY_IGNORES_BUBBLE_BUGFIX = "com.android.window.flags.fullscreen_key_ignores_bubble_bugfix";
     /** @hide */
     public static final String FLAG_GRANT_MANAGE_KEY_GESTURES_TO_RECENTS = "com.android.window.flags.grant_manage_key_gestures_to_recents";
     /** @hide */
-    public static final String FLAG_IGNORE_ASPECT_RATIO_RESTRICTIONS_FOR_RESIZEABLE_FREEFORM_ACTIVITIES = "com.android.window.flags.ignore_aspect_ratio_restrictions_for_resizeable_freeform_activities";
+    public static final String FLAG_HANDLE_OVERVIEW_DESKTOP_SCRIM_BUGFIX = "com.android.window.flags.handle_overview_desktop_scrim_bugfix";
+    /** @hide */
+    public static final String FLAG_HOME_ACTIVITY_ALWAYS_PRESENT = "com.android.window.flags.home_activity_always_present";
+    /** @hide */
+    public static final String FLAG_HOME_PACKAGE_WINDOWING_EXEMPTIONS_BUG_FIX = "com.android.window.flags.home_package_windowing_exemptions_bug_fix";
+    /** @hide */
+    public static final String FLAG_IDEMPOTENT_WCT_RESOLUTION = "com.android.window.flags.idempotent_wct_resolution";
     /** @hide */
     public static final String FLAG_IGNORE_CORNER_RADIUS_AND_SHADOWS = "com.android.window.flags.ignore_corner_radius_and_shadows";
     /** @hide */
-    public static final String FLAG_INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC = "com.android.window.flags.include_top_transparent_fullscreen_task_in_desktop_heuristic";
+    public static final String FLAG_IMPROVE_FLUID_RESIZING_PERFORMANCE = "com.android.window.flags.improve_fluid_resizing_performance";
     /** @hide */
-    public static final String FLAG_INHERIT_TASK_BOUNDS_FOR_TRAMPOLINE_TASK_LAUNCHES = "com.android.window.flags.inherit_task_bounds_for_trampoline_task_launches";
+    public static final String FLAG_INHERIT_CONSECUTIVE_LAUNCH_CALLER_UID = "com.android.window.flags.inherit_consecutive_launch_caller_uid";
     /** @hide */
-    public static final String FLAG_INSETS_DECOUPLED_CONFIGURATION = "com.android.window.flags.insets_decoupled_configuration";
-    /** @hide */
-    public static final String FLAG_INTERCEPT_MOTION_FROM_MOVE_TO_CANCEL = "com.android.window.flags.intercept_motion_from_move_to_cancel";
+    public static final String FLAG_INTERCEPT_TOUCH_EVENT_FOR_APP_HEADER_DRAG_MOVE = "com.android.window.flags.intercept_touch_event_for_app_header_drag_move";
     /** @hide */
     public static final String FLAG_JANK_API = "com.android.window.flags.jank_api";
     /** @hide */
-    public static final String FLAG_KEYBOARD_SHORTCUTS_TO_SWITCH_DESKS = "com.android.window.flags.keyboard_shortcuts_to_switch_desks";
+    public static final String FLAG_KEEP_SHOW_WALLPAPER_ON_BOTTOM = "com.android.window.flags.keep_show_wallpaper_on_bottom";
+    /** @hide */
+    public static final String FLAG_LAUNCH_GAMES_IN_FULLSCREEN_BY_ALLOWLIST = "com.android.window.flags.launch_games_in_fullscreen_by_allowlist";
     /** @hide */
     public static final String FLAG_LETTERBOX_BACKGROUND_WALLPAPER = "com.android.window.flags.letterbox_background_wallpaper";
     /** @hide */
-    public static final String FLAG_MOVABLE_CUTOUT_CONFIGURATION = "com.android.window.flags.movable_cutout_configuration";
+    public static final String FLAG_LITE_TASK_DESCRIPTION_CHANGED = "com.android.window.flags.lite_task_description_changed";
+    /** @hide */
+    public static final String FLAG_MASK_PRESENTATION_FLAGS_ON_INTERNAL_DISPLAYS = "com.android.window.flags.mask_presentation_flags_on_internal_displays";
+    /** @hide */
+    public static final String FLAG_MERGE_PREDICTIVE_BACK_TRANSACTION_TOGETHER = "com.android.window.flags.merge_predictive_back_transaction_together";
+    /** @hide */
+    public static final String FLAG_MIRROR_SURFACE_API = "com.android.window.flags.mirror_surface_api";
+    /** @hide */
+    public static final String FLAG_MOVE_TASK_TO_FRONT_ON_DRAG_RESIZING_BUGFIX = "com.android.window.flags.move_task_to_front_on_drag_resizing_bugfix";
     /** @hide */
     public static final String FLAG_MOVE_TO_EXTERNAL_DISPLAY_SHORTCUT = "com.android.window.flags.move_to_external_display_shortcut";
     /** @hide */
     public static final String FLAG_MULTI_CROP = "com.android.window.flags.multi_crop";
     /** @hide */
-    public static final String FLAG_NAV_BAR_TRANSPARENT_BY_DEFAULT = "com.android.window.flags.nav_bar_transparent_by_default";
-    /** @hide */
     public static final String FLAG_NESTED_TASKS_WITH_INDEPENDENT_BOUNDS_BUGFIX = "com.android.window.flags.nested_tasks_with_independent_bounds_bugfix";
     /** @hide */
-    public static final String FLAG_OFFLOAD_COLOR_EXTRACTION = "com.android.window.flags.offload_color_extraction";
+    public static final String FLAG_NO_TRANSFER_FIRST_WINDOW_DRAWN = "com.android.window.flags.no_transfer_first_window_drawn";
     /** @hide */
-    public static final String FLAG_PARALLEL_CD_TRANSITIONS_DURING_RECENTS = "com.android.window.flags.parallel_cd_transitions_during_recents";
+    public static final String FLAG_ONE_WAY_SET_TASK_DESCRIPTION = "com.android.window.flags.one_way_set_task_description";
+    /** @hide */
+    public static final String FLAG_ONLY_CACHE_LOW_RES_TASK_SNAPSHOT = "com.android.window.flags.only_cache_low_res_task_snapshot";
+    /** @hide */
+    public static final String FLAG_PARTIAL_TRANSLUCENT_ACTIVITY_EMBEDDING = "com.android.window.flags.partial_translucent_activity_embedding";
+    /** @hide */
+    public static final String FLAG_PAUSE_ACTIVITY_BY_TF = "com.android.window.flags.pause_activity_by_tf";
+    /** @hide */
+    public static final String FLAG_PERFECT_EDGE = "com.android.window.flags.perfect_edge";
     /** @hide */
     public static final String FLAG_PORT_WINDOW_SIZE_ANIMATION = "com.android.window.flags.port_window_size_animation";
-    /** @hide */
-    public static final String FLAG_PREDICTIVE_BACK_DEFAULT_ENABLE_SDK_36 = "com.android.window.flags.predictive_back_default_enable_sdk_36";
     /** @hide */
     public static final String FLAG_PREDICTIVE_BACK_PRIORITY_SYSTEM_NAVIGATION_OBSERVER = "com.android.window.flags.predictive_back_priority_system_navigation_observer";
     /** @hide */
@@ -484,67 +429,65 @@ public final class Flags {
     /** @hide */
     public static final String FLAG_PREDICTIVE_BACK_SYSTEM_OVERRIDE_CALLBACK = "com.android.window.flags.predictive_back_system_override_callback";
     /** @hide */
-    public static final String FLAG_PREDICTIVE_BACK_THREE_BUTTON_NAV = "com.android.window.flags.predictive_back_three_button_nav";
-    /** @hide */
     public static final String FLAG_PREDICTIVE_BACK_TIMESTAMP_API = "com.android.window.flags.predictive_back_timestamp_api";
     /** @hide */
-    public static final String FLAG_PRESERVE_RECENTS_TASK_CONFIGURATION_ON_RELAUNCH = "com.android.window.flags.preserve_recents_task_configuration_on_relaunch";
+    public static final String FLAG_PRIORITIZE_VISIBLE_TASK_DISPLAY_OVER_SOURCE = "com.android.window.flags.prioritize_visible_task_display_over_source";
     /** @hide */
-    public static final String FLAG_REAR_DISPLAY_DISABLE_FORCE_DESKTOP_SYSTEM_DECORATIONS = "com.android.window.flags.rear_display_disable_force_desktop_system_decorations";
+    public static final String FLAG_PROTECT_SET_LAUNCH_WINDOWING_MODE_API = "com.android.window.flags.protect_set_launch_windowing_mode_api";
+    /** @hide */
+    public static final String FLAG_QUICK_BUBBLE_SWITCH = "com.android.window.flags.quick_bubble_switch";
     /** @hide */
     public static final String FLAG_REDUCE_CHANGED_EXCLUSION_RECTS_MSGS = "com.android.window.flags.reduce_changed_exclusion_rects_msgs";
     /** @hide */
-    public static final String FLAG_REDUCE_TASK_SNAPSHOT_MEMORY_USAGE = "com.android.window.flags.reduce_task_snapshot_memory_usage";
+    public static final String FLAG_REDUCE_WINDOW_TRAVERSAL_ON_ENTERING = "com.android.window.flags.reduce_window_traversal_on_entering";
     /** @hide */
-    public static final String FLAG_RELATIVE_INSETS = "com.android.window.flags.relative_insets";
+    public static final String FLAG_REENABLE_APP_HANDLE_COLOR_ANIMATIONS = "com.android.window.flags.reenable_app_handle_color_animations";
     /** @hide */
-    public static final String FLAG_RELEASE_SNAPSHOT_AGGRESSIVELY = "com.android.window.flags.release_snapshot_aggressively";
+    public static final String FLAG_REFACTOR_CAPTION_SANDBOXING_TO_CORE = "com.android.window.flags.refactor_caption_sandboxing_to_core";
     /** @hide */
-    public static final String FLAG_RELEASE_SURFACE_ON_TRANSITION_FINISH = "com.android.window.flags.release_surface_on_transition_finish";
+    public static final String FLAG_REFINE_ANCESTOR_SEARCH_AND_BOUNDS = "com.android.window.flags.refine_ancestor_search_and_bounds";
     /** @hide */
-    public static final String FLAG_REMOVE_ACTIVITY_STARTER_DREAM_CALLBACK = "com.android.window.flags.remove_activity_starter_dream_callback";
+    public static final String FLAG_RELEASE_ALL_TRANSITION_SURFACES_ON_IDLE = "com.android.window.flags.release_all_transition_surfaces_on_idle";
     /** @hide */
-    public static final String FLAG_REMOVE_DEPART_TARGET_FROM_MOTION = "com.android.window.flags.remove_depart_target_from_motion";
+    public static final String FLAG_REMOVE_STARTING_WINDOW_WHEN_COMMIT_INVISIBLE = "com.android.window.flags.remove_starting_window_when_commit_invisible";
     /** @hide */
-    public static final String FLAG_REMOVE_STARTING_IN_TRANSITION = "com.android.window.flags.remove_starting_in_transition";
+    public static final String FLAG_REPARENT_DESK_LEAF_TASKS_IF_RELAUNCHED = "com.android.window.flags.reparent_desk_leaf_tasks_if_relaunched";
     /** @hide */
-    public static final String FLAG_REPARENT_TO_DEFAULT_WITH_DISPLAY_REMOVAL = "com.android.window.flags.reparent_to_default_with_display_removal";
+    public static final String FLAG_REPORT_MISSED_ENTER_ANIM_ON_RESUME = "com.android.window.flags.report_missed_enter_anim_on_resume";
     /** @hide */
-    public static final String FLAG_REPARENT_WINDOW_TOKEN_API = "com.android.window.flags.reparent_window_token_api";
+    public static final String FLAG_REPOSITORY_BASED_PERSISTENCE_BG_THREAD = "com.android.window.flags.repository_based_persistence_bg_thread";
     /** @hide */
-    public static final String FLAG_RESPECT_FULLSCREEN_ACTIVITY_OPTION_IN_DESKTOP_LAUNCH_PARAMS = "com.android.window.flags.respect_fullscreen_activity_option_in_desktop_launch_params";
+    public static final String FLAG_REQUEST_FULLSCREEN_API_PERMISSION = "com.android.window.flags.request_fullscreen_api_permission";
     /** @hide */
-    public static final String FLAG_RESPECT_HIERARCHY_SURFACE_VISIBILITY = "com.android.window.flags.respect_hierarchy_surface_visibility";
+    public static final String FLAG_RESPECT_REQUESTED_TASK_SNAPSHOT_RESOLUTION = "com.android.window.flags.respect_requested_task_snapshot_resolution";
     /** @hide */
-    public static final String FLAG_RESPECT_LEAF_TASK_BOUNDS = "com.android.window.flags.respect_leaf_task_bounds";
+    public static final String FLAG_RESPECT_SYSTEM_DEFAULT_MIN_SIZE = "com.android.window.flags.respect_system_default_min_size";
     /** @hide */
-    public static final String FLAG_RESPECT_ORIENTATION_CHANGE_FOR_UNRESIZEABLE = "com.android.window.flags.respect_orientation_change_for_unresizeable";
+    public static final String FLAG_RETURN_WINDOWLESS_ROOT_VIEWS_IN_WMGLOBAL_GETWINDOWVIEW = "com.android.window.flags.return_windowless_root_views_in_wmglobal_getwindowview";
     /** @hide */
-    public static final String FLAG_RESTORE_USER_ASPECT_RATIO_SETTINGS_USING_SERVICE = "com.android.window.flags.restore_user_aspect_ratio_settings_using_service";
+    public static final String FLAG_RUNTIME_DENSITY_RESOLUTION_FOR_WINDOW_LAYOUT = "com.android.window.flags.runtime_density_resolution_for_window_layout";
     /** @hide */
-    public static final String FLAG_RESTRICT_FREEFORM_HIDDEN_SYSTEM_BARS_TO_FILLING_TASKS = "com.android.window.flags.restrict_freeform_hidden_system_bars_to_filling_tasks";
+    public static final String FLAG_RUNTIME_DENSITY_RESOLUTION_FOR_WINDOW_LAYOUT_BUGFIX = "com.android.window.flags.runtime_density_resolution_for_window_layout_bugfix";
     /** @hide */
-    public static final String FLAG_ROOT_TASK_FOR_BUBBLE = "com.android.window.flags.root_task_for_bubble";
+    public static final String FLAG_SAFE_REGION_LETTERBOXING_V1 = "com.android.window.flags.safe_region_letterboxing_v1";
     /** @hide */
-    public static final String FLAG_SAFE_REGION_LETTERBOXING = "com.android.window.flags.safe_region_letterboxing";
-    /** @hide */
-    public static final String FLAG_SAFE_RELEASE_SNAPSHOT_AGGRESSIVELY = "com.android.window.flags.safe_release_snapshot_aggressively";
-    /** @hide */
-    public static final String FLAG_SCHEDULING_FOR_NOTIFICATION_SHADE = "com.android.window.flags.scheduling_for_notification_shade";
-    /** @hide */
-    public static final String FLAG_SCRAMBLE_SNAPSHOT_FILE_NAME = "com.android.window.flags.scramble_snapshot_file_name";
-    /** @hide */
-    public static final String FLAG_SCREEN_BRIGHTNESS_DIM_ON_EMULATOR = "com.android.window.flags.screen_brightness_dim_on_emulator";
+    public static final String FLAG_SCREEN_CAPTURE_EXCLUSION_FLAGS = "com.android.window.flags.screen_capture_exclusion_flags";
     /** @hide */
     public static final String FLAG_SCREEN_RECORDING_CALLBACKS = "com.android.window.flags.screen_recording_callbacks";
     /** @hide */
     public static final String FLAG_SCROLLING_FROM_LETTERBOX = "com.android.window.flags.scrolling_from_letterbox";
     /** @hide */
+    public static final String FLAG_SCVH_SET_FOCUSABLE_API = "com.android.window.flags.scvh_set_focusable_api";
+    /** @hide */
     public static final String FLAG_SCVH_SURFACE_CONTROL_LIFETIME_FIX = "com.android.window.flags.scvh_surface_control_lifetime_fix";
     /** @hide */
     public static final String FLAG_SDK_DESIRED_PRESENT_TIME = "com.android.window.flags.sdk_desired_present_time";
     /** @hide */
-    public static final String FLAG_SET_SC_PROPERTIES_IN_CLIENT = "com.android.window.flags.set_sc_properties_in_client";
+    public static final String FLAG_SECURE_CONTENT_FAILURE_UI = "com.android.window.flags.secure_content_failure_ui";
+    /** @hide */
+    public static final String FLAG_SEND_NEW_INSETS_STATE_WITH_ROTATION = "com.android.window.flags.send_new_insets_state_with_rotation";
+    /** @hide */
+    public static final String FLAG_SHARED_SURFACE_TRANSITION_ANIMATION = "com.android.window.flags.shared_surface_transition_animation";
     /** @hide */
     public static final String FLAG_SHOW_APP_HANDLE_LARGE_SCREENS = "com.android.window.flags.show_app_handle_large_screens";
     /** @hide */
@@ -554,27 +497,33 @@ public final class Flags {
     /** @hide */
     public static final String FLAG_SHOW_HOME_BEHIND_DESKTOP = "com.android.window.flags.show_home_behind_desktop";
     /** @hide */
-    public static final String FLAG_SKIP_COMPAT_UI_EDUCATION_IN_DESKTOP_MODE = "com.android.window.flags.skip_compat_ui_education_in_desktop_mode";
+    public static final String FLAG_SHOW_IME_LAYERING_TARGET_WHEN_ADDING = "com.android.window.flags.show_ime_layering_target_when_adding";
+    /** @hide */
+    public static final String FLAG_SHOW_WHEN_LOCKED_DESKTOP_BUGFIX = "com.android.window.flags.show_when_locked_desktop_bugfix";
     /** @hide */
     public static final String FLAG_SKIP_DEACTIVATION_OF_DESK_WITH_NOTHING_IN_FRONT = "com.android.window.flags.skip_deactivation_of_desk_with_nothing_in_front";
     /** @hide */
-    public static final String FLAG_SKIP_DECOR_VIEW_RELAYOUT_WHEN_CLOSING_BUGFIX = "com.android.window.flags.skip_decor_view_relayout_when_closing_bugfix";
+    public static final String FLAG_SKIP_KILL_PROCESS_FOR_DESKTOP_TASK_CORE_CLOSE_TRANSITION = "com.android.window.flags.skip_kill_process_for_desktop_task_core_close_transition";
     /** @hide */
-    public static final String FLAG_SPLASH_SCREEN_VIEW_SYNC_TRANSACTION = "com.android.window.flags.splash_screen_view_sync_transaction";
+    public static final String FLAG_SLEEP_WAKE_TRANSITIONS = "com.android.window.flags.sleep_wake_transitions";
     /** @hide */
-    public static final String FLAG_SUPPORTS_DRAG_ASSISTANT_TO_MULTIWINDOW = "com.android.window.flags.supports_drag_assistant_to_multiwindow";
+    public static final String FLAG_SUPPORT_CUSTOM_DIM_COLOR = "com.android.window.flags.support_custom_dim_color";
     /** @hide */
-    public static final String FLAG_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI = "com.android.window.flags.supports_multi_instance_system_ui";
+    public static final String FLAG_SYNC_BEFORE_ENABLING_SCREEN = "com.android.window.flags.sync_before_enabling_screen";
     /** @hide */
-    public static final String FLAG_SURFACE_CONTROL_INPUT_RECEIVER = "com.android.window.flags.surface_control_input_receiver";
+    public static final String FLAG_SYNCED_DISPLAY_MODE_UPDATES = "com.android.window.flags.synced_display_mode_updates";
     /** @hide */
-    public static final String FLAG_SURFACE_TRUSTED_OVERLAY = "com.android.window.flags.surface_trusted_overlay";
+    public static final String FLAG_SYNCED_INSETS_ANIMATION = "com.android.window.flags.synced_insets_animation";
     /** @hide */
-    public static final String FLAG_SYNC_SCREEN_CAPTURE = "com.android.window.flags.sync_screen_capture";
-    /** @hide */
-    public static final String FLAG_SYSTEM_UI_POST_ANIMATION_END = "com.android.window.flags.system_ui_post_animation_end";
+    public static final String FLAG_SYSTEM_CONTENT_PRIORITY = "com.android.window.flags.system_content_priority";
     /** @hide */
     public static final String FLAG_TOUCH_PASS_THROUGH_OPT_IN = "com.android.window.flags.touch_pass_through_opt_in";
+    /** @hide */
+    public static final String FLAG_TRACK_LAUNCH_ORIGINATOR = "com.android.window.flags.track_launch_originator";
+    /** @hide */
+    public static final String FLAG_TRANSIT_INVISIBLE_EXISTENCE_CHANGE = "com.android.window.flags.transit_invisible_existence_change";
+    /** @hide */
+    public static final String FLAG_TRANSIT_MIXPATCHER_BASE = "com.android.window.flags.transit_mixpatcher_base";
     /** @hide */
     public static final String FLAG_TRANSIT_READY_TRACKING = "com.android.window.flags.transit_ready_tracking";
     /** @hide */
@@ -582,1700 +531,888 @@ public final class Flags {
     /** @hide */
     public static final String FLAG_TRANSITION_HANDLER_CUJ_TAGS = "com.android.window.flags.transition_handler_cuj_tags";
     /** @hide */
-    public static final String FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW = "com.android.window.flags.trusted_presentation_listener_for_window";
-    /** @hide */
-    public static final String FLAG_UNIFY_BACK_NAVIGATION_TRANSITION = "com.android.window.flags.unify_back_navigation_transition";
-    /** @hide */
     public static final String FLAG_UNIFY_SHELL_BINDERS = "com.android.window.flags.unify_shell_binders";
-    /** @hide */
-    public static final String FLAG_UNIVERSAL_RESIZABLE_BY_DEFAULT = "com.android.window.flags.universal_resizable_by_default";
     /** @hide */
     public static final String FLAG_UNTRUSTED_EMBEDDING_ANY_APP_PERMISSION = "com.android.window.flags.untrusted_embedding_any_app_permission";
     /** @hide */
     public static final String FLAG_UNTRUSTED_EMBEDDING_STATE_SHARING = "com.android.window.flags.untrusted_embedding_state_sharing";
     /** @hide */
+    public static final String FLAG_UPDATE_DESKTOP_SCRIM_ON_DESKTOP_TASK_LAUNCH = "com.android.window.flags.update_desktop_scrim_on_desktop_task_launch";
+    /** @hide */
+    public static final String FLAG_UPDATE_DESKTOP_SCRIM_ON_DRAG_RESIZE_END = "com.android.window.flags.update_desktop_scrim_on_drag_resize_end";
+    /** @hide */
+    public static final String FLAG_UPDATE_DESKTOP_SCRIM_ON_FULLSCREEN_LAUNCH = "com.android.window.flags.update_desktop_scrim_on_fullscreen_launch";
+    /** @hide */
+    public static final String FLAG_UPDATE_DESKTOP_SCRIM_ON_MOVE_TASK_TO_DESK = "com.android.window.flags.update_desktop_scrim_on_move_task_to_desk";
+    /** @hide */
+    public static final String FLAG_UPDATE_DESKTOP_SCRIM_WHEN_LOCKED_BUGFIX = "com.android.window.flags.update_desktop_scrim_when_locked_bugfix";
+    /** @hide */
+    public static final String FLAG_UPDATE_DESKTOP_SCRIM_WHEN_MOVE_TASK_TO_FRONT_BUGFIX = "com.android.window.flags.update_desktop_scrim_when_move_task_to_front_bugfix";
+    /** @hide */
     public static final String FLAG_UPDATE_DIMS_WHEN_WINDOW_SHOWN = "com.android.window.flags.update_dims_when_window_shown";
     /** @hide */
-    public static final String FLAG_UPDATE_HOST_INPUT_TRANSFER_TOKEN = "com.android.window.flags.update_host_input_transfer_token";
+    public static final String FLAG_USE_CLIENT_SURFACE = "com.android.window.flags.use_client_surface";
     /** @hide */
-    public static final String FLAG_UPDATE_TASK_MIN_DIMENSIONS_WITH_ROOT_ACTIVITY = "com.android.window.flags.update_task_min_dimensions_with_root_activity";
+    public static final String FLAG_USE_INPUT_REPORTED_FOCUS_FOR_ACCESSIBILITY = "com.android.window.flags.use_input_reported_focus_for_accessibility";
     /** @hide */
-    public static final String FLAG_USE_CACHED_INSETS_FOR_DISPLAY_SWITCH = "com.android.window.flags.use_cached_insets_for_display_switch";
+    public static final String FLAG_USE_KNOWN_DISPLAY_ID_FOR_BASE_CONTEXT = "com.android.window.flags.use_known_display_id_for_base_context";
     /** @hide */
-    public static final String FLAG_USE_TASKS_DIM_ONLY = "com.android.window.flags.use_tasks_dim_only";
+    public static final String FLAG_USE_SNAPSHOT_FIXED_ROTATION = "com.android.window.flags.use_snapshot_fixed_rotation";
     /** @hide */
     public static final String FLAG_VDM_FORCE_APP_UNIVERSAL_RESIZABLE_API = "com.android.window.flags.vdm_force_app_universal_resizable_api";
     /** @hide */
-    public static final String FLAG_WALLPAPER_OFFSET_ASYNC = "com.android.window.flags.wallpaper_offset_async";
+    public static final String FLAG_VIRTUAL_DISPLAY_CAN_CREATE_SYSTEM_APPLICATION_OVERLAY = "com.android.window.flags.virtual_display_can_create_system_application_overlay";
     /** @hide */
-    public static final String FLAG_WLINFO_ONCREATE = "com.android.window.flags.wlinfo_oncreate";
-
-
-    public static boolean actionModeEdgeToEdge() {
-        
-        return FEATURE_FLAGS.actionModeEdgeToEdge();
-    }
-
-    public static boolean activityEmbeddingDelayTaskFragmentFinishForActivityLaunch() {
-        
-        return FEATURE_FLAGS.activityEmbeddingDelayTaskFragmentFinishForActivityLaunch();
-    }
-
-
+    public static final String FLAG_VIRTUAL_GAMEPAD_DEVELOPER_OPT_OUT = "com.android.window.flags.virtual_gamepad_developer_opt_out";
+    /** @hide */
+    public static final String FLAG_VIRTUAL_GAMEPAD_OVERRIDE = "com.android.window.flags.virtual_gamepad_override";
+    /** @hide */
+    public static final String FLAG_WAIT_FOR_PRESENT_FENCE_ON_DISPLAY_SWITCH = "com.android.window.flags.wait_for_present_fence_on_display_switch";
     public static boolean activityEmbeddingInteractiveDividerFlag() {
-        
-        return FEATURE_FLAGS.activityEmbeddingInteractiveDividerFlag();
+        return true;
     }
-
     public static boolean activityEmbeddingMetrics() {
-        
-        return FEATURE_FLAGS.activityEmbeddingMetrics();
+        return false;
     }
-
-    public static boolean activityEmbeddingSupportForConnectedDisplays() {
-        
-        return FEATURE_FLAGS.activityEmbeddingSupportForConnectedDisplays();
+    public static boolean activityStartInterceptorSpeedbumps() {
+        return false;
     }
-
-
+    public static boolean addBgColorForTransparentBubbles() {
+        return false;
+    }
+    public static boolean aiDesksPlatform() {
+        return false;
+    }
     public static boolean allowDisableActivityRecordInputSink() {
-        
-        return FEATURE_FLAGS.allowDisableActivityRecordInputSink();
+        return true;
     }
-
-
-    public static boolean allowsScreenSizeDecoupledFromStatusBarAndCutout() {
-        
-        return FEATURE_FLAGS.allowsScreenSizeDecoupledFromStatusBarAndCutout();
+    public static boolean allowDragAndDropWhenInteractiveBugfix() {
+        return true;
     }
-
-
-    public static boolean alwaysDrawMagnificationFullscreenBorder() {
-        
-        return FEATURE_FLAGS.alwaysDrawMagnificationFullscreenBorder();
+    public static boolean alwaysMoveTaskToBackOnBackPressedFeatureFlag() {
+        return true;
     }
-
     public static boolean alwaysSeqIdLayout() {
-        
-        return FEATURE_FLAGS.alwaysSeqIdLayout();
+        return true;
     }
-
-
+    public static boolean alwaysSeqIdLayoutWear() {
+        return true;
+    }
     public static boolean alwaysUpdateWallpaperPermission() {
-        
-        return FEATURE_FLAGS.alwaysUpdateWallpaperPermission();
+        return true;
     }
-
     public static boolean aodTransition() {
-        
-        return FEATURE_FLAGS.aodTransition();
+        return true;
     }
-
-    public static boolean appCompatAsyncRelayout() {
-        
-        return FEATURE_FLAGS.appCompatAsyncRelayout();
+    public static boolean appCompatEnableBlurWallpaperInShell() {
+        return false;
     }
-
-
     public static boolean appCompatPropertiesApi() {
-        
-        return FEATURE_FLAGS.appCompatPropertiesApi();
+        return true;
     }
-
-    public static boolean appCompatRefactoring() {
-        
-        return FEATURE_FLAGS.appCompatRefactoring();
+    public static boolean appCompatRefactoringRoundedCornersAnimation() {
+        return false;
     }
-
-    public static boolean appCompatRefactoringRoundedCorners() {
-        
-        return FEATURE_FLAGS.appCompatRefactoringRoundedCorners();
+    public static boolean appCompatRefactoringUseActivityLeashForLetterboxing() {
+        return false;
     }
-
     public static boolean appCompatUiFramework() {
-        
-        return FEATURE_FLAGS.appCompatUiFramework();
+        return false;
     }
-
-    public static boolean appHandleNoRelayoutOnExclusionChange() {
-        
-        return FEATURE_FLAGS.appHandleNoRelayoutOnExclusionChange();
+    public static boolean appheaderLaunchColorBugfix() {
+        return false;
     }
-
     public static boolean applyLifecycleOnPipChange() {
-        
-        return FEATURE_FLAGS.applyLifecycleOnPipChange();
+        return false;
     }
-
-
-    public static boolean avoidRebindingIntentionallyDisconnectedWallpaper() {
-        
-        return FEATURE_FLAGS.avoidRebindingIntentionallyDisconnectedWallpaper();
+    public static boolean assistDisplayIdPublic() {
+        return true;
     }
-
-
-    public static boolean backupAndRestoreForUserAspectRatioSettings() {
-        
-        return FEATURE_FLAGS.backupAndRestoreForUserAspectRatioSettings();
+    public static boolean avoidIntermediateDestroyingState() {
+        return true;
     }
-
-    public static boolean balAdditionalLogging() {
-        
-        return FEATURE_FLAGS.balAdditionalLogging();
-    }
-
-
     public static boolean balAdditionalStartModes() {
-        
-        return FEATURE_FLAGS.balAdditionalStartModes();
+        return true;
     }
-
-    public static boolean balClearAllowlistDuration() {
-        
-        return FEATURE_FLAGS.balClearAllowlistDuration();
+    public static boolean balAsmOptInNullTopActivity() {
+        return false;
     }
-
     public static boolean balCoverIntentSender() {
-        
-        return FEATURE_FLAGS.balCoverIntentSender();
+        return true;
     }
-
-
+    public static boolean balDontAddBalTokenInSetAllowBgActivityStarts() {
+        return false;
+    }
     public static boolean balDontBringExistingBackgroundTaskStackToFg() {
-        
-        return FEATURE_FLAGS.balDontBringExistingBackgroundTaskStackToFg();
+        return true;
     }
-
+    public static boolean balIgnoreCallback() {
+        return true;
+    }
     public static boolean balReduceGracePeriod() {
-        
-        return FEATURE_FLAGS.balReduceGracePeriod();
+        return false;
     }
-
-
+    public static boolean balReportAbortedActivityStarts() {
+        return false;
+    }
     public static boolean balRespectAppSwitchStateWhenCheckBoundByForegroundUid() {
-        
-        return FEATURE_FLAGS.balRespectAppSwitchStateWhenCheckBoundByForegroundUid();
+        return true;
     }
-
-
     public static boolean balSendIntentWithOptions() {
-        
-        return FEATURE_FLAGS.balSendIntentWithOptions();
+        return true;
     }
-
-    public static boolean balShowToastsBlocked() {
-        
-        return FEATURE_FLAGS.balShowToastsBlocked();
-    }
-
-
-    public static boolean balStrictModeGracePeriod() {
-        
-        return FEATURE_FLAGS.balStrictModeGracePeriod();
-    }
-
-
     public static boolean balStrictModeRo() {
-        
-        return FEATURE_FLAGS.balStrictModeRo();
+        return true;
     }
-
-
-    public static boolean betterSupportNonMatchParentActivity() {
-        
-        return FEATURE_FLAGS.betterSupportNonMatchParentActivity();
+    public static boolean betterDeskDeactivationInRecentsTransition() {
+        return true;
     }
-
-    public static boolean cameraCompatForFreeform() {
-        
-        return FEATURE_FLAGS.cameraCompatForFreeform();
+    public static boolean cameraCompatIgnoreRequestedOrientationAllowed() {
+        return false;
     }
-
-    public static boolean cameraCompatFullscreenPickSameTaskActivity() {
-        
-        return FEATURE_FLAGS.cameraCompatFullscreenPickSameTaskActivity();
+    public static boolean cameraCompatLandscapeCameraSupport() {
+        return true;
     }
-
+    public static boolean cameraCompatUnifyCameraPolicies() {
+        return false;
+    }
+    public static boolean cameraCompatUpdateTreatmentOnRotation() {
+        return false;
+    }
+    public static boolean changeDisplayFocusOnWallpaperTouch() {
+        return true;
+    }
+    public static boolean changeMinAspectRatioPermission() {
+        return false;
+    }
+    public static boolean closeFullscreenAndSplitscreenKeyboardShortcut() {
+        return true;
+    }
     public static boolean closeToSquareConfigIncludesStatusBar() {
-        
-        return FEATURE_FLAGS.closeToSquareConfigIncludesStatusBar();
+        return false;
     }
-
-
+    public static boolean commitKeyguardOcclusionBeforeWakingUp() {
+        return false;
+    }
+    public static boolean consolidateRemoveStartingWindowFromTask() {
+        return false;
+    }
     public static boolean coverDisplayOptIn() {
-        
-        return FEATURE_FLAGS.coverDisplayOptIn();
+        return true;
     }
-
+    public static boolean crossDisplayTransitionV2() {
+        return false;
+    }
     public static boolean currentAnimatorScaleUsesSharedMemory() {
-        
-        return FEATURE_FLAGS.currentAnimatorScaleUsesSharedMemory();
+        return true;
     }
-
+    public static boolean currentUserAccessUnassignedDisplays() {
+        return true;
+    }
     public static boolean defaultDeskWithoutWarmupMigration() {
-        
-        return FEATURE_FLAGS.defaultDeskWithoutWarmupMigration();
+        return false;
     }
-
-
-    public static boolean delegateUnhandledDrags() {
-        
-        return FEATURE_FLAGS.delegateUnhandledDrags();
+    public static boolean deferResumeEndBeforeEnsureActivityConfigurationBugfix() {
+        return true;
     }
-
-
+    public static boolean deferResumeFocusInNonFocusedWindow() {
+        return false;
+    }
+    public static boolean delegateRequestFullscreenHandlingToShell() {
+        return true;
+    }
     public static boolean density390Api() {
-        
-        return FEATURE_FLAGS.density390Api();
+        return true;
     }
-
-
-    public static boolean disableDesktopLaunchParamsOutsideDesktopBugFix() {
-        
-        return FEATURE_FLAGS.disableDesktopLaunchParamsOutsideDesktopBugFix();
+    public static boolean deprecateMakeTaskLaunchBehind() {
+        return false;
     }
-
-
-    public static boolean disableNonResizableAppSnapResizing() {
-        
-        return FEATURE_FLAGS.disableNonResizableAppSnapResizing();
+    public static boolean deprecateSurfaceAnimationFrameCallback() {
+        return true;
     }
-
-
-    public static boolean disableOptOutEdgeToEdge() {
-        
-        return FEATURE_FLAGS.disableOptOutEdgeToEdge();
+    public static boolean desktopAiPlatform() {
+        return false;
     }
-
-
-    public static boolean dispatchFirstKeyguardLockedState() {
-        
-        return FEATURE_FLAGS.dispatchFirstKeyguardLockedState();
+    public static boolean desktopHomescreenIconsApplaunchTransitions() {
+        return true;
     }
-
-
-    public static boolean enableAccessibleCustomHeaders() {
-        
-        return FEATURE_FLAGS.enableAccessibleCustomHeaders();
+    public static boolean desktopMinimizeLastTaskBugfix() {
+        return false;
     }
-
-    public static boolean enableActivityEmbeddingSupportForConnectedDisplays() {
-        
-        return FEATURE_FLAGS.enableActivityEmbeddingSupportForConnectedDisplays();
+    public static boolean desktopOverviewRotationTaskResizeBugfix() {
+        return false;
     }
-
-    public static boolean enableAppHandlePositionReporting() {
-        
-        return FEATURE_FLAGS.enableAppHandlePositionReporting();
+    public static boolean deviceEngagementMode() {
+        return true;
     }
-
-
-    public static boolean enableAppHeaderWithTaskDensity() {
-        
-        return FEATURE_FLAGS.enableAppHeaderWithTaskDensity();
+    public static boolean differentDisplayLaunchFocusRestriction() {
+        return false;
     }
-
-    public static boolean enableBlockNonDesktopDisplayWindowDragBugfix() {
-        
-        return FEATURE_FLAGS.enableBlockNonDesktopDisplayWindowDragBugfix();
+    public static boolean dimmingWallpaperForMaximizedAndTiled() {
+        return true;
     }
-
+    public static boolean disableDisplayForceFreeformOnPc() {
+        return true;
+    }
+    public static boolean disableRestoreNonFullscreenBoundsOnConfigurationChange() {
+        return false;
+    }
+    public static boolean enableAddWindowDecorationToAllTasks() {
+        return false;
+    }
+    public static boolean enableAnimationOnBackNavigationInterception() {
+        return false;
+    }
+    public static boolean enableAppRestartAfterUpdate() {
+        return true;
+    }
+    public static boolean enableAppRestartAfterUpdateSplitScreen() {
+        return true;
+    }
+    public static boolean enableAutoRecoveryFromSelfKill() {
+        return true;
+    }
+    public static boolean enableAutoRotateOnSlateState() {
+        return true;
+    }
+    public static boolean enableBackNavigationDesktopAppNoMinimize() {
+        return true;
+    }
     public static boolean enableBorderSettings() {
-        
-        return FEATURE_FLAGS.enableBorderSettings();
+        return true;
     }
-
+    public static boolean enableBoundsRestoringOnDragExit() {
+        return true;
+    }
     public static boolean enableBoxShadowSettings() {
-        
-        return FEATURE_FLAGS.enableBoxShadowSettings();
+        return true;
     }
-
+    public static boolean enableBubbleRootTask() {
+        return true;
+    }
     public static boolean enableBugFixesForSecondaryDisplay() {
-        
-        return FEATURE_FLAGS.enableBugFixesForSecondaryDisplay();
+        return true;
     }
-
-    public static boolean enableCameraCompatCheckDeviceRotationBugfix() {
-        
-        return FEATURE_FLAGS.enableCameraCompatCheckDeviceRotationBugfix();
-    }
-
-
-    public static boolean enableCameraCompatForDesktopWindowing() {
-        
-        return FEATURE_FLAGS.enableCameraCompatForDesktopWindowing();
-    }
-
-
-    public static boolean enableCameraCompatForDesktopWindowingOptOut() {
-        
-        return FEATURE_FLAGS.enableCameraCompatForDesktopWindowingOptOut();
-    }
-
-    public static boolean enableCameraCompatForDesktopWindowingOptOutApi() {
-        
-        return FEATURE_FLAGS.enableCameraCompatForDesktopWindowingOptOutApi();
-    }
-
-    public static boolean enableCameraCompatTrackTaskAndAppBugfix() {
-        
-        return FEATURE_FLAGS.enableCameraCompatTrackTaskAndAppBugfix();
-    }
-
     public static boolean enableCaptionCompatInsetConversion() {
-        
-        return FEATURE_FLAGS.enableCaptionCompatInsetConversion();
+        return false;
     }
-
-
-    public static boolean enableCaptionCompatInsetForceConsumption() {
-        
-        return FEATURE_FLAGS.enableCaptionCompatInsetForceConsumption();
+    public static boolean enableCloseLidWmShellBugfix() {
+        return false;
     }
-
-
-    public static boolean enableCaptionCompatInsetForceConsumptionAlways() {
-        
-        return FEATURE_FLAGS.enableCaptionCompatInsetForceConsumptionAlways();
+    public static boolean enableConnectedDisplaysWallpaperPresentations() {
+        return true;
     }
-
-
-    public static boolean enableCascadingWindows() {
-        
-        return FEATURE_FLAGS.enableCascadingWindows();
+    public static boolean enableConsolidatedWindowOptions() {
+        return false;
     }
-
-    public static boolean enableCloseLidInteraction() {
-        
-        return FEATURE_FLAGS.enableCloseLidInteraction();
+    public static boolean enableCrossDisplaySnapSupport() {
+        return false;
     }
-
-
-    public static boolean enableCompatUiVisibilityStatus() {
-        
-        return FEATURE_FLAGS.enableCompatUiVisibilityStatus();
+    public static boolean enableCrossDisplaysAppLaunchTransition() {
+        return true;
     }
-
-    public static boolean enableCompatuiSysuiLauncher() {
-        
-        return FEATURE_FLAGS.enableCompatuiSysuiLauncher();
-    }
-
-    public static boolean enableConnectedDisplaysDnd() {
-        
-        return FEATURE_FLAGS.enableConnectedDisplaysDnd();
-    }
-
-    public static boolean enableConnectedDisplaysPip() {
-        
-        return FEATURE_FLAGS.enableConnectedDisplaysPip();
-    }
-
-    public static boolean enableConnectedDisplaysWindowDrag() {
-        
-        return FEATURE_FLAGS.enableConnectedDisplaysWindowDrag();
-    }
-
-
     public static boolean enableDesktopAppHandleAnimation() {
-        
-        return FEATURE_FLAGS.enableDesktopAppHandleAnimation();
+        return true;
     }
-
-    public static boolean enableDesktopAppHeaderStateChangeAnnouncements() {
-        
-        return FEATURE_FLAGS.enableDesktopAppHeaderStateChangeAnnouncements();
-    }
-
     public static boolean enableDesktopAppLaunchAlttabTransitions() {
-        
-        return FEATURE_FLAGS.enableDesktopAppLaunchAlttabTransitions();
+        return false;
     }
-
-
-    public static boolean enableDesktopAppLaunchAlttabTransitionsBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopAppLaunchAlttabTransitionsBugfix();
-    }
-
-    public static boolean enableDesktopAppLaunchBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopAppLaunchBugfix();
-    }
-
     public static boolean enableDesktopAppLaunchTransitions() {
-        
-        return FEATURE_FLAGS.enableDesktopAppLaunchTransitions();
+        return false;
     }
-
-
-    public static boolean enableDesktopAppLaunchTransitionsBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopAppLaunchTransitionsBugfix();
-    }
-
-    public static boolean enableDesktopCloseShortcutBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopCloseShortcutBugfix();
-    }
-
-    public static boolean enableDesktopCloseTaskAnimationInDtcBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopCloseTaskAnimationInDtcBugfix();
-    }
-
     public static boolean enableDesktopFirstBasedDefaultToDesktopBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopFirstBasedDefaultToDesktopBugfix();
+        return true;
     }
-
-    public static boolean enableDesktopFirstBasedDragToMaximize() {
-        
-        return FEATURE_FLAGS.enableDesktopFirstBasedDragToMaximize();
+    public static boolean enableDesktopFirstExemptedSourceBugfix() {
+        return true;
     }
-
-    public static boolean enableDesktopFirstFullscreenRefocusBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopFirstFullscreenRefocusBugfix();
+    public static boolean enableDesktopFirstLaptopStateBugfix() {
+        return true;
     }
-
-    public static boolean enableDesktopFirstListener() {
-        
-        return FEATURE_FLAGS.enableDesktopFirstListener();
+    public static boolean enableDesktopFirstMultipleLaunchRootBugfix() {
+        return true;
     }
-
+    public static boolean enableDesktopFirstPolicyInLpm() {
+        return true;
+    }
+    public static boolean enableDesktopFirstTopFullscreenBugfix() {
+        return true;
+    }
+    public static boolean enableDesktopFirstUserChangeBugfix() {
+        return true;
+    }
     public static boolean enableDesktopImeBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopImeBugfix();
+        return true;
     }
-
-
-    public static boolean enableDesktopImmersiveDragBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopImmersiveDragBugfix();
-    }
-
-
-    public static boolean enableDesktopIndicatorInSeparateThreadBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopIndicatorInSeparateThreadBugfix();
-    }
-
     public static boolean enableDesktopModeThroughDevOption() {
-        
-        return FEATURE_FLAGS.enableDesktopModeThroughDevOption();
+        return false;
     }
-
-
-    public static boolean enableDesktopOpeningDeeplinkMinimizeAnimationBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopOpeningDeeplinkMinimizeAnimationBugfix();
+    public static boolean enableDesktopTaskbarInFullscreenMode() {
+        return false;
     }
-
-
-    public static boolean enableDesktopRecentsTransitionsCornersBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopRecentsTransitionsCornersBugfix();
-    }
-
-    public static boolean enableDesktopSplitscreenTransitionBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopSplitscreenTransitionBugfix();
-    }
-
-
-    public static boolean enableDesktopSystemDialogsTransitions() {
-        
-        return FEATURE_FLAGS.enableDesktopSystemDialogsTransitions();
-    }
-
-    public static boolean enableDesktopTabTearingLaunchAnimation() {
-        
-        return FEATURE_FLAGS.enableDesktopTabTearingLaunchAnimation();
-    }
-
-
-    public static boolean enableDesktopTabTearingMinimizeAnimationBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopTabTearingMinimizeAnimationBugfix();
-    }
-
-    public static boolean enableDesktopTaskLimitSeparateTransition() {
-        
-        return FEATURE_FLAGS.enableDesktopTaskLimitSeparateTransition();
-    }
-
     public static boolean enableDesktopTaskbarOnFreeformDisplays() {
-        
-        return FEATURE_FLAGS.enableDesktopTaskbarOnFreeformDisplays();
+        return true;
     }
-
-
-    public static boolean enableDesktopTrampolineCloseAnimationBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopTrampolineCloseAnimationBugfix();
-    }
-
-
     public static boolean enableDesktopWallpaperActivityForSystemUser() {
-        
-        return FEATURE_FLAGS.enableDesktopWallpaperActivityForSystemUser();
+        return true;
     }
-
     public static boolean enableDesktopWindowingAppHandleEducation() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingAppHandleEducation();
+        return false;
     }
-
-
-    public static boolean enableDesktopWindowingAppToWeb() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingAppToWeb();
-    }
-
-
     public static boolean enableDesktopWindowingAppToWebEducation() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingAppToWebEducation();
+        return true;
     }
-
-    public static boolean enableDesktopWindowingAppToWebEducationIntegration() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingAppToWebEducationIntegration();
-    }
-
-
     public static boolean enableDesktopWindowingBackNavigation() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingBackNavigation();
+        return true;
     }
-
-
     public static boolean enableDesktopWindowingEnterTransitionBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingEnterTransitionBugfix();
+        return true;
     }
-
     public static boolean enableDesktopWindowingEnterTransitions() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingEnterTransitions();
+        return false;
     }
-
-
-    public static boolean enableDesktopWindowingExitByMinimizeTransitionBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingExitByMinimizeTransitionBugfix();
-    }
-
     public static boolean enableDesktopWindowingExitTransitions() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingExitTransitions();
+        return false;
     }
-
-
     public static boolean enableDesktopWindowingExitTransitionsBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingExitTransitionsBugfix();
+        return true;
     }
-
-
-    public static boolean enableDesktopWindowingHsum() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingHsum();
+    public static boolean enableDesktopWindowingFreeFloatingPip() {
+        return true;
     }
-
-
-    public static boolean enableDesktopWindowingImmersiveHandleHiding() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingImmersiveHandleHiding();
-    }
-
-
-    public static boolean enableDesktopWindowingModalsPolicy() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingModalsPolicy();
-    }
-
-
     public static boolean enableDesktopWindowingMode() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingMode();
+        return true;
     }
-
-
-    public static boolean enableDesktopWindowingMultiInstanceFeatures() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingMultiInstanceFeatures();
-    }
-
-
     public static boolean enableDesktopWindowingPersistence() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingPersistence();
+        return true;
     }
-
-    public static boolean enableDesktopWindowingPip() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingPip();
-    }
-
-    public static boolean enableDesktopWindowingPipInOverviewBugfix() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingPipInOverviewBugfix();
-    }
-
-
-    public static boolean enableDesktopWindowingQuickSwitch() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingQuickSwitch();
-    }
-
-
-    public static boolean enableDesktopWindowingScvhCacheBugFix() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingScvhCacheBugFix();
-    }
-
-
     public static boolean enableDesktopWindowingSizeConstraints() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingSizeConstraints();
+        return true;
     }
-
-
-    public static boolean enableDesktopWindowingTaskLimit() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingTaskLimit();
-    }
-
-
-    public static boolean enableDesktopWindowingTaskbarRunningApps() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingTaskbarRunningApps();
-    }
-
     public static boolean enableDesktopWindowingTransitions() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingTransitions();
+        return false;
     }
-
-
     public static boolean enableDesktopWindowingWallpaperActivity() {
-        
-        return FEATURE_FLAGS.enableDesktopWindowingWallpaperActivity();
+        return true;
     }
-
-    public static boolean enableDeviceStateAutoRotateSettingLogging() {
-        
-        return FEATURE_FLAGS.enableDeviceStateAutoRotateSettingLogging();
+    public static boolean enableDisplayDisconnectFullscreen() {
+        return true;
     }
-
-
-    public static boolean enableDeviceStateAutoRotateSettingRefactor() {
-        
-        return FEATURE_FLAGS.enableDeviceStateAutoRotateSettingRefactor();
-    }
-
-    public static boolean enableDisplayCompatMode() {
-        
-        return FEATURE_FLAGS.enableDisplayCompatMode();
-    }
-
     public static boolean enableDisplayDisconnectInteraction() {
-        
-        return FEATURE_FLAGS.enableDisplayDisconnectInteraction();
+        return true;
     }
-
-    public static boolean enableDisplayFocusInShellTransitions() {
-        
-        return FEATURE_FLAGS.enableDisplayFocusInShellTransitions();
+    public static boolean enableDisplayDisconnectPip() {
+        return true;
     }
-
+    public static boolean enableDisplayDisconnectSplitscreen() {
+        return true;
+    }
     public static boolean enableDisplayReconnectInteraction() {
-        
-        return FEATURE_FLAGS.enableDisplayReconnectInteraction();
+        return true;
     }
-
     public static boolean enableDisplayWindowingModeSwitching() {
-        
-        return FEATURE_FLAGS.enableDisplayWindowingModeSwitching();
+        return true;
     }
-
-
-    public static boolean enableDragResizeSetUpInBgThread() {
-        
-        return FEATURE_FLAGS.enableDragResizeSetUpInBgThread();
+    public static boolean enableDrawingAppHandle() {
+        return true;
     }
-
-
-    public static boolean enableDragToDesktopIncomingTransitionsBugfix() {
-        
-        return FEATURE_FLAGS.enableDragToDesktopIncomingTransitionsBugfix();
+    public static boolean enableEnhancedAppToWebTransition() {
+        return true;
     }
-
-    public static boolean enableDragToMaximize() {
-        
-        return FEATURE_FLAGS.enableDragToMaximize();
-    }
-
-    public static boolean enableDraggingPipAcrossDisplays() {
-        
-        return FEATURE_FLAGS.enableDraggingPipAcrossDisplays();
-    }
-
-    public static boolean enableDynamicRadiusComputationBugfix() {
-        
-        return FEATURE_FLAGS.enableDynamicRadiusComputationBugfix();
-    }
-
-    public static boolean enableEmptyDeskOnMinimize() {
-        
-        return FEATURE_FLAGS.enableEmptyDeskOnMinimize();
-    }
-
     public static boolean enableExperimentalBubblesController() {
-        
-        return FEATURE_FLAGS.enableExperimentalBubblesController();
+        return false;
     }
-
-    public static boolean enableFreeformBoxShadows() {
-        
-        return FEATURE_FLAGS.enableFreeformBoxShadows();
+    public static boolean enableFluidResizingForListedApps() {
+        return true;
     }
-
-    public static boolean enableFreeformDisplayLaunchParams() {
-        
-        return FEATURE_FLAGS.enableFreeformDisplayLaunchParams();
+    public static boolean enableFocusResetOnDisplayRemoval() {
+        return false;
     }
-
-
-    public static boolean enableFullScreenWindowOnRemovingSplitScreenStageBugfix() {
-        
-        return FEATURE_FLAGS.enableFullScreenWindowOnRemovingSplitScreenStageBugfix();
+    public static boolean enableFocusTransitionObserverCleanup() {
+        return false;
     }
-
+    public static boolean enableFreeformBoxShadowsV2() {
+        return false;
+    }
+    public static boolean enableFreeformFallbackTransitionObserver() {
+        return true;
+    }
+    public static boolean enableFullscreenInNewTaskPreference() {
+        return false;
+    }
     public static boolean enableFullscreenWindowControls() {
-        
-        return FEATURE_FLAGS.enableFullscreenWindowControls();
+        return false;
     }
-
-
-    public static boolean enableFullyImmersiveInDesktop() {
-        
-        return FEATURE_FLAGS.enableFullyImmersiveInDesktop();
+    public static boolean enableGameControlsHandleMenuEntry() {
+        return false;
     }
-
-
     public static boolean enableHandleInputFix() {
-        
-        return FEATURE_FLAGS.enableHandleInputFix();
+        return true;
     }
-
     public static boolean enableHandlersDebuggingMode() {
-        
-        return FEATURE_FLAGS.enableHandlersDebuggingMode();
+        return false;
     }
-
-
-    public static boolean enableHoldToDragAppHandle() {
-        
-        return FEATURE_FLAGS.enableHoldToDragAppHandle();
+    public static boolean enableHomeScreenPeeking() {
+        return false;
     }
-
-    public static boolean enableIndependentBackInProjected() {
-        
-        return FEATURE_FLAGS.enableIndependentBackInProjected();
+    public static boolean enableInputDispatcherLongMethodTracing() {
+        return false;
     }
-
-    public static boolean enableInorderTransitionCallbacksForDesktop() {
-        
-        return FEATURE_FLAGS.enableInorderTransitionCallbacksForDesktop();
+    public static boolean enableInteractionDependentTabTearingBounds() {
+        return true;
     }
-
-
-    public static boolean enableInputLayerTransitionFix() {
-        
-        return FEATURE_FLAGS.enableInputLayerTransitionFix();
+    public static boolean enableInteractivePictureInPicture() {
+        return true;
     }
-
-    public static boolean enableKeyGestureHandlerForSysui() {
-        
-        return FEATURE_FLAGS.enableKeyGestureHandlerForSysui();
+    public static boolean enableLauncherHandleGoHomeKeyboardShortcut() {
+        return true;
     }
-
-
-    public static boolean enableMinimizeButton() {
-        
-        return FEATURE_FLAGS.enableMinimizeButton();
+    public static boolean enableLessActivityRecreationOnConfigChange() {
+        return true;
     }
-
-
-    public static boolean enableModalsFullscreenWithPermission() {
-        
-        return FEATURE_FLAGS.enableModalsFullscreenWithPermission();
+    public static boolean enableMergeAnimations() {
+        return false;
     }
-
-
-    public static boolean enableModalsFullscreenWithPlatformSignature() {
-        
-        return FEATURE_FLAGS.enableModalsFullscreenWithPlatformSignature();
-    }
-
-    public static boolean enableMoveToNextDisplayShortcut() {
-        
-        return FEATURE_FLAGS.enableMoveToNextDisplayShortcut();
-    }
-
     public static boolean enableMultiDisplaySplit() {
-        
-        return FEATURE_FLAGS.enableMultiDisplaySplit();
+        return false;
     }
-
-    public static boolean enableMultidisplayTrackpadBackGesture() {
-        
-        return FEATURE_FLAGS.enableMultidisplayTrackpadBackGesture();
-    }
-
-    public static boolean enableMultipleDesktopsBackend() {
-        
-        return FEATURE_FLAGS.enableMultipleDesktopsBackend();
-    }
-
     public static boolean enableMultipleDesktopsDefaultActivationInDesktopFirstDisplays() {
-        
-        return FEATURE_FLAGS.enableMultipleDesktopsDefaultActivationInDesktopFirstDisplays();
+        return false;
     }
-
-    public static boolean enableMultipleDesktopsFrontend() {
-        
-        return FEATURE_FLAGS.enableMultipleDesktopsFrontend();
+    public static boolean enableNoResizeCursor() {
+        return false;
     }
-
-
-    public static boolean enableNoWindowDecorationForDesks() {
-        
-        return FEATURE_FLAGS.enableNoWindowDecorationForDesks();
+    public static boolean enableNonDefaultDisplaySplitBugfix() {
+        return true;
     }
-
-    public static boolean enableNonDefaultDisplaySplit() {
-        
-        return FEATURE_FLAGS.enableNonDefaultDisplaySplit();
+    public static boolean enableOpenByDefaultDialogFocusBugfix() {
+        return false;
     }
-
-
-    public static boolean enableOmitAccelerometerRotationRestore() {
-        
-        return FEATURE_FLAGS.enableOmitAccelerometerRotationRestore();
-    }
-
-
-    public static boolean enableOpaqueBackgroundForTransparentWindows() {
-        
-        return FEATURE_FLAGS.enableOpaqueBackgroundForTransparentWindows();
-    }
-
     public static boolean enableOverflowButtonForTaskbarPinnedItems() {
-        
-        return FEATURE_FLAGS.enableOverflowButtonForTaskbarPinnedItems();
+        return false;
     }
-
     public static boolean enablePerDisplayDesktopWallpaperActivity() {
-        
-        return FEATURE_FLAGS.enablePerDisplayDesktopWallpaperActivity();
+        return true;
     }
-
-
-    public static boolean enablePerDisplayPackageContextCacheInStatusbarNotif() {
-        
-        return FEATURE_FLAGS.enablePerDisplayPackageContextCacheInStatusbarNotif();
-    }
-
-    public static boolean enablePersistingDisplaySizeForConnectedDisplays() {
-        
-        return FEATURE_FLAGS.enablePersistingDisplaySizeForConnectedDisplays();
-    }
-
     public static boolean enablePinningAppWithContextMenu() {
-        
-        return FEATURE_FLAGS.enablePinningAppWithContextMenu();
+        return true;
     }
-
-    public static boolean enablePresentationForConnectedDisplays() {
-        
-        return FEATURE_FLAGS.enablePresentationForConnectedDisplays();
+    public static boolean enablePresentationStopsTopTaskBugfix() {
+        return true;
     }
-
+    public static boolean enablePreventDesktopInLocktaskmodeBugfix() {
+        return false;
+    }
+    public static boolean enablePrivilegedAppTransparentWindowingExemptions() {
+        return true;
+    }
     public static boolean enableProjectedDisplayDesktopMode() {
-        
-        return FEATURE_FLAGS.enableProjectedDisplayDesktopMode();
+        return true;
     }
-
-
-    public static boolean enableQuickswitchDesktopSplitBugfix() {
-        
-        return FEATURE_FLAGS.enableQuickswitchDesktopSplitBugfix();
+    public static boolean enableRememberedBounds() {
+        return true;
     }
-
-    public static boolean enableRejectHomeTransition() {
-        
-        return FEATURE_FLAGS.enableRejectHomeTransition();
-    }
-
-
-    public static boolean enableRequestFullscreenBugfix() {
-        
-        return FEATURE_FLAGS.enableRequestFullscreenBugfix();
-    }
-
     public static boolean enableRequestFullscreenRefactor() {
-        
-        return FEATURE_FLAGS.enableRequestFullscreenRefactor();
+        return false;
     }
-
-
+    public static boolean enableRequireMovableTaskApi() {
+        return true;
+    }
     public static boolean enableResizingMetrics() {
-        
-        return FEATURE_FLAGS.enableResizingMetrics();
+        return true;
     }
-
-    public static boolean enableRestartMenuForConnectedDisplays() {
-        
-        return FEATURE_FLAGS.enableRestartMenuForConnectedDisplays();
+    public static boolean enableShellThreadLintCheck() {
+        return false;
     }
-
-
-    public static boolean enableRestoreToPreviousSizeFromDesktopImmersive() {
-        
-        return FEATURE_FLAGS.enableRestoreToPreviousSizeFromDesktopImmersive();
+    public static boolean enableSplitDismissAnimationV2() {
+        return false;
     }
-
-    public static boolean enableSeeThroughTaskFragments() {
-        
-        return FEATURE_FLAGS.enableSeeThroughTaskFragments();
+    public static boolean enableSteppedCascading() {
+        return false;
     }
-
-
-    public static boolean enableShellInitialBoundsRegressionBugFix() {
-        
-        return FEATURE_FLAGS.enableShellInitialBoundsRegressionBugFix();
-    }
-
-    public static boolean enableSizeCompatModeImprovementsForConnectedDisplays() {
-        
-        return FEATURE_FLAGS.enableSizeCompatModeImprovementsForConnectedDisplays();
-    }
-
-
-    public static boolean enableStartLaunchTransitionFromTaskbarBugfix() {
-        
-        return FEATURE_FLAGS.enableStartLaunchTransitionFromTaskbarBugfix();
-    }
-
     public static boolean enableSysDecorsCallbacksViaWm() {
-        
-        return FEATURE_FLAGS.enableSysDecorsCallbacksViaWm();
+        return true;
     }
-
-    public static boolean enableTallAppHeaders() {
-        
-        return FEATURE_FLAGS.enableTallAppHeaders();
+    public static boolean enableTaskPositionerRefactor() {
+        return false;
     }
-
-
-    public static boolean enableTaskResizingKeyboardShortcuts() {
-        
-        return FEATURE_FLAGS.enableTaskResizingKeyboardShortcuts();
+    public static boolean enableTaskPositionerRefactorClank() {
+        return false;
     }
-
-
+    public static boolean enableTaskPositionerRefactorForListedApps() {
+        return true;
+    }
     public static boolean enableTaskStackObserverInShell() {
-        
-        return FEATURE_FLAGS.enableTaskStackObserverInShell();
+        return true;
     }
-
     public static boolean enableTaskbarConnectedDisplays() {
-        
-        return FEATURE_FLAGS.enableTaskbarConnectedDisplays();
+        return true;
     }
-
-
     public static boolean enableTaskbarOverflow() {
-        
-        return FEATURE_FLAGS.enableTaskbarOverflow();
+        return true;
     }
-
-    public static boolean enableTaskbarRecentTasksThrottleBugfix() {
-        
-        return FEATURE_FLAGS.enableTaskbarRecentTasksThrottleBugfix();
+    public static boolean enableTrampolineTaskAffinityBugfix() {
+        return true;
     }
-
-
-    public static boolean enableTaskbarRecentsLayoutTransition() {
-        
-        return FEATURE_FLAGS.enableTaskbarRecentsLayoutTransition();
+    public static boolean enableTransientGestureInSystemUi() {
+        return false;
     }
-
-
-    public static boolean enableThemedAppHeaders() {
-        
-        return FEATURE_FLAGS.enableThemedAppHeaders();
+    public static boolean enableUserPreferredHdrMode() {
+        return true;
     }
-
-    public static boolean enableTileResizing() {
-        
-        return FEATURE_FLAGS.enableTileResizing();
+    public static boolean enableVeilLessWindowMaximizationForListedApps() {
+        return false;
     }
-
-
-    public static boolean enableTopVisibleRootTaskPerUserTracking() {
-        
-        return FEATURE_FLAGS.enableTopVisibleRootTaskPerUserTracking();
-    }
-
-    public static boolean enableTransitionOnActivitySetRequestedOrientation() {
-        
-        return FEATURE_FLAGS.enableTransitionOnActivitySetRequestedOrientation();
-    }
-
-
-    public static boolean enableVisualIndicatorInTransitionBugfix() {
-        
-        return FEATURE_FLAGS.enableVisualIndicatorInTransitionBugfix();
-    }
-
-
-    public static boolean enableWindowContextOverrideType() {
-        
-        return FEATURE_FLAGS.enableWindowContextOverrideType();
-    }
-
-
-    public static boolean enableWindowContextResourcesUpdateOnConfigChange() {
-        
-        return FEATURE_FLAGS.enableWindowContextResourcesUpdateOnConfigChange();
-    }
-
     public static boolean enableWindowDecorationRefactor() {
-        
-        return FEATURE_FLAGS.enableWindowDecorationRefactor();
+        return true;
     }
-
     public static boolean enableWindowRepositioningApi() {
-        
-        return FEATURE_FLAGS.enableWindowRepositioningApi();
+        return true;
     }
-
-
-    public static boolean enableWindowingDynamicInitialBounds() {
-        
-        return FEATURE_FLAGS.enableWindowingDynamicInitialBounds();
-    }
-
-
-    public static boolean enableWindowingEdgeDragResize() {
-        
-        return FEATURE_FLAGS.enableWindowingEdgeDragResize();
-    }
-
-
-    public static boolean enableWindowingScaledResizing() {
-        
-        return FEATURE_FLAGS.enableWindowingScaledResizing();
-    }
-
-    public static boolean enableWindowingTaskStackOrderBugfix() {
-        
-        return FEATURE_FLAGS.enableWindowingTaskStackOrderBugfix();
-    }
-
-    public static boolean enableWindowingTransitionHandlersObservers() {
-        
-        return FEATURE_FLAGS.enableWindowingTransitionHandlersObservers();
-    }
-
-
     public static boolean enforceEdgeToEdge() {
-        
-        return FEATURE_FLAGS.enforceEdgeToEdge();
+        return true;
     }
-
-    public static boolean ensureKeyguardDoesTransitionStarting() {
-        
-        return FEATURE_FLAGS.ensureKeyguardDoesTransitionStarting();
+    public static boolean engagementControlApi() {
+        return false;
     }
-
-    public static boolean enterDesktopByDefaultOnFreeformDisplays() {
-        
-        return FEATURE_FLAGS.enterDesktopByDefaultOnFreeformDisplays();
+    public static boolean ensureKeyguardDoesTransitionStartingBugFix() {
+        return false;
     }
-
-
-    public static boolean excludeCaptionFromAppBounds() {
-        
-        return FEATURE_FLAGS.excludeCaptionFromAppBounds();
+    public static boolean ensureWallpaperDrawnOnDisplaySwitch() {
+        return false;
     }
-
-    public static boolean excludeDeskRootsFromDesktopTasks() {
-        
-        return FEATURE_FLAGS.excludeDeskRootsFromDesktopTasks();
+    public static boolean excludeCaptionInsetsOptOutApi() {
+        return true;
     }
-
-    public static boolean excludeNonMainWindowFromSnapshot() {
-        
-        return FEATURE_FLAGS.excludeNonMainWindowFromSnapshot();
+    public static boolean fallbackTransitionPlayer() {
+        return true;
     }
-
-
-    public static boolean excludeTaskFromRecents() {
-        
-        return FEATURE_FLAGS.excludeTaskFromRecents();
-    }
-
-    public static boolean extendingPersistenceSnapshotQueueDepth() {
-        
-        return FEATURE_FLAGS.extendingPersistenceSnapshotQueueDepth();
-    }
-
-    public static boolean fallbackToFocusedDisplay() {
-        
-        return FEATURE_FLAGS.fallbackToFocusedDisplay();
-    }
-
     public static boolean fifoPriorityForMajorUiProcesses() {
-        
-        return FEATURE_FLAGS.fifoPriorityForMajorUiProcesses();
+        return false;
     }
-
-    public static boolean fixFullscreenInMultiWindow() {
-        
-        return FEATURE_FLAGS.fixFullscreenInMultiWindow();
+    public static boolean filterEventsFromIrrelevantDevicesInDragMoveResize() {
+        return false;
     }
-
-
+    public static boolean fixCrossActivityBackAnimationInBubbles() {
+        return true;
+    }
     public static boolean fixHideOverlayApi() {
-        
-        return FEATURE_FLAGS.fixHideOverlayApi();
+        return true;
     }
-
-    public static boolean fixLayoutRestoredTask() {
-        
-        return FEATURE_FLAGS.fixLayoutRestoredTask();
+    public static boolean fixMultiWindowTaskFocusChange() {
+        return false;
     }
-
-    public static boolean fixMovingUnfocusedTask() {
-        
-        return FEATURE_FLAGS.fixMovingUnfocusedTask();
+    public static boolean fixTfAdjacentFocus() {
+        return true;
     }
-
-    public static boolean fixSetAdjacentTaskFragmentsWithParams() {
-        
-        return FEATURE_FLAGS.fixSetAdjacentTaskFragmentsWithParams();
+    public static boolean fixWallpaperDimIssues26q2() {
+        return true;
     }
-
-    public static boolean fixShowWhenLockedSyncTimeout() {
-        
-        return FEATURE_FLAGS.fixShowWhenLockedSyncTimeout();
+    public static boolean fullscreenKeyIgnoresBubbleBugfix() {
+        return false;
     }
-
-    public static boolean forceCloseTopTransparentFullscreenTask() {
-        
-        return FEATURE_FLAGS.forceCloseTopTransparentFullscreenTask();
-    }
-
-
-    public static boolean forceShowSystemBarForBubble() {
-        
-        return FEATURE_FLAGS.forceShowSystemBarForBubble();
-    }
-
-    public static boolean formFactorBasedDesktopFirstSwitch() {
-        
-        return FEATURE_FLAGS.formFactorBasedDesktopFirstSwitch();
-    }
-
-
-    public static boolean getDimmerOnClosing() {
-        
-        return FEATURE_FLAGS.getDimmerOnClosing();
-    }
-
     public static boolean grantManageKeyGesturesToRecents() {
-        
-        return FEATURE_FLAGS.grantManageKeyGesturesToRecents();
+        return true;
     }
-
-
-    public static boolean ignoreAspectRatioRestrictionsForResizeableFreeformActivities() {
-        
-        return FEATURE_FLAGS.ignoreAspectRatioRestrictionsForResizeableFreeformActivities();
+    public static boolean handleOverviewDesktopScrimBugfix() {
+        return true;
     }
-
+    public static boolean homeActivityAlwaysPresent() {
+        return true;
+    }
+    public static boolean homePackageWindowingExemptionsBugFix() {
+        return true;
+    }
+    public static boolean idempotentWctResolution() {
+        return true;
+    }
     public static boolean ignoreCornerRadiusAndShadows() {
-        
-        return FEATURE_FLAGS.ignoreCornerRadiusAndShadows();
+        return false;
     }
-
-
-    public static boolean includeTopTransparentFullscreenTaskInDesktopHeuristic() {
-        
-        return FEATURE_FLAGS.includeTopTransparentFullscreenTaskInDesktopHeuristic();
+    public static boolean improveFluidResizingPerformance() {
+        return false;
     }
-
-
-    public static boolean inheritTaskBoundsForTrampolineTaskLaunches() {
-        
-        return FEATURE_FLAGS.inheritTaskBoundsForTrampolineTaskLaunches();
+    public static boolean inheritConsecutiveLaunchCallerUid() {
+        return true;
     }
-
-
-    public static boolean insetsDecoupledConfiguration() {
-        
-        return FEATURE_FLAGS.insetsDecoupledConfiguration();
+    public static boolean interceptTouchEventForAppHeaderDragMove() {
+        return true;
     }
-
-
-    public static boolean interceptMotionFromMoveToCancel() {
-        
-        return FEATURE_FLAGS.interceptMotionFromMoveToCancel();
-    }
-
-
     public static boolean jankApi() {
-        
-        return FEATURE_FLAGS.jankApi();
+        return true;
     }
-
-    public static boolean keyboardShortcutsToSwitchDesks() {
-        
-        return FEATURE_FLAGS.keyboardShortcutsToSwitchDesks();
+    public static boolean keepShowWallpaperOnBottom() {
+        return false;
     }
-
+    public static boolean launchGamesInFullscreenByAllowlist() {
+        return false;
+    }
     public static boolean letterboxBackgroundWallpaper() {
-        
-        return FEATURE_FLAGS.letterboxBackgroundWallpaper();
+        return false;
     }
-
-
-    public static boolean movableCutoutConfiguration() {
-        
-        return FEATURE_FLAGS.movableCutoutConfiguration();
+    public static boolean liteTaskDescriptionChanged() {
+        return false;
     }
-
+    public static boolean maskPresentationFlagsOnInternalDisplays() {
+        return false;
+    }
+    public static boolean mergePredictiveBackTransactionTogether() {
+        return false;
+    }
+    public static boolean mirrorSurfaceApi() {
+        return true;
+    }
+    public static boolean moveTaskToFrontOnDragResizingBugfix() {
+        return true;
+    }
     public static boolean moveToExternalDisplayShortcut() {
-        
-        return FEATURE_FLAGS.moveToExternalDisplayShortcut();
+        return false;
     }
-
-
     public static boolean multiCrop() {
-        
-        return FEATURE_FLAGS.multiCrop();
+        return true;
     }
-
-    public static boolean navBarTransparentByDefault() {
-        
-        return FEATURE_FLAGS.navBarTransparentByDefault();
-    }
-
-
     public static boolean nestedTasksWithIndependentBoundsBugfix() {
-        
-        return FEATURE_FLAGS.nestedTasksWithIndependentBoundsBugfix();
+        return true;
     }
-
-
-    public static boolean offloadColorExtraction() {
-        
-        return FEATURE_FLAGS.offloadColorExtraction();
+    public static boolean noTransferFirstWindowDrawn() {
+        return false;
     }
-
-    public static boolean parallelCdTransitionsDuringRecents() {
-        
-        return FEATURE_FLAGS.parallelCdTransitionsDuringRecents();
+    public static boolean oneWaySetTaskDescription() {
+        return false;
     }
-
+    public static boolean onlyCacheLowResTaskSnapshot() {
+        return false;
+    }
+    public static boolean partialTranslucentActivityEmbedding() {
+        return true;
+    }
+    public static boolean pauseActivityByTf() {
+        return false;
+    }
+    public static boolean perfectEdge() {
+        return false;
+    }
     public static boolean portWindowSizeAnimation() {
-        
-        return FEATURE_FLAGS.portWindowSizeAnimation();
+        return true;
     }
-
-
-    public static boolean predictiveBackDefaultEnableSdk36() {
-        
-        return FEATURE_FLAGS.predictiveBackDefaultEnableSdk36();
-    }
-
-
     public static boolean predictiveBackPrioritySystemNavigationObserver() {
-        
-        return FEATURE_FLAGS.predictiveBackPrioritySystemNavigationObserver();
+        return true;
     }
-
-
     public static boolean predictiveBackSwipeEdgeNoneApi() {
-        
-        return FEATURE_FLAGS.predictiveBackSwipeEdgeNoneApi();
+        return true;
     }
-
-
     public static boolean predictiveBackSystemOverrideCallback() {
-        
-        return FEATURE_FLAGS.predictiveBackSystemOverrideCallback();
+        return true;
     }
-
-
-    public static boolean predictiveBackThreeButtonNav() {
-        
-        return FEATURE_FLAGS.predictiveBackThreeButtonNav();
-    }
-
-
     public static boolean predictiveBackTimestampApi() {
-        
-        return FEATURE_FLAGS.predictiveBackTimestampApi();
+        return true;
     }
-
-    public static boolean preserveRecentsTaskConfigurationOnRelaunch() {
-        
-        return FEATURE_FLAGS.preserveRecentsTaskConfigurationOnRelaunch();
+    public static boolean prioritizeVisibleTaskDisplayOverSource() {
+        return false;
     }
-
-
-    public static boolean rearDisplayDisableForceDesktopSystemDecorations() {
-        
-        return FEATURE_FLAGS.rearDisplayDisableForceDesktopSystemDecorations();
+    public static boolean protectSetLaunchWindowingModeApi() {
+        return false;
     }
-
+    public static boolean quickBubbleSwitch() {
+        return true;
+    }
     public static boolean reduceChangedExclusionRectsMsgs() {
-        
-        return FEATURE_FLAGS.reduceChangedExclusionRectsMsgs();
+        return true;
     }
-
-    public static boolean reduceTaskSnapshotMemoryUsage() {
-        
-        return FEATURE_FLAGS.reduceTaskSnapshotMemoryUsage();
+    public static boolean reduceWindowTraversalOnEntering() {
+        return false;
     }
-
-    public static boolean relativeInsets() {
-        
-        return FEATURE_FLAGS.relativeInsets();
+    public static boolean reenableAppHandleColorAnimations() {
+        return false;
     }
-
-
-    public static boolean releaseSnapshotAggressively() {
-        
-        return FEATURE_FLAGS.releaseSnapshotAggressively();
+    public static boolean refactorCaptionSandboxingToCore() {
+        return true;
     }
-
-
-    public static boolean releaseSurfaceOnTransitionFinish() {
-        
-        return FEATURE_FLAGS.releaseSurfaceOnTransitionFinish();
+    public static boolean refineAncestorSearchAndBounds() {
+        return false;
     }
-
-    public static boolean removeActivityStarterDreamCallback() {
-        
-        return FEATURE_FLAGS.removeActivityStarterDreamCallback();
+    public static boolean releaseAllTransitionSurfacesOnIdle() {
+        return false;
     }
-
-
-    public static boolean removeDepartTargetFromMotion() {
-        
-        return FEATURE_FLAGS.removeDepartTargetFromMotion();
+    public static boolean removeStartingWindowWhenCommitInvisible() {
+        return false;
     }
-
-
-    public static boolean removeStartingInTransition() {
-        
-        return FEATURE_FLAGS.removeStartingInTransition();
+    public static boolean reparentDeskLeafTasksIfRelaunched() {
+        return true;
     }
-
-
-    public static boolean reparentToDefaultWithDisplayRemoval() {
-        
-        return FEATURE_FLAGS.reparentToDefaultWithDisplayRemoval();
+    public static boolean reportMissedEnterAnimOnResume() {
+        return false;
     }
-
-
-    public static boolean reparentWindowTokenApi() {
-        
-        return FEATURE_FLAGS.reparentWindowTokenApi();
+    public static boolean repositoryBasedPersistenceBgThread() {
+        return false;
     }
-
-    public static boolean respectFullscreenActivityOptionInDesktopLaunchParams() {
-        
-        return FEATURE_FLAGS.respectFullscreenActivityOptionInDesktopLaunchParams();
+    public static boolean requestFullscreenApiPermission() {
+        return false;
     }
-
-
-    public static boolean respectHierarchySurfaceVisibility() {
-        
-        return FEATURE_FLAGS.respectHierarchySurfaceVisibility();
+    public static boolean respectRequestedTaskSnapshotResolution() {
+        return true;
     }
-
-    public static boolean respectLeafTaskBounds() {
-        
-        return FEATURE_FLAGS.respectLeafTaskBounds();
+    public static boolean respectSystemDefaultMinSize() {
+        return true;
     }
-
-
-    public static boolean respectOrientationChangeForUnresizeable() {
-        
-        return FEATURE_FLAGS.respectOrientationChangeForUnresizeable();
+    public static boolean returnWindowlessRootViewsInWmglobalGetwindowview() {
+        return false;
     }
-
-
-    public static boolean restoreUserAspectRatioSettingsUsingService() {
-        
-        return FEATURE_FLAGS.restoreUserAspectRatioSettingsUsingService();
+    public static boolean runtimeDensityResolutionForWindowLayout() {
+        return false;
     }
-
-    public static boolean restrictFreeformHiddenSystemBarsToFillingTasks() {
-        
-        return FEATURE_FLAGS.restrictFreeformHiddenSystemBarsToFillingTasks();
+    public static boolean runtimeDensityResolutionForWindowLayoutBugfix() {
+        return true;
     }
-
-    public static boolean rootTaskForBubble() {
-        
-        return FEATURE_FLAGS.rootTaskForBubble();
+    public static boolean safeRegionLetterboxingV1() {
+        return true;
     }
-
-    public static boolean safeRegionLetterboxing() {
-        
-        return FEATURE_FLAGS.safeRegionLetterboxing();
+    public static boolean screenCaptureExclusionFlags() {
+        return false;
     }
-
-
-    public static boolean safeReleaseSnapshotAggressively() {
-        
-        return FEATURE_FLAGS.safeReleaseSnapshotAggressively();
-    }
-
-
-    public static boolean schedulingForNotificationShade() {
-        
-        return FEATURE_FLAGS.schedulingForNotificationShade();
-    }
-
-    public static boolean scrambleSnapshotFileName() {
-        
-        return FEATURE_FLAGS.scrambleSnapshotFileName();
-    }
-
-    public static boolean screenBrightnessDimOnEmulator() {
-        
-        return FEATURE_FLAGS.screenBrightnessDimOnEmulator();
-    }
-
-
     public static boolean screenRecordingCallbacks() {
-        
-        return FEATURE_FLAGS.screenRecordingCallbacks();
+        return true;
     }
-
     public static boolean scrollingFromLetterbox() {
-        
-        return FEATURE_FLAGS.scrollingFromLetterbox();
+        return false;
     }
-
+    public static boolean scvhSetFocusableApi() {
+        return true;
+    }
     public static boolean scvhSurfaceControlLifetimeFix() {
-        
-        return FEATURE_FLAGS.scvhSurfaceControlLifetimeFix();
+        return true;
     }
-
-
     public static boolean sdkDesiredPresentTime() {
-        
-        return FEATURE_FLAGS.sdkDesiredPresentTime();
+        return true;
     }
-
-    public static boolean setScPropertiesInClient() {
-        
-        return FEATURE_FLAGS.setScPropertiesInClient();
+    public static boolean secureContentFailureUi() {
+        return false;
     }
-
+    public static boolean sendNewInsetsStateWithRotation() {
+        return true;
+    }
+    public static boolean sharedSurfaceTransitionAnimation() {
+        return false;
+    }
     public static boolean showAppHandleLargeScreens() {
-        
-        return FEATURE_FLAGS.showAppHandleLargeScreens();
+        return false;
     }
-
-
     public static boolean showDesktopExperienceDevOption() {
-        
-        return FEATURE_FLAGS.showDesktopExperienceDevOption();
+        return true;
     }
-
-
     public static boolean showDesktopWindowingDevOption() {
-        
-        return FEATURE_FLAGS.showDesktopWindowingDevOption();
+        return true;
     }
-
     public static boolean showHomeBehindDesktop() {
-        
-        return FEATURE_FLAGS.showHomeBehindDesktop();
+        return false;
     }
-
-
-    public static boolean skipCompatUiEducationInDesktopMode() {
-        
-        return FEATURE_FLAGS.skipCompatUiEducationInDesktopMode();
+    public static boolean showImeLayeringTargetWhenAdding() {
+        return false;
     }
-
+    public static boolean showWhenLockedDesktopBugfix() {
+        return false;
+    }
     public static boolean skipDeactivationOfDeskWithNothingInFront() {
-        
-        return FEATURE_FLAGS.skipDeactivationOfDeskWithNothingInFront();
+        return true;
     }
-
-
-    public static boolean skipDecorViewRelayoutWhenClosingBugfix() {
-        
-        return FEATURE_FLAGS.skipDecorViewRelayoutWhenClosingBugfix();
+    public static boolean skipKillProcessForDesktopTaskCoreCloseTransition() {
+        return true;
     }
-
-
-    public static boolean splashScreenViewSyncTransaction() {
-        
-        return FEATURE_FLAGS.splashScreenViewSyncTransaction();
+    public static boolean sleepWakeTransitions() {
+        return true;
     }
-
-
-    public static boolean supportsDragAssistantToMultiwindow() {
-        
-        return FEATURE_FLAGS.supportsDragAssistantToMultiwindow();
+    public static boolean supportCustomDimColor() {
+        return false;
     }
-
-
-    public static boolean supportsMultiInstanceSystemUi() {
-        
-        return FEATURE_FLAGS.supportsMultiInstanceSystemUi();
+    public static boolean syncBeforeEnablingScreen() {
+        return false;
     }
-
-
-    public static boolean surfaceControlInputReceiver() {
-        
-        return FEATURE_FLAGS.surfaceControlInputReceiver();
+    public static boolean syncedDisplayModeUpdates() {
+        return false;
     }
-
-
-    public static boolean surfaceTrustedOverlay() {
-        
-        return FEATURE_FLAGS.surfaceTrustedOverlay();
+    public static boolean syncedInsetsAnimation() {
+        return false;
     }
-
-
-    public static boolean syncScreenCapture() {
-        
-        return FEATURE_FLAGS.syncScreenCapture();
+    public static boolean systemContentPriority() {
+        return true;
     }
-
-
-    public static boolean systemUiPostAnimationEnd() {
-        
-        return FEATURE_FLAGS.systemUiPostAnimationEnd();
-    }
-
-
     public static boolean touchPassThroughOptIn() {
-        
-        return FEATURE_FLAGS.touchPassThroughOptIn();
+        return true;
     }
-
+    public static boolean trackLaunchOriginator() {
+        return true;
+    }
+    public static boolean transitInvisibleExistenceChange() {
+        return false;
+    }
+    public static boolean transitMixpatcherBase() {
+        return false;
+    }
     public static boolean transitReadyTracking() {
-        
-        return FEATURE_FLAGS.transitReadyTracking();
+        return false;
     }
-
     public static boolean transitTrackerPlumbing() {
-        
-        return FEATURE_FLAGS.transitTrackerPlumbing();
+        return false;
     }
-
     public static boolean transitionHandlerCujTags() {
-        
-        return FEATURE_FLAGS.transitionHandlerCujTags();
+        return false;
     }
-
-
-    public static boolean trustedPresentationListenerForWindow() {
-        
-        return FEATURE_FLAGS.trustedPresentationListenerForWindow();
-    }
-
-
-    public static boolean unifyBackNavigationTransition() {
-        
-        return FEATURE_FLAGS.unifyBackNavigationTransition();
-    }
-
     public static boolean unifyShellBinders() {
-        
-        return FEATURE_FLAGS.unifyShellBinders();
+        return false;
     }
-
-
-    public static boolean universalResizableByDefault() {
-        
-        return FEATURE_FLAGS.universalResizableByDefault();
-    }
-
     public static boolean untrustedEmbeddingAnyAppPermission() {
-        
-        return FEATURE_FLAGS.untrustedEmbeddingAnyAppPermission();
+        return false;
     }
-
-
     public static boolean untrustedEmbeddingStateSharing() {
-        
-        return FEATURE_FLAGS.untrustedEmbeddingStateSharing();
+        return true;
     }
-
+    public static boolean updateDesktopScrimOnDesktopTaskLaunch() {
+        return true;
+    }
+    public static boolean updateDesktopScrimOnDragResizeEnd() {
+        return true;
+    }
+    public static boolean updateDesktopScrimOnFullscreenLaunch() {
+        return true;
+    }
+    public static boolean updateDesktopScrimOnMoveTaskToDesk() {
+        return true;
+    }
+    public static boolean updateDesktopScrimWhenLockedBugfix() {
+        return true;
+    }
+    public static boolean updateDesktopScrimWhenMoveTaskToFrontBugfix() {
+        return true;
+    }
     public static boolean updateDimsWhenWindowShown() {
-        
-        return FEATURE_FLAGS.updateDimsWhenWindowShown();
+        return false;
     }
-
-
-    public static boolean updateHostInputTransferToken() {
-        
-        return FEATURE_FLAGS.updateHostInputTransferToken();
+    public static boolean useClientSurface() {
+        return true;
     }
-
-    public static boolean updateTaskMinDimensionsWithRootActivity() {
-        
-        return FEATURE_FLAGS.updateTaskMinDimensionsWithRootActivity();
+    public static boolean useInputReportedFocusForAccessibility() {
+        return false;
     }
-
-
-    public static boolean useCachedInsetsForDisplaySwitch() {
-        
-        return FEATURE_FLAGS.useCachedInsetsForDisplaySwitch();
+    public static boolean useKnownDisplayIdForBaseContext() {
+        return true;
     }
-
-
-    public static boolean useTasksDimOnly() {
-        
-        return FEATURE_FLAGS.useTasksDimOnly();
+    public static boolean useSnapshotFixedRotation() {
+        return false;
     }
-
-
     public static boolean vdmForceAppUniversalResizableApi() {
-        
-        return FEATURE_FLAGS.vdmForceAppUniversalResizableApi();
+        return true;
     }
-
-
-    public static boolean wallpaperOffsetAsync() {
-        
-        return FEATURE_FLAGS.wallpaperOffsetAsync();
+    public static boolean virtualDisplayCanCreateSystemApplicationOverlay() {
+        return true;
     }
-
-
-    public static boolean wlinfoOncreate() {
-        
-        return FEATURE_FLAGS.wlinfoOncreate();
+    public static boolean virtualGamepadDeveloperOptOut() {
+        return false;
     }
-
-    private static FeatureFlags FEATURE_FLAGS = new FeatureFlagsImpl();
+    public static boolean virtualGamepadOverride() {
+        return true;
+    }
+    public static boolean waitForPresentFenceOnDisplaySwitch() {
+        return false;
+    }
 
 }

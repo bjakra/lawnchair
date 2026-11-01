@@ -9,6 +9,7 @@ import app.lawnchair.compatlib.RemoteTransitionCompat
 import app.lawnchair.compatlib.eleven.QuickstepCompatFactoryVR
 import app.lawnchair.compatlib.fifteen.QuickstepCompatFactoryVV
 import app.lawnchair.compatlib.fourteen.QuickstepCompatFactoryVU
+import app.lawnchair.compatlib.seventeen.QuickstepCompatFactoryVCinnamonBun
 import app.lawnchair.compatlib.sixteen.QuickstepCompatFactoryVBaklava
 import app.lawnchair.compatlib.ten.QuickstepCompatFactoryVQ
 import app.lawnchair.compatlib.thirteen.QuickstepCompatFactoryVT
@@ -44,9 +45,14 @@ object LawnchairQuickstepCompat {
     @JvmField
     val ATLEAST_BAKLAVA: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA
 
+    @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.CINNAMON_BUN)
+    @JvmField
+    val ATLEAST_CINNAMON_BUN: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN
+
     @JvmStatic
     val factory: QuickstepCompatFactory by lazy {
         when {
+            ATLEAST_CINNAMON_BUN -> QuickstepCompatFactoryVCinnamonBun()
             ATLEAST_BAKLAVA -> QuickstepCompatFactoryVBaklava()
             ATLEAST_V -> QuickstepCompatFactoryVV()
             ATLEAST_U -> QuickstepCompatFactoryVU()
