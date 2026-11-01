@@ -65,7 +65,8 @@
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <!-- Graphite: no LAUNCHER category. Lawnchair is the system home, so it doesn't list
+                     itself in its own app drawer; settings are under long-press → Home settings. -->
                 <action android:name="android.intent.action.SHOW_WORK_APPS" />
                 <action android:name="android.intent.action.ALL_APPS" />
                 <category android:name="android.intent.category.HOME" />
