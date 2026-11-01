@@ -101,7 +101,7 @@ class PreferenceManager2 @Inject constructor(
 
     private fun idpPreference(
         key: Preferences.Key<Int>,
-        defaultSelector: InvariantDeviceProfile.GridOption.() -> Int,
+        defaultSelector: GridOption.() -> Int,
         onSet: (Int) -> Unit = {},
     ): IdpPreference = IdpPreference(
         key = key,

@@ -5,11 +5,12 @@ import app.lawnchair.preferences.PreferenceManager
 import app.lawnchair.preferences2.PreferenceManager2
 import app.lawnchair.preferences2.firstCached
 import com.android.launcher3.InvariantDeviceProfile
-import com.android.launcher3.InvariantDeviceProfile.INDEX_DEFAULT
-import com.android.launcher3.InvariantDeviceProfile.INDEX_LANDSCAPE
-import com.android.launcher3.InvariantDeviceProfile.INDEX_TWO_PANEL_LANDSCAPE
-import com.android.launcher3.InvariantDeviceProfile.INDEX_TWO_PANEL_PORTRAIT
+import com.android.launcher3.deviceprofile.parser.DeviceTypedMap.INDEX_DEFAULT
+import com.android.launcher3.deviceprofile.parser.DeviceTypedMap.INDEX_LANDSCAPE
+import com.android.launcher3.deviceprofile.parser.DeviceTypedMap.INDEX_TWO_PANEL_LANDSCAPE
+import com.android.launcher3.deviceprofile.parser.DeviceTypedMap.INDEX_TWO_PANEL_PORTRAIT
 import com.android.launcher3.dagger.ApplicationContext
+import com.android.launcher3.deviceprofile.parser.GridOption
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.util.DaggerSingletonObject
@@ -23,15 +24,18 @@ class DeviceProfileOverrides @Inject constructor(
     private val prefs = PreferenceManager.getInstance(context)
     private val preferenceManager2 = PreferenceManager2.getInstance(context)
 
-    private val predefinedGrids = InvariantDeviceProfile.parseAllGridOptions(context)
-        .map { option ->
-            val gridInfo = DBGridInfo(
-                numHotseatColumns = option.numHotseatIcons,
-                numRows = option.numRows,
-                numColumns = option.numColumns,
-            )
-            gridInfo to option.name
-        }
+    // Lazy: InvariantDeviceProfile asks this class for overrides while it initializes.
+    private val predefinedGrids by lazy {
+        InvariantDeviceProfile.INSTANCE.get(context).parseAllGridOptions(context)
+            .map { option ->
+                val gridInfo = DBGridInfo(
+                    numHotseatColumns = option.numHotseatIcons,
+                    numRows = option.numRows,
+                    numColumns = option.numColumns,
+                )
+                gridInfo to option.name
+            }
+    }
 
     fun getGridInfo() = DBGridInfo(prefs)
 
@@ -56,7 +60,7 @@ class DeviceProfileOverrides @Inject constructor(
     }
 
     fun getOverrides(
-        defaultGrid: InvariantDeviceProfile.GridOption,
+        defaultGrid: GridOption,
         deviceType: Int,
         previewOverrides: PreviewOverrides? = null,
     ) = Options(
@@ -113,7 +117,7 @@ class DeviceProfileOverrides @Inject constructor(
         constructor(
             prefs: PreferenceManager,
             prefs2: PreferenceManager2,
-            defaultGrid: InvariantDeviceProfile.GridOption,
+            defaultGrid: GridOption,
             deviceType: Int,
             previewOverrides: PreviewOverrides,
         ) : this(

@@ -219,7 +219,7 @@ sealed class BasePreferenceManager(private val context: Context) : SharedPrefere
 
     inner class IdpIntPref(
         key: String,
-        private val selectDefaultValue: InvariantDeviceProfile.GridOption.() -> Int,
+        private val selectDefaultValue: GridOption.() -> Int,
         primaryListener: ChangeListener? = null,
     ) : IntPref(key, -1, primaryListener) {
         override val defaultValue: Int
@@ -233,11 +233,11 @@ sealed class BasePreferenceManager(private val context: Context) : SharedPrefere
             error("unsupported")
         }
 
-        fun defaultValue(defaultGrid: InvariantDeviceProfile.GridOption): Int {
+        fun defaultValue(defaultGrid: GridOption): Int {
             return selectDefaultValue(defaultGrid)
         }
 
-        fun get(defaultGrid: InvariantDeviceProfile.GridOption): Int {
+        fun get(defaultGrid: GridOption): Int {
             val value = super.get()
             return if (value == -1) {
                 selectDefaultValue(defaultGrid)
@@ -246,7 +246,7 @@ sealed class BasePreferenceManager(private val context: Context) : SharedPrefere
             }
         }
 
-        fun set(newValue: Int, defaultGrid: InvariantDeviceProfile.GridOption) {
+        fun set(newValue: Int, defaultGrid: GridOption) {
             if (newValue == selectDefaultValue(defaultGrid)) {
                 super.set(-1)
             } else {

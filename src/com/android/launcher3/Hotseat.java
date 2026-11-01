@@ -656,8 +656,10 @@ public class Hotseat extends FrameLayout implements Insettable {
     public DragAndDropAccessibilityDelegate getDragAndDropAccessibilityDelegate() {
         CellLayout page = getCurrentPageLayout();
         return page != null ? page.getDragAndDropAccessibilityDelegate() : null;
+    }
+
+    /** Applies the operator to the items of every dock page. */
     @Nullable
-    @Override
     public View mapOverItems(ItemOperator op) {
         if (Flags.enableQsbOnHotseat()
                 && mQsb != null
@@ -665,7 +667,13 @@ public class Hotseat extends FrameLayout implements Insettable {
                 && op.evaluate(info, mQsb)) {
             return mQsb;
         }
-        return super.mapOverItems(op);
+        for (CellLayout page : getPageLayouts()) {
+            View result = page.mapOverItems(op);
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
     }
 
     /** Dumps the Hotseat internal state */

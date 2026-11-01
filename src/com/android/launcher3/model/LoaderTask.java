@@ -16,13 +16,9 @@
 
 package com.android.launcher3.model;
 
-import static android.os.Process.myUserHandle;
-import static com.android.launcher3.BuildConfigs.WIDGET_ON_FIRST_SCREEN;
-import static com.android.launcher3.Flags.enableLauncherBrMetricsFixed;
 import static com.android.launcher3.LauncherPrefs.IS_FIRST_LOAD_AFTER_RESTORE;
 import static com.android.launcher3.icons.CacheableShortcutInfo.convertShortcutsToCacheableShortcuts;
 import static com.android.launcher3.icons.cache.CacheLookupFlag.DEFAULT_LOOKUP_FLAG;
-import static com.android.launcher3.folder.FolderGridOrganizer.createFolderGridOrganizer;
 import static com.android.launcher3.model.FirstScreenBroadcastHelper.DISABLE_INSTALLED_APPS_BROADCAST;
 import static com.android.launcher3.model.ModelUtils.WIDGET_FILTER;
 import static com.android.launcher3.model.ModelUtils.currentScreenContentFilter;
@@ -127,7 +123,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -269,7 +264,7 @@ public class LoaderTask implements Runnable {
 
     private void sendFirstScreenActiveInstallsBroadcast() {
         // Screen set is never empty
-        IntArray allScreens = mBgDataModel.itemsIdMap.collectWorkspaceScreens(mContext);
+        IntArray allScreens = mBgDataModel.itemsIdMap.collectWorkspaceScreens();
         final int firstScreen = allScreens.get(0);
         IntSet firstScreens = IntSet.wrap(firstScreen);
 
@@ -485,14 +480,12 @@ public class LoaderTask implements Runnable {
 
             final HashMap<PackageUserKey, SessionInfo> installingPkgs =
                     mSessionHelper.getActiveSessions();
-            if (Utilities.ATLEAST_V && Flags.enableSupportForArchiving()) {
+            if (Flags.enableSupportForArchiving()) {
                 mInstallingPkgsCached = installingPkgs;
             }
             installingPkgs.forEach(mIconCache::updateSessionCache);
-            if (Utilities.ATLEAST_U) { 
-                FileLog.d(TAG, "loadWorkspace: Packages with active install sessions: "
+            FileLog.d(TAG, "loadWorkspace: Packages with active install/update sessions: "
                     + installingPkgs.keySet().stream().map(info -> info.mPackageName).toList());
-            }
 
             mShortcutKeyToPinnedShortcuts = new HashMap<>();
             final LoaderCursor c = mLoaderCursorFactory.createLoaderCursor(
@@ -647,7 +640,7 @@ public class LoaderTask implements Runnable {
         List<LauncherActivityInfo> allActivityList = new ArrayList<>();
         // Clear the list of apps
         mBgAllAppsList.clear();
-        
+
         List<IconRequestInfo<AppInfo>> allAppsItemRequestInfos = new ArrayList<>();
         boolean isWorkProfileQuiet = false;
         boolean isPrivateProfileQuiet = false;
@@ -656,22 +649,11 @@ public class LoaderTask implements Runnable {
             UserHandle user = iconInfo.user;
 
             // Query for the set of apps
-            List<LauncherActivityInfo> apps;
-            try {
-                apps = mLauncherApps.getActivityList(null, user);
-            } catch (SecurityException e) {
-                // Lawnchair-Note: Android 17 QPR2 Beta 3 crash when accessing activity list with null pkgName for non-Main user
-                // Ref: https://issuetracker.google.com/issues/547643926
-                Log.e("LC-LoaderTask", "Failed to get activity list for user " + user, e);
-                apps = Collections.emptyList();
-            }
+            final List<LauncherActivityInfo> apps = mLauncherApps.getActivityList(null, user);
             // Fail if we don't have any apps
+            // TODO: Fix this. Only fail for the current user.
             if (apps == null || apps.isEmpty()) {
-                if (myUserHandle().equals(user)) {
-                    return allActivityList;
-                } else {
-                    continue;
-                }
+                return allActivityList;
             }
             boolean quietMode = cachedUserInfo.isQuietModeEnabled();
 
@@ -695,15 +677,11 @@ public class LoaderTask implements Runnable {
                             new PackageUserKey(appPackageName, user))
                             : mSessionHelper.getActiveSessionInfo(user,
                                     appPackageName);
-                            if (si != null) {
-                                appInfo.runtimeStatusFlags |= FLAG_INSTALL_SESSION_ACTIVE;
-                                appInfo.setProgressLevel((int) (si.getProgress() * 100),
-                                        PackageInstallInfo.STATUS_INSTALLING);
-                            }
-                        }
+                    if (si != null) {
+                        appInfo.runtimeStatusFlags |= FLAG_INSTALL_SESSION_ACTIVE;
+                        appInfo.setProgressLevel((int) (si.getProgress() * 100),
+                                PackageInstallInfo.STATUS_INSTALLING);
                     }
-                } catch (Throwable e) {
-                    // LC-Ignored: Ignore any exceptions while trying to get the session info.
                 }
 
                 IconRequestInfo<AppInfo> iconRequestInfo = getAppInfoIconRequestInfo(
@@ -723,15 +701,15 @@ public class LoaderTask implements Runnable {
                     AppInfo appInfo = iconRequestInfo.itemInfo;
                     if (mIconCache.isDefaultIcon(appInfo.bitmap, appInfo.user)) {
                         logASplit("LoadAllAppsIconsInBulk: default icon found for "
-                            + appInfo.getTargetComponent()
-                            + ", will attempt to load from iconBlob: "
-                            + Arrays.toString(iconRequestInfo.iconBlob));
+                                + appInfo.getTargetComponent()
+                                + ", will attempt to load from iconBlob: "
+                                + Arrays.toString(iconRequestInfo.iconBlob));
                         iconRequestInfo.loadIconFromDbBlob(mContext);
                     }
                 }
             }
             allAppsItemRequestInfos.forEach(iconRequestInfo ->
-                mBgAllAppsList.updateSectionName(iconRequestInfo.itemInfo));
+                    mBgAllAppsList.updateSectionName(iconRequestInfo.itemInfo));
         } finally {
             Trace.endSection();
         }
@@ -761,7 +739,7 @@ public class LoaderTask implements Runnable {
             List<IconRequestInfo<WorkspaceItemInfo>> workspaceRequestInfos,
             boolean isRestoreFromBackup
     ) {
-        if (Utilities.ATLEAST_V && Flags.restoreArchivedAppIconsFromDb() && isRestoreFromBackup) {
+        if (Flags.restoreArchivedAppIconsFromDb() && isRestoreFromBackup) {
             Optional<IconRequestInfo<WorkspaceItemInfo>> workspaceIconRequest =
                     workspaceRequestInfos.stream()
                             .filter(request -> appInfo.getTargetComponent().equals(

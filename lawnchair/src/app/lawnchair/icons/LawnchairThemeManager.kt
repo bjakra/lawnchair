@@ -17,7 +17,7 @@ import com.android.launcher3.graphics.ThemeManager
 import com.android.launcher3.icons.mono.MonoIconThemeController
 import com.android.launcher3.icons.mono.ThemedIconDrawable
 import com.android.launcher3.util.DaggerSingletonTracker
-import com.android.launcher3.util.DisplayController
+import com.android.launcher3.display.DisplayController
 import com.android.launcher3.util.LooperExecutor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineName

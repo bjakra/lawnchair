@@ -51,7 +51,6 @@ import androidx.annotation.UiThread;
 
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.R;
-import com.android.launcher3.Utilities;
 import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.statehandlers.DesktopVisibilityController;
 import com.android.launcher3.statemanager.BaseState;
@@ -445,7 +444,7 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
             );
             insets = outRect;
         }
-//        potentialTaskRect.inset(insets);
+        potentialTaskRect.inset(insets);
 
         outRect.set(
                 minimumHorizontalPadding,
@@ -454,7 +453,7 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
                 claimedSpaceBelow);
         // Rotate the paddings to portrait perspective,
         orientationHandler.rotateInsets(outRect, outRect);
-//        potentialTaskRect.inset(outRect);
+        potentialTaskRect.inset(outRect);
 
         calculateTaskSizeInternal(dp, potentialTaskRect, maxScale, gravity, outRect);
     }
@@ -502,14 +501,6 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
         outRect.set(0, 0, dp.getDeviceProperties().getWidthPx(), dp.getDeviceProperties().getHeightPx());
         outRect.inset(Math.max(insets.left, sideMargin), insets.top,
                 Math.max(insets.right, sideMargin), Math.max(insets.bottom, bottomMargin));
-        } else {
-            outRect.set(
-                Math.max(insets.left, sideMargin),
-                insets.top + topMargin,
-                outRect.width() - Math.max(insets.right, sideMargin),
-                outRect.height() - Math.max(insets.bottom, bottomMargin)
-            );
-        }
     }
 
     /**

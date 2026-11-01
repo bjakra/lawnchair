@@ -41,14 +41,12 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
-
+import android.os.Trace;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.SparseArray;
-import android.util.Xml;
-import android.view.Display;
 
+import app.lawnchair.DeviceProfileOverrides;
 import androidx.annotation.DimenRes;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
@@ -89,9 +87,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import app.lawnchair.DeviceProfileOverrides.DBGridInfo;
-import app.lawnchair.DeviceProfileOverrides;
-
 @LauncherAppSingleton
 public class InvariantDeviceProfile {
 
@@ -129,10 +124,10 @@ public class InvariantDeviceProfile {
     private static final String RES_GRID_NUM_COLUMNS = "grid_num_columns";
     private static final String RES_GRID_ICON_SIZE_DP = "grid_icon_size_dp";
 
-    private DisplayController mDisplayController;
-    private WindowManagerProxy mWMProxy;
-    private LauncherPrefs mPrefs;
-    private ThemeManager mThemeManager;
+    private final DisplayController mDisplayController;
+    private final WindowManagerProxy mWMProxy;
+    private final LauncherPrefs mPrefs;
+    private final ThemeManager mThemeManager;
 
     /**
      * Number of icons per row and column in the workspace.
@@ -148,20 +143,7 @@ public class InvariantDeviceProfile {
     public int[] numFolderColumns;
     public float[] iconSize;
     public float[] iconTextSize;
-        /**
-         * Bitmap size for workspace icons. This is calculated independently from all apps
-         * to allow different icon size factors without affecting each other.
-         */
     public int iconBitmapSize;
-        /**
-         * Bitmap size for all apps icons. This is calculated independently from workspace
-         * to allow different icon size factors without affecting each other.
-         */
-        public int allAppsIconBitmapSize;
-        /**
-         * The icon density used for loading resources. This is based on the maximum of
-         * iconBitmapSize and allAppsIconBitmapSize to ensure adequate quality for both.
-         */
     public int fillResIconDpi;
     public @DeviceType int deviceType;
     public LauncherDisplayInfo displayInfo;
@@ -185,11 +167,6 @@ public class InvariantDeviceProfile {
     public float[] transientTaskbarIconSize;
 
     public boolean[] startAlignTaskbar;
-
-    /**
-     * Original profile before preference overrides
-     */
-    public GridOption closestProfile;
 
     /**
      * Number of icons inside the hotseat area.
@@ -255,7 +232,7 @@ public class InvariantDeviceProfile {
     /**
      * Fixed landscape mode is the landscape on the phones.
      */
-    public static boolean isFixedLandscape = false;
+    public boolean isFixedLandscape = false;
 
     @GridType
     public int gridType;
@@ -276,7 +253,7 @@ public class InvariantDeviceProfile {
     private final LooperExecutor mMainExecutor;
 
     @Inject
-    public InvariantDeviceProfile(
+    InvariantDeviceProfile(
             @ApplicationContext Context context,
             LauncherPrefs prefs,
             DisplayController dc,
@@ -310,12 +287,14 @@ public class InvariantDeviceProfile {
         LauncherPrefChangeListener prefListener = key -> {
             if (FIXED_LANDSCAPE_MODE.getSharedPrefKey().equals(key)
                     && isFixedLandscape != prefs.get(FIXED_LANDSCAPE_MODE)) {
+                Trace.beginSection("InvariantDeviceProfile#setFixedLandscape");
                 if (isFixedLandscape) {
                     setCurrentGrid(prefs.get(NON_FIXED_LANDSCAPE_GRID_NAME));
                 } else {
                     prefs.put(NON_FIXED_LANDSCAPE_GRID_NAME, mPrefs.get(GRID_NAME));
                     onConfigChanged();
                 }
+                Trace.endSection();
             } else if (ENABLE_TWOLINE_ALLAPPS_TOGGLE.getSharedPrefKey().equals(key)
                     && enableTwoLinesInAllApps != prefs.get(ENABLE_TWOLINE_ALLAPPS_TOGGLE)) {
                 onConfigChanged();
@@ -374,37 +353,6 @@ public class InvariantDeviceProfile {
                 + ", LauncherPrefs DB_FILE:" + mPrefs.get(DB_FILE));
     }
 
-    private String initGrid(Context context, String gridName, DeviceProfileOverrides.DBGridInfo dbGridInfo) {
-        return initGrid(context, gridName, dbGridInfo, null);
-    }
-
-    private String initGrid(Context context, String gridName, DeviceProfileOverrides.DBGridInfo dbGridInfo,
-            DeviceProfileOverrides.PreviewOverrides previewOverrides) {
-        Info displayInfo = mDisplayController.getInfo();
-        List<DisplayOption> allOptions = getPredefinedDeviceProfiles(
-                context,
-                gridName,
-                displayInfo,
-                (RestoreDbTask.isPending(mPrefs) && !Flags.oneGridSpecs()),
-                mPrefs.get(FIXED_LANDSCAPE_MODE)
-        );
-
-        List<DisplayOption> allOptionsFilteredByColCount =
-                filterByColumnCount(allOptions, dbGridInfo.getNumColumns());
-
-        DisplayOption displayOption =
-                invDistWeightedInterpolate(displayInfo, allOptionsFilteredByColCount.isEmpty()
-                                ? new ArrayList<>(allOptions)
-                                : new ArrayList<>(allOptionsFilteredByColCount),
-                        displayInfo.getDeviceType());
-
-        if (!displayOption.grid.name.equals(gridName)) {
-            mPrefs.put(GRID_NAME, displayOption.grid.name);
-        }
-        initGrid(context, displayInfo, displayOption, dbGridInfo, previewOverrides);
-        return displayOption.grid.name;
-    }
-
     private List<DisplayOption> filterByColumnCount(
             List<DisplayOption> allOptions, int numColumns) {
         return allOptions.stream()
@@ -421,30 +369,39 @@ public class InvariantDeviceProfile {
         initGrid(mPrefs.get(GRID_NAME));
     }
 
+    /** Lawnchair: applies the user's home screen grid and icon settings on top of the grid. */
+    private void applyLawnchairOverrides(Context context, GridOption grid) {
+        DeviceProfileOverrides overrides = DeviceProfileOverrides.INSTANCE.get(context);
+        DeviceProfileOverrides.DBGridInfo gridInfo = overrides.getGridInfo();
+        numRows = gridInfo.getNumRows();
+        numColumns = gridInfo.getNumColumns();
+        dbFile = gridInfo.getDbFile();
+        if (deviceType != TYPE_MULTI_DISPLAY) {
+            numShownHotseatIcons = gridInfo.getNumHotseatColumns();
+            numDatabaseHotseatIcons = numShownHotseatIcons;
+        }
+        overrides.getOverrides(grid, deviceType, null).applyUi(this);
+    }
+
     private void initGridForDisplayOption(
             LauncherDisplayInfo displayInfo, DisplayOption displayOption) {
         Context context = displayInfo.context;
         enableTwoLinesInAllApps = Flags.enableTwolineToggle()
+                && Utilities.isEnglishLanguage(context)
                 && mPrefs.get(ENABLE_TWOLINE_ALLAPPS_TOGGLE);
         mLocale = context.getResources().getConfiguration().locale.toString();
 
-         DeviceProfileOverrides.Options overrideOptions = DeviceProfileOverrides.INSTANCE.get(context)
-                 .getOverrides(displayOption.grid, displayInfo.getDeviceType(), previewOverrides);
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         GridOption closestProfile = displayOption.grid;
-        numRows = dbGridInfo.getNumRows();
-        numColumns = dbGridInfo.getNumColumns();
-        numSearchContainerColumns = deviceType == TYPE_MULTI_DISPLAY
-                ? closestProfile.numSearchContainerColumns
-                : dbGridInfo.getNumHotseatColumns();
-        dbFile = dbGridInfo.getDbFile();
+        numRows = closestProfile.numRows;
+        numColumns = closestProfile.numColumns;
+        numSearchContainerColumns = closestProfile.numSearchContainerColumns;
+        dbFile = closestProfile.dbFile;
         gridType = closestProfile.gridType;
         defaultLayoutId = closestProfile.defaultLayoutId;
 
-        // LC-Note: copies, because DeviceProfileOverrides writes the folder settings into these
-        // arrays and the settings take their defaults from closestProfile's (the grid option's).
-        numFolderRows = closestProfile.numFolderRows.clone();
-        numFolderColumns = closestProfile.numFolderColumns.clone();
+        numFolderRows = closestProfile.numFolderRows;
+        numFolderColumns = closestProfile.numFolderColumns;
         folderStyle = closestProfile.folderStyle;
 
         cellStyle = closestProfile.cellStyle;
@@ -472,7 +429,13 @@ public class InvariantDeviceProfile {
         inlineNavButtonsEndSpacing = closestProfile.inlineNavButtonsEndSpacing;
 
         iconSize = displayOption.iconSizes;
-        allAppsIconSize = displayOption.allAppsIconSizes;
+        float maxIconSize = iconSize[0];
+        for (int i = 1; i < iconSize.length; i++) {
+            maxIconSize = Math.max(maxIconSize, iconSize[i]);
+        }
+        iconBitmapSize = ResourceUtils.pxFromDp(maxIconSize, metrics);
+
+        fillResIconDpi = getLauncherIconDensity(iconBitmapSize);
 
         iconTextSize = displayOption.textSizes;
 
@@ -494,7 +457,7 @@ public class InvariantDeviceProfile {
         numAllAppsColumns = closestProfile.numAllAppsColumns;
 
         numDatabaseAllAppsColumns = deviceType == TYPE_MULTI_DISPLAY
-                ? closestProfile.numDatabaseAllAppsColumns : numAllAppsColumns;
+                ? closestProfile.numDatabaseAllAppsColumns : closestProfile.numAllAppsColumns;
 
         allAppsCellSize = displayOption.allAppsCellSize;
         allAppsBorderSpaces = displayOption.allAppsBorderSpaces;
@@ -513,21 +476,6 @@ public class InvariantDeviceProfile {
         // If the partner customization apk contains any grid overrides, apply them
         // Supported overrides: numRows, numColumns, iconSize
         applyPartnerDeviceProfileOverrides(context, metrics);
-
-        // Lawnchair ignores partner overrides and allows the user to customize the grid themselves
-        overrideOptions.applyUi(this);
-
-        float maxIconSize = iconSize[0];
-        for (int i = 1; i < iconSize.length; i++) {
-            maxIconSize = Math.max(maxIconSize, iconSize[i]);
-        }
-        float maxAllAppsIconSize = allAppsIconSize[0];
-        for (int i = 1; i < allAppsIconSize.length; i++) {
-            maxAllAppsIconSize = Math.max(maxAllAppsIconSize, allAppsIconSize[i]);
-        }
-        iconBitmapSize = ResourceUtils.pxFromDp(maxIconSize, metrics);
-        allAppsIconBitmapSize = ResourceUtils.pxFromDp(maxAllAppsIconSize, metrics);
-        fillResIconDpi = getLauncherIconDensity(Math.max(iconBitmapSize, allAppsIconBitmapSize));
 
         final List<DeviceProfile> localSupportedProfiles = new ArrayList<>();
         defaultWallpaperSize = new Point(displayInfo.currentSize);
@@ -574,6 +522,8 @@ public class InvariantDeviceProfile {
                             numMinShownHotseatIconsForTablet
                     )
                 );
+
+        applyLawnchairOverrides(context, closestProfile);
     }
 
     DeviceProfile.Builder newDPBuilder(LauncherDisplayInfo info) {
@@ -586,11 +536,6 @@ public class InvariantDeviceProfile {
 
     public void removeOnChangeListener(OnIDPChangeListener listener) {
         mChangeListeners.remove(listener);
-    }
-
-    public void onPreferencesChanged(Context context) {
-        Context appContext = context.getApplicationContext();
-        MAIN_EXECUTOR.execute(() -> onConfigChanged(appContext));
     }
 
     /**
@@ -610,7 +555,7 @@ public class InvariantDeviceProfile {
     private Object[] toModelState() {
         return new Object[]{
                 numColumns, numRows, numSearchContainerColumns, numDatabaseHotseatIcons,
-                        iconBitmapSize, allAppsIconBitmapSize, fillResIconDpi, numDatabaseAllAppsColumns, dbFile};
+                iconBitmapSize, fillResIconDpi, numDatabaseAllAppsColumns, dbFile, mLocale};
     }
 
     /** Updates IDP using the provided context. Notifies listeners of change. */
