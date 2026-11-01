@@ -42,8 +42,6 @@ import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.testing.TestLogging
 import com.android.launcher3.testing.shared.TestProtocol
 import com.android.launcher3.util.KFloatProperty
-import com.android.launcher3.Utilities
-import com.android.launcher3.util.OverviewReleaseFlags.enableOverviewIconMenu
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.launcher3.util.TransformingTouchDelegate
@@ -69,8 +67,6 @@ import com.android.quickstep.util.RecentsOrientedState
 import com.android.quickstep.util.getRemoteTargetHandle
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper
 import kotlin.math.roundToInt
-
-import app.lawnchair.theme.color.tokens.ColorTokens
 
 /** TaskView that contains all tasks that are part of the desktop. */
 class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -160,7 +156,7 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
                 cornerRadius = contentViewFullscreenParams.currentCornerRadius
                 backgroundView = findViewById(R.id.background)
                 backgroundView.setBackgroundColor(
-                    resources.getColor(ColorTokens.Neutral2_300.resolveColor(context), context.theme)
+                    resources.getColor(android.R.color.system_neutral2_300, context.theme)
                 )
             }
     }

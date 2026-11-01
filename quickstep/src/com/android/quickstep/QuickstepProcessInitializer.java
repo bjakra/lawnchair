@@ -26,7 +26,7 @@ import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
 import android.view.ViewRootImpl;
 
-import com.android.launcher3.BuildConfig;
+import com.android.launcher3.BuildConfigs;
 import com.android.launcher3.MainProcessInitializer;
 import com.android.launcher3.R;
 import com.android.quickstep.util.QuickstepProtoLogGroup;
@@ -79,7 +79,7 @@ public class QuickstepProcessInitializer extends MainProcessInitializer {
         // This allows us to see Handler callbacks on traces.
         Looper.getMainLooper().setTraceTag(Trace.TRACE_TAG_APP);
 
-        if (BuildConfig.IS_STUDIO_BUILD) {
+        if (BuildConfigs.IS_STUDIO_BUILD) {
             Set<String> allowedTargets = Set.of(
                     "android.view.IWindowManager",
                     "android.app.IActivityManager",

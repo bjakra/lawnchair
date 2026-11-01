@@ -16,6 +16,8 @@
 
 package app.lawnchair.preferences2
 
+import com.android.launcher3.deviceprofile.parser.DeviceTypedMap.INDEX_DEFAULT
+import com.android.launcher3.deviceprofile.parser.GridOption
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.Composable
@@ -56,7 +58,6 @@ import app.lawnchair.util.kotlinxJson
 import app.lawnchair.views.overlay.FullScreenOverlayMode
 import com.android.launcher3.BuildConfig
 import com.android.launcher3.InvariantDeviceProfile
-import com.android.launcher3.InvariantDeviceProfile.INDEX_DEFAULT
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.ENABLE_TWOLINE_ALLAPPS_TOGGLE

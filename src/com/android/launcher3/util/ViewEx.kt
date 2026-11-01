@@ -29,7 +29,7 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.graphics.drawable.toDrawable
-import com.android.launcher3.BuildConfig
+import com.android.launcher3.BuildConfigs
 import com.android.launcher3.R
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -105,7 +105,7 @@ object ViewEx {
                         }
                 }
                 .onFailure { throwable ->
-                    if (BuildConfig.IS_STUDIO_BUILD) {
+                    if (BuildConfigs.IS_STUDIO_BUILD) {
                         Log.e(TAG, "Failed to capture view snapshot for $debugString: ", throwable)
                     }
                 }

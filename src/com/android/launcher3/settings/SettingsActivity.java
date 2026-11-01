@@ -20,7 +20,7 @@ import static android.provider.Settings.Global.DEVELOPMENT_SETTINGS_ENABLED;
 
 import static androidx.preference.PreferenceFragmentCompat.ARG_PREFERENCE_ROOT;
 
-import static com.android.launcher3.BuildConfig.IS_STUDIO_BUILD;
+import static com.android.launcher3.BuildConfigs.IS_STUDIO_BUILD;
 import static com.android.launcher3.BuildConfigs.IS_DEBUG_DEVICE;
 import static com.android.launcher3.BuildConfigs.IS_STUDIO_BUILD;
 import static com.android.launcher3.BuildConfigs.NOTIFICATION_DOTS_ENABLED;
@@ -54,7 +54,7 @@ import androidx.preference.PreferenceGroup.PreferencePositionCallback;
 import androidx.preference.PreferenceScreen;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.launcher3.BuildConfig;
+import com.android.launcher3.BuildConfigs;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherFiles;
 import com.android.launcher3.R;

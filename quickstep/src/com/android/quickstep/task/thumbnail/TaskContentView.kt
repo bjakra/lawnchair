@@ -39,7 +39,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import com.android.compose.theme.PlatformTheme
+import androidx.compose.material3.MaterialTheme
 import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
 import com.android.launcher3.R
 import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT
@@ -303,7 +303,7 @@ class TaskContentView @JvmOverloads constructor(context: Context, attrs: Attribu
                         ComposeView(context).apply {
                             setContent {
                                 val timerUiState by taskAppTimerViewModel.uiState
-                                PlatformTheme { AppTimerToast(timerUiState, taskAppTimerViewModel) }
+                                MaterialTheme { AppTimerToast(timerUiState, taskAppTimerViewModel) }
                             }
                         }
                     addAppTimerToastToLayout()

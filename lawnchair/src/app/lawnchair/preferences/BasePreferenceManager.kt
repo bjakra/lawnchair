@@ -16,6 +16,7 @@
 
 package app.lawnchair.preferences
 
+import com.android.launcher3.deviceprofile.parser.GridOption
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit

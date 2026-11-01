@@ -1,5 +1,6 @@
 package app.lawnchair.preferences2
 
+import com.android.launcher3.deviceprofile.parser.GridOption
 import androidx.annotation.Discouraged
 import androidx.compose.runtime.Composable
 import androidx.datastore.core.DataStore

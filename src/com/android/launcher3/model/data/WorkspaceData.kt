@@ -16,6 +16,8 @@
 
 package com.android.launcher3.model.data
 
+import androidx.annotation.VisibleForTesting
+import app.lawnchair.LawnchairApp
 import android.content.Context
 import android.util.SparseArray
 import androidx.core.util.putAll
@@ -42,6 +44,8 @@ sealed class WorkspaceData : Iterable<ItemInfo> {
 
     /** Creates an array of valid workspace screens based on current items in the model. */
     // LC-Note: Add context to replace QSB_ON_FIRST_SCREEN config
+    fun collectWorkspaceScreens(): IntArray = collectWorkspaceScreens(LawnchairApp.instance)
+
     fun collectWorkspaceScreens(context: Context): IntArray {
         val prefs2 = PreferenceManager2.INSTANCE.get(context)
         val smartspaceEnabled = prefs2.enableSmartspace.firstCached()

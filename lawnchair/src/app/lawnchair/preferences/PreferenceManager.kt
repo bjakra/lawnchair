@@ -16,6 +16,8 @@
 
 package app.lawnchair.preferences
 
+import com.android.launcher3.deviceprofile.parser.DeviceTypedMap.INDEX_DEFAULT
+import com.android.launcher3.deviceprofile.parser.GridOption
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -25,7 +27,6 @@ import app.lawnchair.util.getApkVersionComparison
 import app.lawnchair.util.isGestureNavContractCompatible
 import app.lawnchair.util.isOnePlusStock
 import com.android.launcher3.InvariantDeviceProfile
-import com.android.launcher3.InvariantDeviceProfile.INDEX_DEFAULT
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppComponent

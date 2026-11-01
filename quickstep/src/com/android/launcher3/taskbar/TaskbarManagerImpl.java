@@ -825,6 +825,11 @@ public class TaskbarManagerImpl {
     }
 
 
+    @VisibleForTesting
+    protected void injectTestInsights() {
+        // Graphite: Ambient Cue bar is removed
+    }
+
     /** Called when the SysUI flags for a given display change. */
     public void onSystemUiFlagsChanged(@SystemUiStateFlags long systemUiStateFlags, int displayId) {
         if (displayId == mPrimaryDisplayId) {

@@ -78,9 +78,9 @@ class HotseatPagedView @JvmOverloads constructor(
             page.isLongClickable = false
             page.isHapticFeedbackEnabled = false
             if (hasVerticalHotseat) {
-                page.setGridSize(1, dp.numShownHotseatIcons)
+                page.setGridSize(1, dp.hotseatProfile.numShownIcons)
             } else {
-                page.setGridSize(dp.numShownHotseatIcons, dp.numHotseatRows)
+                page.setGridSize(dp.hotseatProfile.numShownIcons, dp.numHotseatRows)
             }
             addView(page, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         }

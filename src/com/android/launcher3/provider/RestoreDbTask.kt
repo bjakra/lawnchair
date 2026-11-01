@@ -26,7 +26,7 @@ import android.os.Process
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
-import com.android.launcher3.BuildConfig
+import com.android.launcher3.BuildConfigs
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherFiles
@@ -300,7 +300,7 @@ class RestoreDbTask {
         newWidgetIds: IntArray,
         host: AppWidgetHost,
     ) {
-        if (!BuildConfig.WIDGETS_ENABLED) {
+        if (!BuildConfigs.WIDGETS_ENABLED) {
             FileLog.e(TAG, "Skipping widget ID remap as widgets not supported")
             host.deleteHost()
             launcherRestoreEventLogger.logFavoritesItemsRestoreFailed(

@@ -645,7 +645,6 @@ public class Hotseat extends FrameLayout implements Insettable {
     }
 
     /** Delegates to the current page's shortcuts container. */
-    @Nullable
     public ShortcutAndWidgetContainer getShortcutsAndWidgets() {
         CellLayout page = getCurrentPageLayout();
         return page != null ? page.getShortcutsAndWidgets() : null;
@@ -656,6 +655,25 @@ public class Hotseat extends FrameLayout implements Insettable {
     public DragAndDropAccessibilityDelegate getDragAndDropAccessibilityDelegate() {
         CellLayout page = getCurrentPageLayout();
         return page != null ? page.getDragAndDropAccessibilityDelegate() : null;
+    }
+
+    /** Delegates to the current page. */
+    public View getChildAt(int cellX, int cellY) {
+        CellLayout page = getCurrentPageLayout();
+        return page != null ? page.getChildAt(cellX, cellY) : null;
+    }
+
+    /** Delegates to the current page. */
+    public void addDelegatedCellDrawing(CellLayout.DelegatedCellDrawing bg) {
+        CellLayout page = getCurrentPageLayout();
+        if (page != null) page.addDelegatedCellDrawing(bg);
+    }
+
+    /** Delegates to the current page. */
+    public void removeDelegatedCellDrawing(CellLayout.DelegatedCellDrawing bg) {
+        for (CellLayout page : getPageLayouts()) {
+            page.removeDelegatedCellDrawing(bg);
+        }
     }
 
     /** Applies the operator to the items of every dock page. */

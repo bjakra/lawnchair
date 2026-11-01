@@ -21,7 +21,7 @@ import android.content.Intent
 import android.text.TextUtils
 import android.view.View
 import android.widget.Toast
-import com.android.launcher3.BuildConfig
+import com.android.launcher3.BuildConfigs
 import com.android.launcher3.Flags
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherSettings.Favorites
@@ -62,7 +62,7 @@ object WorkspaceLongPressOptions {
                 startWallpaperPicker(ac, v)
             }
         )
-        if (BuildConfig.WIDGETS_ENABLED) {
+        if (BuildConfigs.WIDGETS_ENABLED) {
             add(
                 PopupData(
                     R.drawable.ic_widget,

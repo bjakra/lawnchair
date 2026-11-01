@@ -81,6 +81,10 @@ import javax.inject.Inject;
 @SuppressLint("NewApi")
 public class DeviceProfile {
 
+    // Lawnchair: number of dock rows, and of horizontally scrollable dock pages (1 = classic dock).
+    public int numHotseatRows = 1;
+    public int numHotseatPages = 1;
+
     private static final float MAX_ASPECT_RATIO_FOR_ALTERNATE_EDIT_STATE = 1.5f;
 
     public static final PointF DEFAULT_SCALE = new PointF(1.0f, 1.0f);
@@ -229,6 +233,9 @@ public class DeviceProfile {
                 mDeviceProperties.createWindowBounds());
 
         final Resources res = context.getResources();
+        var lawnchairPrefs = app.lawnchair.preferences.PreferenceManager.getInstance(context);
+        numHotseatRows = Math.max(1, Math.min(2, lawnchairPrefs.getHotseatRows().get()));
+        numHotseatPages = Math.max(1, Math.min(5, lawnchairPrefs.getDockPages().get()));
 
         overviewProfile = OverviewProfile.Factory.createOverviewProfile(res);
 

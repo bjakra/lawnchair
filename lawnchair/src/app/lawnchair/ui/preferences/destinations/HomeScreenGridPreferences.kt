@@ -1,5 +1,6 @@
 package app.lawnchair.ui.preferences.destinations
 
+import com.android.launcher3.deviceprofile.parser.GridOption
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

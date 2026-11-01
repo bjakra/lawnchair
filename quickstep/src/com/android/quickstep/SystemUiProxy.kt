@@ -26,12 +26,10 @@ import android.content.Intent
 import android.content.pm.ShortcutInfo
 import android.graphics.Point
 import android.graphics.Rect
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Message
-import android.os.Parcel
 import android.os.RemoteException
 import android.os.Trace
 import android.os.Trace.traceBegin
@@ -52,14 +50,10 @@ import android.window.WindowContainerTransaction
 import androidx.annotation.MainThread
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
-import app.lawnchair.util.isAndroidBaklavaInitial
-import app.lawnchair.util.isNothingOs
-//import app.lawnchair.gestures.type.GestureType
 import com.android.internal.logging.InstanceId
 import com.android.internal.util.ScreenshotRequest
 import com.android.internal.view.AppearanceRegion
 import com.android.launcher3.Flags
-import com.android.launcher3.Utilities
 import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI
 import com.android.launcher3.concurrent.annotations.Ui
@@ -496,8 +490,7 @@ constructor(
      */
     fun notifyTaskbarAutohideSuspend(suspend: Boolean) =
         executeWithErrorLog({ "Failed call notifyTaskbarAutohideSuspend with arg: $suspend" }) {
-            // LC-Ignored
-            //systemUiProxy?.notifyTaskbarAutohideSuspend(suspend)
+            systemUiProxy?.notifyTaskbarAutohideSuspend(suspend)
         }
 
     fun notifyRecentsButtonPositionChanged(bounds: Rect) {
@@ -510,26 +503,22 @@ constructor(
 
     fun takeScreenshot(request: ScreenshotRequest) =
         executeWithErrorLog({ "Failed call takeScreenshot" }) {
-            // LC-Ignored
-            //systemUiProxy?.takeScreenshot(request)
+            systemUiProxy?.takeScreenshot(request)
         }
 
     fun expandNotificationPanel() =
         executeWithErrorLog({ "Failed call expandNotificationPanel" }) {
-            // LC-Ignored
-            //systemUiProxy?.expandNotificationPanel()
+            systemUiProxy?.expandNotificationPanel()
         }
 
     fun toggleNotificationPanel() =
         executeWithErrorLog({ "Failed call toggleNotificationPanel" }) {
-            // LC-Ignored
-            //systemUiProxy?.toggleNotificationPanel()
+            systemUiProxy?.toggleNotificationPanel()
         }
 
     fun toggleQuickSettingsPanel() =
         executeWithErrorLog({ "Failed call toggleQuickSettingsPanel" }) {
-            // LC-Ignored
-            //systemUiProxy?.toggleQuickSettingsPanel()
+            systemUiProxy?.toggleQuickSettingsPanel()
         }
 
     //
@@ -1032,11 +1021,10 @@ constructor(
         controller: ILauncherUnlockAnimationController?,
     ) {
         executeWithErrorLog({ "Failed call setLauncherUnlockAnimationController" }) {
-            // LC-Ignored
-//            sysuiUnlockAnimationController?.apply {
-//                setLauncherUnlockController(activityClass, controller)
-//                controller?.dispatchSmartspaceStateToSysui()
-//            }
+            sysuiUnlockAnimationController?.apply {
+                setLauncherUnlockController(activityClass, controller)
+                controller?.dispatchSmartspaceStateToSysui()
+            }
         }
         launcherActivityClass = activityClass
         launcherUnlockAnimationController = controller
@@ -1048,8 +1036,7 @@ constructor(
      */
     fun notifySysuiSmartspaceStateUpdated(state: SmartspaceState?) =
         executeWithErrorLog({ "Failed call notifySysuiSmartspaceStateUpdated" }) {
-            // LC-Ignored
-            //sysuiUnlockAnimationController?.onLauncherSmartspaceStateUpdated(state)
+            sysuiUnlockAnimationController?.onLauncherSmartspaceStateUpdated(state)
         }
 
     //
@@ -1305,24 +1292,6 @@ constructor(
         displayId: Int,
     ): Boolean {
         executeWithErrorLog({ "Error starting recents via shell" }) {
-            if (usesAOSPBaklavaInitialRecentsTransitionAidl()) {
-                if (wct != null) {
-                    Log.w("LC-SystemUiProxy", "Android 16 initial does not support WCT-backed recents transitions")
-                    return false
-                }
-                val recentTasks = recentTasks ?: return false
-                return startInitialAndroid16RecentsTransition(
-                    recentTasks,
-                    getRecentsPendingIntent(displayId),
-                    intent,
-                    options.toBundle().apply {
-                        if (useSyntheticRecentsTransition) {
-                            putBoolean("is_synthetic_recents_transition", true)
-                        }
-                    },
-                    RecentsAnimationListenerStub(listener),
-                )
-            }
             recentTasks?.startRecentsTransition(
                 getRecentsPendingIntent(displayId),
                 intent,
@@ -1336,7 +1305,7 @@ constructor(
                 RecentsAnimationListenerStub(listener),
             )
                 ?: run {
-                    if (Utilities.ATLEAST_S) ActiveGestureProtoLogProxy.logRecentTasksMissing()
+                    ActiveGestureProtoLogProxy.logRecentTasksMissing()
                     return false
                 }
             return true
@@ -1346,45 +1315,6 @@ constructor(
 
     private class RecentsAnimationListenerStub(val listener: RecentsAnimationListener) :
         IRecentsAnimationRunner.Stub() {
-        override fun onTransact(
-            code: Int,
-            data: Parcel,
-            reply: Parcel?,
-            flags: Int,
-        ): Boolean {
-            if (usesNothingOs4BaklavaInitialRecentsTransitionAidl()
-                    && code == LC_TRANSACTION_onAnimationStartWithSurfaceTransaction) {
-                // LC-Note: What even the fuck this is (this handles a Nothing OS 4 binder transaction)
-                data.enforceInterface(IRecentsAnimationRunner.DESCRIPTOR) // This can be mistaken for IRecentsAnimationController, keep it this way
-                val controller = IRecentsAnimationController.Stub.asInterface(
-                    data.readStrongBinder())
-                val transitionInfo = data.readTypedObject(TransitionInfo.CREATOR)
-                val transaction = data.readTypedObject(Transaction.CREATOR)
-                val apps = data.createTypedArray(RemoteAnimationTarget.CREATOR)
-                val wallpapers = data.createTypedArray(RemoteAnimationTarget.CREATOR)
-                val homeContentInsets = data.readTypedObject(Rect.CREATOR)
-                val minimizedHomeBounds = data.readTypedObject(Rect.CREATOR)
-                val extras = data.readTypedObject(Bundle.CREATOR)
-                data.enforceNoDataAvail()
-                try {
-                    transaction?.apply()
-                } finally {
-                    transaction?.close()
-                }
-                onAnimationStart(
-                    controller,
-                    apps,
-                    wallpapers,
-                    homeContentInsets,
-                    minimizedHomeBounds,
-                    extras,
-                    transitionInfo,
-                )
-                return true
-            }
-            return super.onTransact(code, data, reply, flags)
-        }
-
         override fun onAnimationStart(
             controller: IRecentsAnimationController,
             apps: Array<RemoteAnimationTarget>?,
@@ -1484,31 +1414,6 @@ constructor(
 
     companion object {
         private const val TAG = "SystemUiProxy"
-
-        /** LC-Note: Android 16.0 start recents transition binder code */
-        private const val LC_TRANSACTION_startRecentsTransition_AOSP_BaklavaInitial =
-            IBinder.FIRST_CALL_TRANSACTION + 4
-
-        /** LC-Note: Android 16.0, Nothing OS 4.0 start recents transition binder code whose value
-         * is higher than AOSP 16.0 or [LC_TRANSACTION_startRecentsTransition_AOSP_BaklavaInitial] */
-        private const val LC_TRANSACTION_startRecentsTransition_NothingOS_4_BaklavaInitial =
-            IBinder.FIRST_CALL_TRANSACTION + 5
-
-        /** LC-Note: onAnimationStartWithSurfaceTransac binder code */
-        private const val LC_TRANSACTION_onAnimationStartWithSurfaceTransaction =
-            IBinder.FIRST_CALL_TRANSACTION + 4
-
-        /** LC-Note: Should use AOSP 16.0 recents transition AIDL? */
-        private fun usesAOSPBaklavaInitialRecentsTransitionAidl(): Boolean {
-            return Build.VERSION.SDK_INT == Build.VERSION_CODES.BAKLAVA
-                    && isAndroidBaklavaInitial
-        }
-
-        /** LC-Note: Should use Nothing OS 16.0 recents transition AIDL? */
-        private fun usesNothingOs4BaklavaInitialRecentsTransitionAidl(): Boolean {
-            return usesAOSPBaklavaInitialRecentsTransitionAidl()
-                    && isNothingOs
-        }
 
         @JvmField val INSTANCE = DaggerSingletonObject(LauncherAppComponent::getSystemUiProxy)
 

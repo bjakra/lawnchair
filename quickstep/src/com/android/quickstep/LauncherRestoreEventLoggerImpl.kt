@@ -7,7 +7,6 @@ import android.app.backup.BackupRestoreEventLogger.BackupRestoreError
 import android.content.Context
 import androidx.annotation.VisibleForTesting
 import com.android.launcher3.LauncherSettings.Favorites
-import com.android.launcher3.Utilities
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger
 import com.android.launcher3.dagger.ApplicationContext
 import javax.inject.Inject
@@ -34,16 +33,8 @@ constructor(@ApplicationContext private val context: Context) : LauncherRestoreE
         @BackupRestoreDataType private const val DATA_TYPE_APP_PAIR = "app_pair"
     }
 
-    private val restoreEventLogger: BackupRestoreEventLogger? = if (Utilities.ATLEAST_S) {
-        try {
-            BackupManager(context).delayedRestoreLogger
-        } catch (e: NoSuchMethodError) {
-            // Lawnchair-TODO: pE-TODO: wtf?
-            null
-        }
-    } else {
-        null
-    }
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    val restoreEventLogger: BackupRestoreEventLogger = BackupManager(context).delayedRestoreLogger
 
     /**
      * For logging when multiple items of a given data type failed to restore.

@@ -23,7 +23,6 @@ import android.os.SystemClock
 import android.uilatencystats.UiLatencyStatsManager
 import android.view.CrossWindowBlurListeners
 import com.android.app.displaylib.PerDisplayRepository
-import com.android.extensions.computercontrol.ComputerControlExtensions
 import com.android.internal.R
 import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.internal.util.LatencyTracker
@@ -74,7 +73,7 @@ import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.widget.LauncherWidgetHolder.WidgetHolderFactory
 import com.android.launcher3.widget.ProvidersUpdateDispatcher
 import com.android.quickstep.AspectRatioSystemShortcut
-import com.android.quickstep.AutomationRepositoryImpl
+import com.android.launcher3.automation.AutomationNoOpRepository
 import com.android.quickstep.DesktopShortcut
 import com.android.quickstep.ExternalDisplayShortcut
 import com.android.quickstep.InstantAppResolverImpl
@@ -247,11 +246,6 @@ object StaticObjectModule {
 
     @Provides fun provideTaskUtils() = TaskUtils
 
-    @Provides
-    @JvmStatic
-    fun provideComputerControlExtensions(
-        @ApplicationContext context: Context
-    ): ComputerControlExtensions? = ComputerControlExtensions.getInstance(context)
 
     @Provides
     fun provideUiLatencyStatsManager(@ApplicationContext context: Context): UiLatencyStatsManager? =
@@ -355,5 +349,5 @@ object TaskOverlayModule {
 /** Used by both Recents and Launcher for package automation */
 @Module
 interface AutomationModule {
-    @Binds fun bindAutomatedRepository(impl: AutomationRepositoryImpl): AutomationRepository
+    @Binds fun bindAutomatedRepository(impl: AutomationNoOpRepository): AutomationRepository
 }
