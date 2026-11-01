@@ -34,7 +34,7 @@ import android.window.DesktopModeFlags;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.window.flags2.Flags;
+import com.android.window.flags.Flags;
 
 import java.util.Arrays;
 

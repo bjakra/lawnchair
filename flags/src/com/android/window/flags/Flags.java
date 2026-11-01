@@ -1,4 +1,4 @@
-package com.android.window.flags2;
+package com.android.window.flags;
 
 
 /** @hide */

@@ -69,7 +69,7 @@ constructor(
     /** listenable value holder for current IconShape */
     val iconShapeData: ListenableRef<IconShape> = _iconShapeData.asListenable()
     /** Representation of the current icon state */
-    open var iconState = parseIconState(null)
+    var iconState = parseIconState(null)
         protected set
 
     @Deprecated("Use [ThemePreference] instead")

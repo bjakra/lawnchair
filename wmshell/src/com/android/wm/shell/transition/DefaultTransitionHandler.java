@@ -107,7 +107,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.ProtoLog;
-import com.android.window.flags2.Flags;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.animation.SizeChangeAnimation;
 import com.android.wm.shell.common.DisplayController;
@@ -367,7 +367,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         mTransitionAnimators.put(transition, animations);
         mFinishCallbacks.put(transition, finishCallback);
 
-        final boolean isTaskTransition = com.android.window.flags2.Flags.transitionHandlerCujTags()
+        final boolean isTaskTransition = com.android.window.flags.Flags.transitionHandlerCujTags()
                 && isTaskTransition(info);
 
         final Consumer<WindowAnimation> onAnimFinish = (winAnim) -> {

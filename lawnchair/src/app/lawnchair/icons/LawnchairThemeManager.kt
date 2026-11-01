@@ -75,9 +75,13 @@ constructor(
         uiExecutor.execute { verifyIconState() }
     }
 
-    override var iconState = parseIconStateV2(null)
+    // False while ThemeManager's constructor runs: it can call verifyIconState before our fields exist.
+    private var ready = false
 
     init {
+        iconState = parseIconStateV2(null)
+        ready = true
+
         val scope = MainScope() + CoroutineName("LawnchairThemeManager")
         merge(
             prefs2.iconShape.get(),
@@ -129,6 +133,7 @@ constructor(
     }
 
     override fun verifyIconState() {
+        if (!ready) return
         val newState = parseIconStateV2(iconState)
         val oldState = iconState
         if (newState == oldState) return

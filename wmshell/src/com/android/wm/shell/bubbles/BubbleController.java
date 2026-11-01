@@ -624,7 +624,7 @@ public class BubbleController implements ConfigurationChangeListener,
         mShellCommandHandler.addDumpCallback(this::dump, this);
         mShellCommandHandler.addCommandCallback("bubbles", mBubbleShellCommandHandler, this);
 
-        if (com.android.window.flags2.Flags.enableExperimentalBubblesController()) {
+        if (com.android.window.flags.Flags.enableExperimentalBubblesController()) {
             try {
                 final BubbleMultitaskingDelegate delegate = new BubbleMultitaskingDelegate(
                         this, mBubbleData, mCurrentUserId);

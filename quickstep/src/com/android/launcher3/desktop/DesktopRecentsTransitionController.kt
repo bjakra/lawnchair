@@ -33,7 +33,7 @@ import com.android.quickstep.TaskViewUtils
 import com.android.quickstep.views.DesktopTaskView
 import com.android.quickstep.views.TaskContainer
 import com.android.quickstep.views.TaskView
-import com.android.window.flags2.Flags
+import com.android.window.flags.Flags
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
 import java.util.function.Consumer
 
