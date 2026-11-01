@@ -54,7 +54,7 @@ class ReloadHelper(private val context: Context) {
     fun reloadIcons() {
         Executors.MODEL_EXECUTOR.execute {
             LauncherAppState.INSTANCE.get(context).iconCache.clearMemoryCache()
-            LauncherAppState.INSTANCE.get(context).model.reloadIfActive()
+            LauncherAppState.INSTANCE.get(context).model.reloadIfActive("Lawnchair")
         }
     }
 

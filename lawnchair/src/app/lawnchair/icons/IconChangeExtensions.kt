@@ -4,8 +4,8 @@ import android.os.UserHandle
 import androidx.annotation.WorkerThread
 import app.lawnchair.LawnchairApp
 import com.android.launcher3.LauncherModel
-import com.android.launcher3.model.PackageUpdatedTask
-import com.android.launcher3.model.ShortcutsChangedTask
+import com.android.launcher3.model.tasks.PackageUpdatedTask
+import com.android.launcher3.model.tasks.ShortcutsChangedTask
 import com.android.launcher3.shortcuts.ShortcutRequest
 
 /** Refreshes the icons of a package outside of package events, e.g. after a custom icon change. */

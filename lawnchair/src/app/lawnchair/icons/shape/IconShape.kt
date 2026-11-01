@@ -602,7 +602,7 @@ object CornerShapeCompat {
     ) {
         addToPath(shape, path.path, left, top, right, bottom, size, endSize, progress)
         path.setBounds(left, top, right, bottom)
-        path.setCornerRadius(Utilities.mapRange(progress, size, endSize))
+        path.cornerRadius = Utilities.mapRange(progress, size, endSize)
     }
 
     @JvmOverloads

@@ -273,7 +273,7 @@ private fun clearAllViewsFromHomeScreen(context: Context, type: Int) {
     )
     val isViewsRemoved = modelWriter.clearAllHomeScreenViewsByType(type)
     if (isViewsRemoved) {
-        launcherModel.forceReload()
+        launcherModel.forceReload("Lawnchair")
         Toast.makeText(
             context,
             R.string.home_screen_all_views_removed_msg,

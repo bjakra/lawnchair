@@ -57,7 +57,7 @@ data class PathShapeDelegate(val iconShape: IconShape) : ShapeDelegate {
     override fun addToPath(path: PathWrapper, offsetX: Float, offsetY: Float, radius: Float) {
         addToPath(path.path, offsetX, offsetY, radius, Matrix())
         path.setBounds(offsetX, offsetY, offsetX + radius * 2, offsetY + radius * 2)
-        path.setCornerRadius(radius)
+        path.cornerRadius = radius
     }
 
     private fun addToPath(

@@ -223,6 +223,9 @@ public class InvariantDeviceProfile {
     public int allAppsCellSpecsTwoPanelId = INVALID_RESOURCE_HANDLE;
 
     private String mLocale = "";
+
+    /** Lawnchair: the grid before the user's overrides are applied. */
+    public GridOption closestProfile;
     public boolean enableTwoLinesInAllApps = false;
 
     // If non-negative, the workspace row with which top of the all apps container is to be aligned
@@ -367,6 +370,11 @@ public class InvariantDeviceProfile {
     @Deprecated
     public void reset() {
         initGrid(mPrefs.get(GRID_NAME));
+    }
+
+    /** Lawnchair: re-applies the grid after a setting changed. */
+    public void onPreferencesChanged(Context context) {
+        MAIN_EXECUTOR.execute(this::onConfigChanged);
     }
 
     /** Lawnchair: applies the user's home screen grid and icon settings on top of the grid. */
@@ -523,6 +531,7 @@ public class InvariantDeviceProfile {
                     )
                 );
 
+        this.closestProfile = closestProfile;
         applyLawnchairOverrides(context, closestProfile);
     }
 

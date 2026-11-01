@@ -1,5 +1,6 @@
 package app.lawnchair.deck
 
+import com.android.launcher3.util.IntSet
 import android.content.Intent
 import android.os.UserHandle
 import com.android.launcher3.InvariantDeviceProfile
@@ -50,16 +51,14 @@ class AddFoldersWithItemsTask(
             folders.forEach { folderInfo ->
                 // Find space for the folder
                 val coords = itemSpaceFinder.findSpaceForItem(
-                    workspaceScreens,
-                    addedWorkspaceScreensFinal,
                     addedItemsFinal,
                     folderInfo.spanX,
                     folderInfo.spanY,
-                    context,
+                    IntSet(),
                 )
-                val screenId = coords[0]
-                val cellX = coords[1]
-                val cellY = coords[2]
+                val screenId = coords.screenId
+                val cellX = coords.cellX
+                val cellY = coords.cellY
 
                 // Add folder to database
                 modelWriter.addItemToDatabase(

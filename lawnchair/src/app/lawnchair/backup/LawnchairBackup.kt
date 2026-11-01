@@ -83,7 +83,7 @@ class LawnchairBackup(
         // the restored entries, so writing the grid state first would let it be overwritten.
         DeviceGridState(info.gridState).writeToPrefs(context, true)
 
-        val dbController = ModelDbController(context)
+        val dbController = LauncherAppState.getInstance(context).model.modelDbController
         RestoreDbTask.performRestore(context, dbController)
     }
 

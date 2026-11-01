@@ -1,5 +1,6 @@
 package app.lawnchair.backup
 
+import com.android.launcher3.LauncherAppState
 import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
@@ -177,7 +178,7 @@ class NovaBackupConverter(
             restoredDbFile.parentFile?.mkdirs()
             stagedDbFile.copyTo(restoredDbFile, overwrite = true)
 
-            val dbController = ModelDbController(context)
+            val dbController = LauncherAppState.getInstance(context).model.modelDbController
             RestoreDbTask.performRestore(context, dbController)
 
             pinImportedDeepShortcuts(importedDeepShortcuts)

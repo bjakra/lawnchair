@@ -87,7 +87,7 @@ class IconOverrideRepository @Inject constructor(
     suspend fun deleteAll() {
         dao.deleteAll()
         _overridesMap = emptyMap()
-        LauncherAppState.getInstance(context).model.reloadIfActive()
+        LauncherAppState.getInstance(context).model.reloadIfActive("Lawnchair")
     }
 
     private fun updatePackageIcons(target: ComponentKey) {

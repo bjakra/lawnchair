@@ -479,7 +479,7 @@ class RestoreDbTask {
                 }
         }
 
-        private fun performRestore(context: Context, controller: ModelDbController): Boolean {
+        fun performRestore(context: Context, controller: ModelDbController): Boolean {
             val db = controller.db
 
             val restoreDbTaskWriteDao = LegacyRestoreDbTaskWriteDao(db)

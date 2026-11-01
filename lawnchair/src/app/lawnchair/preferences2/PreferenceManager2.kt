@@ -908,7 +908,7 @@ class PreferenceManager2 @Inject constructor(
             .onEach { shape ->
                 initializeIconShape(shape)
                 L3ThemeManager.INSTANCE.get(context)
-                LauncherAppState.getInstance(context).model.reloadIfActive()
+                LauncherAppState.getInstance(context).model.reloadIfActive("Lawnchair")
             }
             .launchIn(scope)
 

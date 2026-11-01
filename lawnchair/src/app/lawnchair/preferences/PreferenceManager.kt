@@ -50,16 +50,14 @@ class PreferenceManager @Inject constructor(
     SafeCloseable {
     private val idp get() = InvariantDeviceProfile.INSTANCE.get(context)
     private val dc get() = DisplayController.INSTANCE.get(context)
-    private val mRecentsModel get() = RecentsModel.INSTANCE.get(context)
     private val las get() = LauncherAppState.INSTANCE.get(context)
     private val reloadIcons: () -> Unit = {
-        mRecentsModel.onThemeChanged()
         Executors.MODEL_EXECUTOR.execute {
             // All of this is like refreshAndReloadLauncher in ModelInitializer
             LauncherIcons.clearPool(context)
             las.iconCache.clearMemoryCache()
             las.iconCache.updateIconParams(idp.fillResIconDpi, idp.iconBitmapSize)
-            las.model.forceReload()
+            las.model.forceReload("Lawnchair")
         }
     }
     private val reloadGrid: () -> Unit = { idp.onPreferencesChanged(context) }

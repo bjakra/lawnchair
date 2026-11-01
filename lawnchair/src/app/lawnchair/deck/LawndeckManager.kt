@@ -1,5 +1,6 @@
 package app.lawnchair.deck
 
+import com.android.launcher3.model.SerializedItemItem
 import android.content.Context
 import android.util.Log
 import app.lawnchair.LawnchairLauncher
@@ -89,9 +90,9 @@ class LawndeckManager(private val context: Context) {
     private fun backupExists(suffix: String): Boolean = getDatabaseFiles(suffix).backupDb.exists()
 
     private fun postRestoreActions() {
-        ModelDbController(context).let { RestoreDbTask.performRestore(context, it) }
+        LauncherAppState.getInstance(context).model.modelDbController.let { RestoreDbTask.performRestore(context, it) }
         MainScope().launch(Dispatchers.Main) {
-            LauncherAppState.getInstance(context).model.forceReload()
+            LauncherAppState.getInstance(context).model.forceReload("Lawnchair")
         }
     }
 
@@ -126,7 +127,7 @@ class LawndeckManager(private val context: Context) {
             if (categoryApps.size == 1) {
                 // Single app - add directly to workspace
                 val app = categoryApps.first()
-                ItemInstallQueue.INSTANCE.get(context).queueItem(app.targetPackage, app.user)
+                ItemInstallQueue.INSTANCE.get(context).queueItem(SerializedItemItem(app.targetPackage, app.user))
                 singleAppCount++
             } else {
                 // Multiple apps - create folder
@@ -208,13 +209,13 @@ class LawndeckManager(private val context: Context) {
 
                 if (categorizedApps.isEmpty()) {
                     // No category found, add directly to workspace
-                    ItemInstallQueue.INSTANCE.get(context).queueItem(packageName, user)
+                    ItemInstallQueue.INSTANCE.get(context).queueItem(SerializedItemItem(packageName, user))
                     return
                 }
 
                 // Get the category from flowerpot
                 categorizedApps.entries.firstOrNull()?.key ?: run {
-                    ItemInstallQueue.INSTANCE.get(context).queueItem(packageName, user)
+                    ItemInstallQueue.INSTANCE.get(context).queueItem(SerializedItemItem(packageName, user))
                     return
                 }
             }
@@ -238,7 +239,7 @@ class LawndeckManager(private val context: Context) {
         } else {
             // Single app in category, add directly to workspace
             // The app will be categorized properly when added
-            ItemInstallQueue.INSTANCE.get(context).queueItem(packageName, user)
+            ItemInstallQueue.INSTANCE.get(context).queueItem(SerializedItemItem(packageName, user))
         }
     }
 
