@@ -18,6 +18,7 @@
 
 package com.android.launcher3;
 
+import com.android.launcher3.celllayout.DelegatedCellDrawing;
 import static android.view.View.MeasureSpec.makeMeasureSpec;
 
 import static com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_X;
@@ -664,13 +665,13 @@ public class Hotseat extends FrameLayout implements Insettable {
     }
 
     /** Delegates to the current page. */
-    public void addDelegatedCellDrawing(CellLayout.DelegatedCellDrawing bg) {
+    public void addDelegatedCellDrawing(DelegatedCellDrawing bg) {
         CellLayout page = getCurrentPageLayout();
         if (page != null) page.addDelegatedCellDrawing(bg);
     }
 
     /** Delegates to the current page. */
-    public void removeDelegatedCellDrawing(CellLayout.DelegatedCellDrawing bg) {
+    public void removeDelegatedCellDrawing(DelegatedCellDrawing bg) {
         for (CellLayout page : getPageLayouts()) {
             page.removeDelegatedCellDrawing(bg);
         }
