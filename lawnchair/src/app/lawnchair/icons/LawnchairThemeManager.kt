@@ -9,17 +9,27 @@ import app.lawnchair.preferences.PreferenceManager
 import app.lawnchair.preferences2.PreferenceManager2
 import app.lawnchair.preferences2.firstCached
 import app.lawnchair.theme.ThemeProvider
+import app.lawnchair.theme.color.tokens.ColorTokens
 import com.android.launcher3.LauncherPrefs
+import com.android.launcher3.R
+import com.android.launcher3.Utilities
+import com.android.launcher3.graphics.ShapeDelegate
+import com.android.launcher3.graphics.ThemeManager.Companion.ICON_FACTORY_DAGGER_KEY
+import com.android.launcher3.graphics.theme.IconThemeFactory
+import com.android.launcher3.graphics.theme.ThemePreference
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.graphics.ThemeManager
 import com.android.launcher3.icons.mono.MonoIconThemeController
-import com.android.launcher3.icons.mono.ThemedIconDrawable
+import com.android.launcher3.icons.mono.ColorList
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.display.DisplayController
+import com.android.launcher3.display.LauncherDisplayInfo
+import com.android.launcher3.display.OverlayChangeHandler
 import com.android.launcher3.util.LooperExecutor
 import javax.inject.Inject
+import javax.inject.Named
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -34,17 +44,22 @@ class LawnchairThemeManager
 constructor(
     @ApplicationContext private val context: Context,
     @Ui private val uiExecutor: LooperExecutor,
-    private val prefs: LauncherPrefs,
-    private val iconControllerFactory: IconControllerFactory,
+    prefs: LauncherPrefs,
+    private val themePreference: ThemePreference,
+    @Named(ICON_FACTORY_DAGGER_KEY)
+    iconThemeFactories: Map<String, @JvmSuppressWildcards IconThemeFactory>,
+    overlayChangeHandler: OverlayChangeHandler,
     private val lifecycle: DaggerSingletonTracker,
     private val prefs2: PreferenceManager2,
     private val prefs1: PreferenceManager,
     private val themeProvider: ThemeProvider,
 ) : ThemeManager(
     context,
-    uiExecutor,
     prefs,
-    iconControllerFactory,
+    themePreference,
+    iconThemeFactories,
+    uiExecutor,
+    overlayChangeHandler,
     lifecycle,
 ) {
     private val statePrefs1 = listOf(
@@ -97,30 +112,32 @@ constructor(
         }
         themeProvider.addListener(colorSchemeChangeListener)
 
-        val displayController = DisplayController.INSTANCE.get(context)
-        val displayInfoChangeListener = DisplayController.DisplayInfoChangeListener { _, _, flags ->
-            if (flags and DisplayController.CHANGE_NIGHT_MODE != 0) {
-                uiExecutor.execute { verifyIconState() }
+        val displayInfoCloseable = DisplayController.INSTANCE.get(context).listenable?.forEachChange(uiExecutor) { _, flags ->
+            if (flags and LauncherDisplayInfo.CHANGE_NIGHT_MODE != 0) {
+                verifyIconState()
             }
         }
-        displayController.addChangeListener(displayInfoChangeListener)
 
         statePrefs1.forEach { it.addListener(prefListener) }
 
         lifecycle.addCloseable {
             colorSchemeChangeListener.destroy()
             scope.cancel()
-            displayController.removeChangeListener(displayInfoChangeListener)
+            displayInfoCloseable?.close()
             statePrefs1.forEach { it.removeListener(prefListener) }
         }
     }
 
     override fun verifyIconState() {
         val newState = parseIconStateV2(iconState)
-        if (newState == iconState) return
+        val oldState = iconState
+        if (newState == oldState) return
         iconState = newState
 
         listeners.forEach { it.onThemeChanged() }
+        if (newState.iconShape != oldState.iconShape) {
+            _iconShapeData.dispatchValue(iconShape.createIconShape(iconShapeData.value.pathSize))
+        }
     }
 
     private fun prefs1State(): String = statePrefs1.joinToString(",") { it.get().toString() }
@@ -143,7 +160,7 @@ constructor(
         val currentPrefs1State = prefs1State()
         val appShapeKey = currentAppShape.getHashString() + currentPrefs1State
         val folderShapeKey = currentFolderShape.getHashString() + currentPrefs1State
-        val themeController = iconControllerFactory.createThemeController()?.let {
+        val themeController = themePreference.value?.let {
             if (prefs1.forceIconMonochrome.get()) {
                 FORCED_MONO_THEME_CONTROLLER
             } else {
@@ -152,7 +169,7 @@ constructor(
         }
         val themedColorsKey =
             if (themeController != null) {
-                ThemedIconDrawable.getColors(context).joinToString(",")
+                lawnchairThemedColors(context).toString()
             } else {
                 ""
             }
@@ -177,13 +194,34 @@ constructor(
             folderRadius = 1f,
             shapeRadius = 1f,
             themeController = themeController,
+            themeCode = themeController?.themeID ?: "no-theme",
             iconShape = appShape,
             folderShape = folderShape,
+            fileShape = oldState?.fileShape ?: ShapeDelegate.GenericPathShape(
+                context.resources.getString(R.string.home_screen_files_file_icon_path_data),
+            ),
         )
     }
 }
 
 // Reuse controllers to allow the equality check in verifyIconState.
-private val MONO_THEME_CONTROLLER = MonoIconThemeController()
-private val FORCED_MONO_THEME_CONTROLLER = MonoIconThemeController(shouldForceThemeIcon = true)
+private val MONO_THEME_CONTROLLER = MonoIconThemeController(colorProvider = ::lawnchairThemedColors)
+private val FORCED_MONO_THEME_CONTROLLER =
+    MonoIconThemeController(shouldForceThemeIcon = true, colorProvider = ::lawnchairThemedColors)
+
+/** Lawnchair's themed icon colours, from its own colour tokens. */
+internal fun lawnchairThemedColors(context: Context): ColorList {
+    val (background, foreground) = if (Utilities.isDarkTheme(context)) {
+        ColorTokens.Accent2_800.resolveColor(context) to ColorTokens.Accent1_200.resolveColor(context)
+    } else {
+        ColorTokens.Accent1_100.resolveColor(context) to ColorTokens.Accent1_700.resolveColor(context)
+    }
+    return ColorList(
+        iconBackgroundColor = background,
+        iconForegroundColor = foreground,
+        iconAdaptiveBackgroundColor = background,
+        badgeBackgroundColor = background,
+        badgeForegroundColor = foreground,
+    )
+}
 private const val TAG = "LawnchairThemeManager"

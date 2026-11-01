@@ -41,7 +41,9 @@ import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.graphics.ThemeManager
 import com.android.launcher3.icons.ClockDrawableWrapper
 import com.android.launcher3.icons.LauncherIconProvider
-import com.android.launcher3.icons.mono.ThemedIconDrawable
+import com.android.launcher3.icons.PersistedItemState
+import com.android.launcher3.icons.IconChangeTracker
+import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.ComponentKey
 import com.android.launcher3.util.SafeCloseable
 import javax.inject.Inject
@@ -51,6 +53,7 @@ import org.xmlpull.v1.XmlPullParser
 class LawnchairIconProvider @Inject constructor(
     @ApplicationContext private val context: Context,
     val themeManager: ThemeManager,
+    private val iconChangeTracker: IconChangeTracker,
 ) : LauncherIconProvider(
     context,
     themeManager,
@@ -174,7 +177,7 @@ class LawnchairIconProvider @Inject constructor(
         iconEntry: IconEntry,
         iconDpi: Int,
     ): Drawable? {
-        val themedColors = ThemedIconDrawable.getColors(context)
+        val themedColors = lawnchairThemedColors(context)
         val clock = iconPackProvider.getClockMetadata(iconEntry)
 
         return when {
@@ -188,8 +191,8 @@ class LawnchairIconProvider @Inject constructor(
                 val clockThemedData = ThemeData(context.resources, R.drawable.themed_icon_static_clock)
                 clockThemedData.loadPaddedDrawable()?.let { foreground ->
                     CustomAdaptiveIconDrawable(
-                        themedColors[0].toDrawable(),
-                        foreground.apply { setTint(themedColors[1]) },
+                        themedColors.iconBackgroundColor.toDrawable(),
+                        foreground.apply { setTint(themedColors.iconForegroundColor) },
                     )
                 }
             }
@@ -205,8 +208,8 @@ class LawnchairIconProvider @Inject constructor(
                 val nativeThemed = componentName?.let { ThemedIconCompat.getThemedIcon(context, it) }
                 if (nativeThemed != null) {
                     CustomAdaptiveIconDrawable(
-                        themedColors[0].toDrawable(),
-                        nativeThemed.apply { setTint(themedColors[1]) },
+                        themedColors.iconBackgroundColor.toDrawable(),
+                        nativeThemed.apply { setTint(themedColors.iconForegroundColor) },
                     )
                 } else {
                     val themeData = getThemeDataForPackage(packageName)
@@ -214,8 +217,8 @@ class LawnchairIconProvider @Inject constructor(
                     // Return null so the caller can use the icon-pack or system fallback.
                     themeData?.loadPaddedDrawable()?.let { foreground ->
                         CustomAdaptiveIconDrawable(
-                            themedColors[0].toDrawable(),
-                            foreground.apply { setTint(themedColors[1]) },
+                            themedColors.iconBackgroundColor.toDrawable(),
+                            foreground.apply { setTint(themedColors.iconForegroundColor) },
                         )
                     }
                 }
@@ -223,7 +226,7 @@ class LawnchairIconProvider @Inject constructor(
         }
     }
 
-    override fun getStateForApp(info: ApplicationInfo?): String {
+    override fun getStateForApp(info: ApplicationInfo?): PersistedItemState {
         val base = super.getStateForApp(info)
         val overrideState = if (info != null) {
             val user = UserHandle.getUserHandleForUid(info.uid)
@@ -231,13 +234,14 @@ class LawnchairIconProvider @Inject constructor(
         } else {
             ""
         }
-        return "$base|lc:" +
-            "ip=${iconPackPref.get()}," +
-            "tip=${themedIconSourcePref.get()}," +
-            "ti=${prefs.themedIcons.get()}," +
-            "dti=${prefs.drawerThemedIcons.get()}," +
-            "fm=${prefs.forceIconMonochrome.get()}," +
-            "ov=$overrideState"
+        return base.withAdditionalValues(
+            "lc:ip=${iconPackPref.get()}",
+            "tip=${themedIconSourcePref.get()}",
+            "ti=${prefs.themedIcons.get()}",
+            "dti=${prefs.drawerThemedIcons.get()}",
+            "fm=${prefs.forceIconMonochrome.get()}",
+            "ov=$overrideState",
+        )
     }
 
     override fun getThemeDataForPackage(packageName: String?): ThemeData? {
@@ -300,13 +304,11 @@ class LawnchairIconProvider @Inject constructor(
         return themedIconMap
     }
 
-    override fun registerIconChangeListener(
-        callback: IconChangeListener,
-        handler: Handler,
-    ): SafeCloseable {
-        return MultiSafeCloseable().apply {
-            add(super.registerIconChangeListener(callback, handler))
-            add(IconPackChangeReceiver(context, handler, callback))
+    // Lawnchair's extra icon change sources report to AOSP's IconChangeTracker.
+    private val changeReceivers = run {
+        val handler = MODEL_EXECUTOR.handler
+        MultiSafeCloseable().apply {
+            add(IconPackChangeReceiver(context, handler))
             add(LawniconsChangeReceiver(context, handler))
         }
     }
@@ -314,7 +316,6 @@ class LawnchairIconProvider @Inject constructor(
     private inner class IconPackChangeReceiver(
         private val context: Context,
         private val handler: Handler,
-        private val callback: IconChangeListener,
     ) : SafeCloseable {
 
         private var calendarAndClockChangeReceiver: CalendarAndClockChangeReceiver? = null
@@ -349,7 +350,7 @@ class LawnchairIconProvider @Inject constructor(
         private fun recreateCalendarAndClockChangeReceiver() {
             val iconPack = IconPackProvider.INSTANCE.get(context).getIconPack(iconPackPref.get())
             calendarAndClockChangeReceiver = if (iconPack != null) {
-                CalendarAndClockChangeReceiver(context, handler, iconPack, callback)
+                CalendarAndClockChangeReceiver(context, handler, iconPack, iconChangeTracker)
             } else {
                 null
             }
@@ -366,7 +367,7 @@ class LawnchairIconProvider @Inject constructor(
         private val context: Context,
         handler: Handler,
         private val iconPack: IconPack,
-        private val callback: IconChangeListener,
+        private val iconChangeTracker: IconChangeTracker,
     ) : BroadcastReceiver(),
         SafeCloseable {
 
@@ -383,7 +384,7 @@ class LawnchairIconProvider @Inject constructor(
                 ACTION_TIMEZONE_CHANGED, ACTION_TIME_CHANGED, ACTION_TIME_TICK -> {
                     context.getSystemService<UserManager>()?.userProfiles?.forEach { user ->
                         iconPack.getClocks().forEach { componentName ->
-                            callback.onAppIconChanged(
+                            iconChangeTracker.notifyIconChanged(
                                 componentName.packageName,
                                 user,
                             )
@@ -394,7 +395,7 @@ class LawnchairIconProvider @Inject constructor(
                 ACTION_DATE_CHANGED -> {
                     context.getSystemService<UserManager>()?.userProfiles?.forEach { user ->
                         iconPack.getCalendars().forEach { componentName ->
-                            callback.onAppIconChanged(componentName.packageName, user)
+                            iconChangeTracker.notifyIconChanged(componentName.packageName, user)
                         }
                     }
                 }

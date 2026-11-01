@@ -43,7 +43,7 @@ import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
 import com.android.launcher3.icons.LauncherIconProvider
-import com.android.launcher3.icons.LauncherIconProviderImpl
+import app.lawnchair.icons.LawnchairIconProvider
 import com.android.launcher3.logging.StatsLogManager.StatsImpressionLogger
 import com.android.launcher3.logging.StatsLogManager.StatsLatencyLogger
 import com.android.launcher3.logging.StatsLogManager.StatsLogger
@@ -154,7 +154,7 @@ abstract class ApiWrapperModule {
     @Binds abstract fun bindApiWrapper(systemApiWrapper: SystemApiWrapper): ApiWrapper
 
     @Binds
-    abstract fun bindIconProvider(iconProviderImpl: LauncherIconProviderImpl): LauncherIconProvider
+    abstract fun bindIconProvider(iconProviderImpl: LawnchairIconProvider): LauncherIconProvider
 
     @Binds abstract fun bindInstantAppResolver(impl: InstantAppResolverImpl): InstantAppResolver
 

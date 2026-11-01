@@ -64,7 +64,7 @@ constructor(
     lifecycle: DaggerSingletonTracker,
 ) {
 
-    private val _iconShapeData = MutableListenableRef(IconShape.EMPTY)
+    protected val _iconShapeData = MutableListenableRef(IconShape.EMPTY)
 
     /** listenable value holder for current IconShape */
     val iconShapeData: ListenableRef<IconShape> = _iconShapeData.asListenable()

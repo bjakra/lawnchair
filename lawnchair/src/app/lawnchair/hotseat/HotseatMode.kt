@@ -13,7 +13,6 @@ sealed class HotseatMode(
     companion object {
         fun fromString(value: String): HotseatMode = when (value) {
             "disabled" -> DisabledHotseat
-            "google_search" -> GoogleSearchHotseat
             else -> LawnchairHotseat
         }
 
@@ -23,7 +22,6 @@ sealed class HotseatMode(
         fun values() = listOf(
             DisabledHotseat,
             LawnchairHotseat,
-            GoogleSearchHotseat,
         )
     }
 
@@ -36,15 +34,6 @@ object LawnchairHotseat : HotseatMode(
 ) {
     override fun toString() = "lawnchair"
     override fun isAvailable(context: Context): Boolean = true
-}
-
-object GoogleSearchHotseat : HotseatMode(
-    nameResourceId = R.string.hotseat_mode_google_search,
-    layoutResourceId = R.layout.search_container_hotseat_google_search,
-) {
-    override fun toString(): String = "google_search"
-
-    override fun isAvailable(context: Context): Boolean = context.packageManager.isPackageInstalledAndEnabled("com.google.android.googlequicksearchbox")
 }
 
 object DisabledHotseat : HotseatMode(

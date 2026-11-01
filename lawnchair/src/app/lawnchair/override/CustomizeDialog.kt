@@ -1,5 +1,6 @@
 package app.lawnchair.override
 
+import app.lawnchair.icons.onAppIconChanged
 import android.app.Activity
 import android.graphics.drawable.Drawable
 import android.util.Log

@@ -155,16 +155,6 @@ class LawnQsbLayout(context: Context, attrs: AttributeSet?) : FrameLayout(contex
             LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT),
         )
 
-        if (searchProvider == Google) {
-            repeatOnAttached {
-                val forceWebsite = preferenceManager2.hotseatQsbForceWebsite.get()
-                forceWebsite
-                    .flatMapLatest {
-                        if (it) Google.getSearchIntent(context) else flowOf(null)
-                    }
-                    .collect()
-            }
-        }
     }
 
     private fun openOptions() {
@@ -202,10 +192,10 @@ class LawnQsbLayout(context: Context, attrs: AttributeSet?) : FrameLayout(contex
         val height = MeasureSpec.getSize(heightMeasureSpec)
         val cellWidth = DeviceProfile.calculateCellWidth(
             requestedWidth,
-            dp.cellLayoutBorderSpacePx.x,
-            dp.numShownHotseatIcons,
+            dp.workspaceProfile.cellLayoutBorderSpacePx.x,
+            dp.hotseatProfile.numShownIcons,
         )
-        val iconSize = (dp.iconSizePx * 0.92f).toInt()
+        val iconSize = (dp.workspaceProfile.iconSizePx * 0.92f).toInt()
         val widthReduction = cellWidth - iconSize
         val width = requestedWidth - widthReduction
         setMeasuredDimension(width, height)

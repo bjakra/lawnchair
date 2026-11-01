@@ -13,8 +13,6 @@ sealed class SmartspaceMode(
 ) {
     companion object {
         fun fromString(value: String): SmartspaceMode = when (value) {
-            "google" -> GoogleSmartspace
-            "google_search" -> GoogleSearchSmartspace
             "smartspacer" -> Smartspacer
             else -> LawnchairSmartspace
         }
@@ -24,8 +22,6 @@ sealed class SmartspaceMode(
          */
         fun values() = listOf(
             LawnchairSmartspace,
-            GoogleSmartspace,
-            GoogleSearchSmartspace,
             Smartspacer,
         )
     }
@@ -39,24 +35,6 @@ object LawnchairSmartspace : SmartspaceMode(
 ) {
     override fun toString() = "lawnchair"
     override fun isAvailable(context: Context): Boolean = true
-}
-
-object GoogleSearchSmartspace : SmartspaceMode(
-    nameResourceId = R.string.smartspace_mode_google_search,
-    layoutResourceId = R.layout.search_container_workspace,
-) {
-    override fun toString(): String = "google_search"
-
-    override fun isAvailable(context: Context): Boolean = context.packageManager.isPackageInstalledAndEnabled("com.google.android.googlequicksearchbox")
-}
-
-object GoogleSmartspace : SmartspaceMode(
-    nameResourceId = R.string.smartspace_mode_google,
-    layoutResourceId = R.layout.smartspace_legacy,
-) {
-    override fun toString(): String = "google"
-
-    override fun isAvailable(context: Context): Boolean = context.packageManager.isPackageInstalledAndEnabled("com.google.android.googlequicksearchbox")
 }
 
 object Smartspacer : SmartspaceMode(

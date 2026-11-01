@@ -1,5 +1,6 @@
 package app.lawnchair.ui.preferences.destinations
 
+import app.lawnchair.icons.onAppIconChanged
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.LauncherApps
