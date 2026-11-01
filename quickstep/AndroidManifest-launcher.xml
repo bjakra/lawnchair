@@ -61,7 +61,10 @@
             android:taskAffinity=""
             android:exported="true"
             android:enabled="true">
-            <intent-filter>
+            <!-- Graphite: priority 1 makes Lawnchair the default home over the system Launcher3
+                 (PermissionController picks the highest-priority HOME activity). No LAUNCHER
+                 category, so Lawnchair doesn't list itself in its own app drawer. -->
+            <intent-filter android:priority="1">
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.SHOW_WORK_APPS" />
                 <action android:name="android.intent.action.ALL_APPS" />
@@ -69,7 +72,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.MONKEY"/>
                 <category android:name="android.intent.category.LAUNCHER_APP" />
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <meta-data
                 android:name="com.android.launcher3.grid.control"
