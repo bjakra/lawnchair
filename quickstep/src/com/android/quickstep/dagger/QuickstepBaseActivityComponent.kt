@@ -25,6 +25,7 @@ import com.android.quickstep.fallback.FallbackWindowRecentsView
 import com.android.quickstep.views.DesktopTaskView
 import com.android.quickstep.views.GroupedTaskView
 import com.android.quickstep.views.LauncherRecentsView
+import com.android.quickstep.views.RecentsViewDependencies
 import com.android.quickstep.views.TaskView
 
 /** Activity Quickstep base component for Dagger injection. */
@@ -48,4 +49,6 @@ interface QuickstepBaseActivityComponent : BaseActivityContextComponent {
     fun inject(recentsView: FallbackActivityRecentsView)
 
     fun inject(recentsView: FallbackWindowRecentsView)
+
+    val recentsViewDependencies: RecentsViewDependencies
 }

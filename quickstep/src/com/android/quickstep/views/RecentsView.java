@@ -253,7 +253,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import javax.inject.Inject;
 
 /**
  * A list of recent tasks.
@@ -831,22 +830,22 @@ public abstract class RecentsView<
      */
     protected boolean mAnyTaskHasBeenDismissed;
 
-    @Inject RecentsViewModel mRecentsViewModel;
-    @Inject RecentsViewModelHelper mHelper;
-    @Inject DesktopState mDesktopState;
-    @Inject DesktopVisibilityController mDesktopVisibilityController;
-    @Inject OverviewComponentObserver mOverviewComponentObserver;
-    @Inject RecentsModel mRecentsModel;
-    @Inject SystemUiProxy mSystemUiProxy;
-    @Inject TopTaskTracker mTopTaskTracker;
-    @Inject VibratorWrapper mVibratorWrapper;
-    @Inject RecentsOrientedState mOrientationState;
+    RecentsViewModel mRecentsViewModel;
+    RecentsViewModelHelper mHelper;
+    DesktopState mDesktopState;
+    DesktopVisibilityController mDesktopVisibilityController;
+    OverviewComponentObserver mOverviewComponentObserver;
+    RecentsModel mRecentsModel;
+    SystemUiProxy mSystemUiProxy;
+    TopTaskTracker mTopTaskTracker;
+    VibratorWrapper mVibratorWrapper;
+    RecentsOrientedState mOrientationState;
 
     // Package-private for Dagger only, should not use directly
     @VisibleForTesting
-    @Inject RecentsViewUtils.Factory mUtilsFactory;
+    RecentsViewUtils.Factory mUtilsFactory;
     @VisibleForTesting
-    @Inject RecentsDismissUtils.Factory mDismissUtilsFactory;
+    RecentsDismissUtils.Factory mDismissUtilsFactory;
 
     protected final RecentsViewUtils mUtils;
     protected final RecentsDismissUtils mDismissUtils;
@@ -873,6 +872,9 @@ public abstract class RecentsView<
         mContainerInterface = mContainer.getContainerInterface();
 
         initialiseInjectables();
+        // Graphite: Dagger's KSP generator can't write a MembersInjector for this class's
+        // self-bounded type parameters, so the injected fields arrive through a holder.
+        mContainer.getActivityComponent().getRecentsViewDependencies().applyTo(this);
         mUtils = mUtilsFactory.create(this);
         mDismissUtils = mDismissUtilsFactory.create(this);
 

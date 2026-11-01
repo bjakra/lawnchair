@@ -116,7 +116,6 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
 
     TaskOverlayFactory getTaskOverlayFactory();
 
-    InsightHandler getInsightHandler();
 
     TaskbarUiStateMonitor getTaskbarUiStateMonitor();
 
