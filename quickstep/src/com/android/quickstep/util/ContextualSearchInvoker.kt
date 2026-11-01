@@ -16,6 +16,7 @@
 
 package com.android.quickstep.util
 
+import android.app.contextualsearch.ContextualSearchConfig
 import android.app.contextualsearch.ContextualSearchManager
 import android.app.contextualsearch.ContextualSearchManager.ENTRYPOINT_LONG_PRESS_HOME
 import android.app.contextualsearch.ContextualSearchManager.FEATURE_CONTEXTUAL_SEARCH
@@ -108,7 +109,11 @@ internal constructor(
      * @return `true` if the override was handled, i.e. an assist surface was shown or the request
      *   should be ignored. `false` means the caller should start assist another way.
      */
-    fun tryStartAssistOverride(invocationType: Int): Boolean {
+    @JvmOverloads
+    fun tryStartAssistOverride(
+        invocationType: Int,
+        config: ContextualSearchConfig? = null,
+    ): Boolean {
         if (invocationType == AssistUtils.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS) {
             // LC-Note: QuickSwitch compatibility!
             if (
@@ -119,12 +124,13 @@ internal constructor(
                 return false
             }
 
-            val success = show(ENTRYPOINT_LONG_PRESS_HOME)
+            val success = show(ENTRYPOINT_LONG_PRESS_HOME, config)
             if (success) {
+                val displayId = config?.displayId ?: DEFAULT_DISPLAY
                 val runningPackage =
                     TopTaskTracker.INSTANCE[context].getCachedTopTask(
                             /* filterOnlyVisibleRecents */ true,
-                            DEFAULT_DISPLAY,
+                            displayId,
                         )
                         .getPackageName()
                 statsLogManager
@@ -145,9 +151,10 @@ internal constructor(
      * @param entryPoint one of the ENTRY_POINT_* constants defined in this class
      * @return true if invocation was successful, false otherwise
      */
-    fun show(entryPoint: Int): Boolean {
+    @JvmOverloads
+    fun show(entryPoint: Int, config: ContextualSearchConfig? = null): Boolean {
         return if (!runContextualSearchInvocationChecksAndLogFailures()) false
-        else invokeContextualSearchUnchecked(entryPoint)
+        else invokeContextualSearchUnchecked(entryPoint, config = config)
     }
 
     /**
@@ -182,9 +189,6 @@ internal constructor(
             if (!contextualSearchStateManager.isInvocationAllowedOnKeyguard) {
                 Log.i(TAG, "Contextual Search invocation failed: keyguard not allowed")
                 return false
-            } else if (!contextualSearchStateManager.supportsShowWhenLocked()) {
-                Log.i(TAG, "Contextual Search invocation failed: AGA doesn't support keyguard")
-                return false
             }
         }
         if (isInSplitscreen()) {
@@ -210,13 +214,18 @@ internal constructor(
      * @param entryPoint Entry point identifier, passed to ContextualSearchService.
      * @return true if invocation was successful, false otherwise
      */
-    fun invokeContextualSearchUncheckedWithHaptic(entryPoint: Int): Boolean {
-        return invokeContextualSearchUnchecked(entryPoint, withHaptic = true)
+    @JvmOverloads
+    fun invokeContextualSearchUncheckedWithHaptic(
+        entryPoint: Int,
+        config: ContextualSearchConfig? = null,
+    ): Boolean {
+        return invokeContextualSearchUnchecked(entryPoint, withHaptic = true, config)
     }
 
     private fun invokeContextualSearchUnchecked(
         entryPoint: Int,
         withHaptic: Boolean = false,
+        config: ContextualSearchConfig? = null,
     ): Boolean {
         if (withHaptic && DeviceConfigWrapper.get().enableSearchHapticCommit) {
             contextualSearchHapticManager.vibrateForSearch()
@@ -228,10 +237,10 @@ internal constructor(
         if (recentsContainerInterface?.isInLiveTileMode() == true) {
             Log.i(TAG, "Contextual Search invocation attempted: live tile")
             endLiveTileMode(recentsContainerInterface) {
-                contextualSearchManager.startContextualSearch(entryPoint)
+                contextualSearchManager.startContextualSearch(entryPoint, config)
             }
         } else {
-            contextualSearchManager.startContextualSearch(entryPoint)
+            contextualSearchManager.startContextualSearch(entryPoint, config)
         }
         return true
     }
@@ -271,7 +280,7 @@ internal constructor(
         val recentsView: RecentsView<*, *> = recentsViewContainer.getOverviewPanel()
         recentsView.switchToScreenshot {
             recentsView.finishRecentsAnimation(
-                true, /* toRecents */
+                true, /* toHome */
                 false, /* shouldPip */
                 onCompleteRunnable,
             )

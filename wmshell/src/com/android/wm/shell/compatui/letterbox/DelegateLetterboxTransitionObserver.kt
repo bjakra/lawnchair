@@ -20,12 +20,12 @@ import android.os.IBinder
 import android.view.SurfaceControl
 import android.window.TransitionInfo
 import com.android.internal.protolog.ProtoLog
-import com.android.window.flags.Flags.appCompatRefactoring
 import com.android.wm.shell.compatui.letterbox.lifecycle.LetterboxLifecycleController
 import com.android.wm.shell.compatui.letterbox.lifecycle.LetterboxLifecycleEventFactory
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_APP_COMPAT
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
+import com.android.wm.shell.transition.Transitions.TRANSIT_MOVE_LETTERBOX_REACHABILITY
 
 /**
  * The [TransitionObserver] to handle Letterboxing events in Shell delegating to a
@@ -35,43 +35,44 @@ class DelegateLetterboxTransitionObserver(
     shellInit: ShellInit,
     private val transitions: Transitions,
     private val letterboxLifecycleController: LetterboxLifecycleController,
-    private val letterboxLifecycleEventFactory: LetterboxLifecycleEventFactory
+    private val letterboxLifecycleEventFactory: LetterboxLifecycleEventFactory,
 ) : Transitions.TransitionObserver {
 
     companion object {
-        @JvmStatic
-        private val TAG = "DelegateLetterboxTransitionObserver"
+        @JvmStatic private val TAG = "DelegateLetterboxTransitionObserver"
     }
 
     init {
-        if (appCompatRefactoring()) {
-            logV("Initializing LetterboxTransitionObserver")
-            shellInit.addInitCallback({
-                transitions.registerObserver(this)
-            }, this)
-        }
+        logV("Initializing LetterboxTransitionObserver")
+        shellInit.addInitCallback({ transitions.registerObserver(this) }, this)
     }
 
     override fun onTransitionReady(
         transition: IBinder,
         info: TransitionInfo,
         startTransaction: SurfaceControl.Transaction,
-        finishTransaction: SurfaceControl.Transaction
+        finishTransaction: SurfaceControl.Transaction,
     ) {
+        if (info.type == TRANSIT_MOVE_LETTERBOX_REACHABILITY) {
+            // Reachability transitions are handled in LetterboxAnimationHandler
+            return
+        }
         info.changes.forEach { change ->
             if (letterboxLifecycleEventFactory.canHandle(change)) {
                 letterboxLifecycleEventFactory.createLifecycleEvent(change)?.let { event ->
                     letterboxLifecycleController.onLetterboxLifecycleEvent(
                         event,
                         startTransaction,
-                        finishTransaction
+                        finishTransaction,
                     )
                 }
             }
         }
     }
 
+    // TODO(b/478792808): Remove suppression
+    @SuppressWarnings("ProtoLogNonConstantFormat")
     private fun logV(msg: String) {
-        ProtoLog.v(WM_SHELL_APP_COMPAT, "%s: %s", TAG, msg)
+        ProtoLog.v(WM_SHELL_APP_COMPAT, "$TAG: $msg")
     }
 }

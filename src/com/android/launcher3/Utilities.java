@@ -16,15 +16,17 @@
 
 package com.android.launcher3;
 
+import static com.android.launcher3.Flags.enableCursorDrivenWorkflows;
 import static com.android.launcher3.Flags.enableMouseInteractionChanges;
+import static com.android.launcher3.Flags.reduceWorkspaceBlurUsage;
+import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.ICON_OVERLAP_FACTOR;
 import static com.android.launcher3.graphics.ShapeDelegate.DEFAULT_PATH_SIZE;
-import static com.android.launcher3.icons.BitmapInfo.FLAG_THEMED;
 import static com.android.launcher3.icons.IconNormalizer.ICON_VISIBLE_AREA_FACTOR;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_TYPE_MAIN;
+import static com.android.window.flags.Flags.enableNonDefaultDisplaySplitBugfix;
 
-import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.Person;
@@ -42,13 +44,9 @@ import android.graphics.LightingColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.AdaptiveIconDrawable;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.DeadObjectException;
@@ -62,7 +60,6 @@ import android.text.TextUtils;
 import android.text.style.TtsSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Pair;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -74,10 +71,9 @@ import androidx.annotation.ChecksSdkIntAtLeast;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.WorkerThread;
 import androidx.core.graphics.ColorUtils;
 
-import com.android.launcher3.dragndrop.FolderAdaptiveIcon;
+import com.android.launcher3.deviceprofile.DeviceProperties;
 import com.android.launcher3.graphics.ThemeManager;
 import com.android.launcher3.graphics.TintedDrawableSpan;
 import com.android.launcher3.icons.BitmapInfo;
@@ -92,20 +88,19 @@ import com.android.launcher3.pm.UserCache;
 import com.android.launcher3.shortcuts.ShortcutKey;
 import com.android.launcher3.shortcuts.ShortcutRequest;
 import com.android.launcher3.testing.shared.ResourceUtils;
-import com.android.launcher3.util.FlagOp;
 import com.android.launcher3.util.IntArray;
 import com.android.launcher3.util.PackageManagerHelper;
 import com.android.launcher3.util.SplitConfigurationOptions.SplitPositionOption;
-import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.BaseDragLayer;
-import com.android.launcher3.widget.PendingAddShortcutInfo;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import app.lawnchair.icons.ExtendedBitmapDrawable;
 import app.lawnchair.preferences.PreferenceManager;
@@ -252,7 +247,7 @@ public final class Utilities {
         }
     }
 
-    private static boolean sIsRunningInTestHarness = ActivityManager.isRunningInTestHarness();
+    private static boolean sIsRunningInTestHarness = ActivityManager.isRunningInUserTestHarness();
 
     public static boolean isRunningInTestHarness() {
         return sIsRunningInTestHarness;
@@ -607,8 +602,8 @@ public final class Utilities {
     }
 
     /** Converts a pixel value (px) to scale pixel value (SP) for the current device. */
-    public static float pxToSp(float size) {
-        return size / Resources.getSystem().getDisplayMetrics().scaledDensity;
+    public static float pxToSp(float size, Context context) {
+        return size / context.getResources().getDisplayMetrics().scaledDensity;
     }
 
     public static float dpiFromPx(float size, int densityDpi) {
@@ -634,6 +629,10 @@ public final class Utilities {
 
     public static int pxFromSp(float size, DisplayMetrics metrics) {
         return pxFromSp(size, metrics, 1f);
+    }
+
+    public static int getIconSizeWithOverlap(int iconSize) {
+        return (int) Math.ceil(iconSize * ICON_OVERLAP_FACTOR);
     }
 
     public static int pxFromSp(float size, DisplayMetrics metrics, float scale) {
@@ -754,118 +753,6 @@ public final class Utilities {
                 .equals(Locale.ENGLISH.getLanguage());
     }
 
-    /**
-     * Returns the full drawable for info as multiple layers of AdaptiveIconDrawable. The second
-     * drawable in the Pair is the badge used with the icon.
-     *
-     * @param useTheme If true, will theme icons when applicable
-     */
-    @SuppressLint("UseCompatLoadingForDrawables")
-    @Nullable
-    @WorkerThread
-    public static <T extends Context & ActivityContext> Pair<AdaptiveIconDrawable, Drawable>
-            getFullDrawable(T context, ItemInfo info, int width, int height, boolean useTheme) {
-        LauncherAppState appState = LauncherAppState.getInstance(context);
-        Drawable mainIcon = null;
-
-        Drawable badge = null;
-        if ((info instanceof ItemInfoWithIcon iiwi) && !iiwi.getMatchingLookupFlag().useLowRes()) {
-            badge = iiwi.bitmap.getBadgeDrawable(context, useTheme, getIconShapeOrNull(context));
-        }
-
-        if (info instanceof PendingAddShortcutInfo) {
-            ShortcutConfigActivityInfo activityInfo =
-                    ((PendingAddShortcutInfo) info).getActivityInfo(context);
-            mainIcon = activityInfo.getFullResIcon(appState.getIconCache());
-        } else if (info.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION) {
-            LauncherActivityInfo activityInfo = context.getSystemService(LauncherApps.class)
-                    .resolveActivity(info.getIntent(), info.user);
-            if (activityInfo == null) {
-                return null;
-            }
-            if (Utilities.ATLEAST_S) {
-                mainIcon = appState.getIconCache().getFullResIcon(activityInfo.getActivityInfo());
-            } else {
-                mainIcon = appState.getIconCache().getFullResIcon(activityInfo.getComponentName().getPackageName());
-            }
-        } else if (info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT) {
-            List<ShortcutInfo> siList = ShortcutKey.fromItemInfo(info)
-                    .buildRequest(context)
-                    .query(ShortcutRequest.ALL);
-            if (siList.isEmpty()) {
-                return null;
-            } else {
-                ShortcutInfo si = siList.get(0);
-                mainIcon = CacheableShortcutInfo.getIcon(context, si,
-                        appState.getInvariantDeviceProfile().fillResIconDpi);
-                // Only fetch badge if the icon is on workspace
-                if (info.id != ItemInfo.NO_ID && badge == null) {
-                    badge = appState.getIconCache().getShortcutInfoBadge(si).newIcon(
-                            context,
-                            ThemeManager.INSTANCE.get(context).isIconThemeEnabled()
-                                    ? FLAG_THEMED : 0,
-                            getIconShapeOrNull(context)
-                    );
-                }
-            }
-        } else if (info.itemType == LauncherSettings.Favorites.ITEM_TYPE_FOLDER) {
-            FolderAdaptiveIcon icon = FolderAdaptiveIcon.createFolderAdaptiveIcon(
-                    context, info.id, new Point(width, height));
-            if (icon == null) {
-                return null;
-            }
-            mainIcon =  icon;
-            badge = icon.getBadge();
-        }
-
-        if (mainIcon == null) {
-            return null;
-        }
-        AdaptiveIconDrawable result;
-
-        if (ExtendedBitmapDrawable.isFromIconPack(mainIcon) || (!PreferenceManager.INSTANCE.get(context).getWrapAdaptiveIcons().get() && info.itemType != LauncherSettings.Favorites.ITEM_TYPE_FOLDER))
-            return null;
-        if (mainIcon instanceof AdaptiveIconDrawable aid) {
-            result = aid;
-        } else {
-            // Wrap the main icon in AID
-            try (LauncherIcons li = LauncherIcons.obtain(context)) {
-                result = li.wrapToAdaptiveIcon(mainIcon);
-            }
-        }
-        if (result == null) {
-            return null;
-        }
-
-        // Inject theme icon drawable
-        if (ATLEAST_T && useTheme) {
-            IconThemeController themeController =
-                    ThemeManager.INSTANCE.get(context).getThemeController();
-            if (themeController != null) {
-                result = themeController.createThemedAdaptiveIcon(
-                        context,
-                        result,
-                        info instanceof ItemInfoWithIcon iiwi ? iiwi.bitmap : null);
-                if (result == null) {
-                    return null;
-                }
-            }
-        }
-
-        if (badge == null) {
-            badge = BitmapInfo.LOW_RES_INFO.withFlags(
-                    UserCache.INSTANCE.get(context)
-                            .getUserInfo(info.user)
-                            .applyBitmapInfoFlags(FlagOp.NO_OP)
-                    )
-                    .getBadgeDrawable(context, useTheme, getIconShapeOrNull(context));
-            if (badge == null) {
-                badge = new ColorDrawable(Color.TRANSPARENT);
-            }
-        }
-        return Pair.create(result, badge);
-    }
-
     public static float squaredHypot(float x, float y) {
         return x * x + y * y;
     }
@@ -981,12 +868,12 @@ public final class Utilities {
     public static List<SplitPositionOption> getSplitPositionOptions(
             DeviceProfile dp) {
         int splitIconRes;
-        if (dp.isLeftRightSplit) {
+        if (dp.getSysuiProfile().isLeftRightSplit()) {
             splitIconRes = R.drawable.ic_split_horizontal;
         } else {
             splitIconRes = R.drawable.ic_split_vertical;
         }
-        int stagePosition = dp.isLeftRightSplit
+        int stagePosition = dp.getSysuiProfile().isLeftRightSplit()
                 ? STAGE_POSITION_BOTTOM_OR_RIGHT
                 : STAGE_POSITION_TOP_OR_LEFT;
         return Collections.singletonList(new SplitPositionOption(
@@ -1124,5 +1011,58 @@ public final class Utilities {
     public static boolean shouldEnableMouseInteractionChanges(Context context) {
         return enableMouseInteractionChanges() && context.getResources().getBoolean(
                 R.bool.desktop_form_factor);
+    }
+
+    /**
+     * Returns whether cursor-driven workflows intended for the desktop form factor should be
+     * enabled.
+     */
+    public static boolean shouldEnableCursorDrivenWorkflows(Context context) {
+        return enableCursorDrivenWorkflows() && context.getResources().getBoolean(
+                R.bool.desktop_form_factor);
+    }
+
+    /**
+     * Returns a partial, loggable stack trace.
+     */
+    public static String getTrimmedStackTrace(String callingMethodName) {
+        String stackTrace = Log.getStackTraceString(new Exception());
+        return Arrays.stream(stackTrace.split("\\n"))
+                .skip(2) // Removes the line "java.lang.Exception" and "getTrimmedStackTrace".
+                .filter(traceLine -> !traceLine.contains(callingMethodName))
+                .limit(3)
+                .collect(Collectors.joining("\n"));
+    }
+
+    /**
+     * Determines whether the split should be left/right split layout and returns a boolean.
+     * The split orientation depends on the device's properties (tablet vs. phone, landscape vs.
+     * portrait), if current display is external display, and flags.
+     *
+     * @return {@code true} if the split should be a left/right split, {@code false} if it should
+     *     be a top/bottom split.
+     */
+    public static boolean calculateIsLeftRightSplit(boolean allowLeftRightSplitInPortrait,
+            DeviceProperties deviceProperties, boolean isExternalDisplay) {
+        if (allowLeftRightSplitInPortrait && deviceProperties.isLargeScreen()) {
+            if (!isExternalDisplay || !enableNonDefaultDisplaySplitBugfix()) {
+                return !deviceProperties.isLandscape();
+            } else {
+                // If split is started in external display and the non_default_display_split
+                // is enabled, set isLeftRightSplit to true in landscape mode.
+                return deviceProperties.isLandscape();
+            }
+        } else {
+            return deviceProperties.isLandscape();
+        }
+    }
+
+    /**
+     * Checks whether the full workspace blur and zoom effects are disabled behind surfaces like the
+     * "All apps" panel or the widget picker.
+     */
+    public static boolean shouldReduceWorkspaceBlurUsage(Context context) {
+        return reduceWorkspaceBlurUsage() && context.getResources().getBoolean(
+                R.bool.reduce_workspace_blur_usage);
     }
 }

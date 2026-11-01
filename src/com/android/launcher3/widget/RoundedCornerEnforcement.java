@@ -16,8 +16,6 @@
 
 package com.android.launcher3.widget;
 
-import static com.android.launcher3.Flags.useSystemRadiusForAppWidgets;
-
 import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.content.res.Resources;
@@ -30,7 +28,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.R;
-
 import com.android.launcher3.Utilities;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,16 +98,7 @@ public class RoundedCornerEnforcement {
      */
     public static float computeEnforcedRadius(@NonNull Context context) {
         Resources res = context.getResources();
-        if (!Utilities.ATLEAST_S) {
-            return res.getDimension(R.dimen.enforced_rounded_corner_max_radius);
-        }
-        float systemRadius = res.getDimension(android.R.dimen.system_app_widget_background_radius);
-        if (useSystemRadiusForAppWidgets()) {
-            return systemRadius;
-        }
-
-        float defaultRadius = res.getDimension(R.dimen.enforced_rounded_corner_max_radius);
-        return Math.min(defaultRadius, systemRadius);
+        return res.getDimension(android.R.dimen.system_app_widget_background_radius);
     }
 
     private static List<View> findViewsWithId(View view, @IdRes int viewId) {

@@ -34,6 +34,7 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Handler;
 import android.util.Log;
 import android.view.IWindow;
 import android.view.SurfaceControl;
@@ -43,7 +44,6 @@ import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.window.flags2.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -300,16 +300,30 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
 
     /** Releases the surface control and tears down the view hierarchy. */
     public void release() {
+        Runnable removeViews = () -> {
+            removeLayout();
+
+            if (mViewHost != null) {
+                mViewHost.release();
+                mViewHost = null;
+            }
+        };
+
         // Hiding before releasing to avoid flickering when transitioning to the Home screen.
         View layout = getLayout();
         if (layout != null) {
-            layout.setVisibility(View.GONE);
-        }
-        removeLayout();
-
-        if (mViewHost != null) {
-            mViewHost.release();
-            mViewHost = null;
+            final Handler handler = layout.getHandler();
+            if (handler != null && !handler.getLooper().isCurrentThread()) {
+                handler.post(() -> {
+                    layout.setVisibility(View.GONE);
+                    removeViews.run();
+                });
+            } else {
+                layout.setVisibility(View.GONE);
+                removeViews.run();
+            }
+        } else {
+            removeViews.run();
         }
 
         if (mLeash != null) {
@@ -328,15 +342,8 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
         if (mViewHost == null) {
             return;
         }
-        if (Flags.appCompatAsyncRelayout()) {
-            mViewHost.relayout(windowLayoutParams, tx -> {
-                updateSurfacePosition(tx);
-                tx.apply();
-            });
-        } else {
-            mViewHost.relayout(windowLayoutParams);
-            updateSurfacePosition();
-        }
+        mViewHost.relayout(windowLayoutParams);
+        updateSurfacePosition();
     }
 
     @NonNull

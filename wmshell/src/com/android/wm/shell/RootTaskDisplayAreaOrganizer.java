@@ -27,6 +27,7 @@ import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.SurfaceControl;
@@ -44,6 +45,7 @@ import com.android.wm.shell.sysui.ShellInit;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.Executor;
 
 /** Display area organizer for the root/default TaskDisplayAreas */
@@ -87,6 +89,20 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
         }
     }
 
+    /**
+     * Returns the initial set of task display areas.
+     * This can be removed once we have a synchronizing transition for the initial state when SysUI
+     * starts up.
+     */
+    @NonNull
+    public List<Pair<DisplayAreaInfo, SurfaceControl>> getInitialTaskDisplayAreas() {
+        final ArrayList<Pair<DisplayAreaInfo, SurfaceControl>> displayAreas = new ArrayList<>();
+        for (int i = mDisplayAreasInfo.size() - 1; i >= 0; --i) {
+            displayAreas.add(new Pair<>(mDisplayAreasInfo.valueAt(i), mLeashes.valueAt(i)));
+        }
+        return displayAreas;
+    }
+
     public void registerListener(int displayId, RootTaskDisplayAreaListener listener) {
         ArrayList<RootTaskDisplayAreaListener> listeners = mListeners.get(displayId);
         if (listeners == null) {
@@ -124,11 +140,18 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
     }
 
     /**
-     * Sets the layer of {@param sc} to be relative to the TDA on {@param displayId}.
+     * Sets the layer of {@code sc} to be relative to the TDA on {@code displayId}.
+     *
+     * @throws NoSuchElementException if {@code displayId} has not appeared or has been removed.
      */
     public void relZToDisplayArea(int displayId, SurfaceControl sc, SurfaceControl.Transaction t,
             int z) {
-        t.setRelativeLayer(sc, mLeashes.get(displayId), z);
+        final SurfaceControl dsc = mLeashes.get(displayId);
+        if (dsc != null) {
+            t.setRelativeLayer(sc, dsc, z);
+        } else {
+            throw new NoSuchElementException("Display " + displayId + " is not registered");
+        }
     }
 
     /**
@@ -244,6 +267,18 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
     @Nullable
     public DisplayAreaInfo getDisplayAreaInfo(int displayId) {
         return mDisplayAreasInfo.get(displayId);
+    }
+
+    /**
+     * Returns the {@link DisplayAreaInfo} of the display containing the default task display area.
+     */
+    @Nullable
+    public DisplayAreaInfo getDefaultDisplayArea() {
+        for (int i = 0; i < mDisplayAreasInfo.size(); i++) {
+            DisplayAreaInfo info = mDisplayAreasInfo.valueAt(i);
+            if (info.featureId == FEATURE_DEFAULT_TASK_CONTAINER) return info;
+        }
+        return null;
     }
 
     @Nullable

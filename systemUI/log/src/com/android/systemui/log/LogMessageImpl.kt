@@ -32,6 +32,7 @@ data class LogMessageImpl(
     override var str3: String?,
     override var int1: Int,
     override var int2: Int,
+    override var int3: Int,
     override var long1: Long,
     override var long2: Long,
     override var double1: Double,
@@ -39,6 +40,7 @@ data class LogMessageImpl(
     override var bool2: Boolean,
     override var bool3: Boolean,
     override var bool4: Boolean,
+    override var bool5: Boolean,
 ) : LogMessage {
 
     fun clear() {
@@ -62,6 +64,7 @@ data class LogMessageImpl(
         str3 = null
         int1 = 0
         int2 = 0
+        int3 = 0
         long1 = 0
         long2 = 0
         double1 = 0.0
@@ -69,6 +72,7 @@ data class LogMessageImpl(
         bool2 = false
         bool3 = false
         bool4 = false
+        bool5 = false
     }
 
     companion object Factory {
@@ -86,7 +90,9 @@ data class LogMessageImpl(
                 0,
                 0,
                 0,
+                0,
                 0.0,
+                false,
                 false,
                 false,
                 false,

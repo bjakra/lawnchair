@@ -52,7 +52,6 @@ import com.android.launcher3.celllayout.DelegatedCellDrawing;
 import com.android.launcher3.graphics.PathWrapper;
 import com.android.launcher3.graphics.ShapeDelegate;
 import com.android.launcher3.graphics.ThemeManager;
-import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.ActivityContext;
 import app.lawnchair.preferences2.PreferenceCacheExtensionsKt;
 
@@ -92,7 +91,6 @@ public class PreviewBackground extends DelegatedCellDrawing {
     float mScale = 1f;
     private int mBgColor;
     private int mStrokeColor;
-    private int mDotColor;
     private float mStrokeWidth;
     private int mStrokeAlpha = MAX_BG_OPACITY;
     private int mShadowAlpha = 255;
@@ -204,10 +202,10 @@ public class PreviewBackground extends DelegatedCellDrawing {
             basePreviewOffsetX = (availableSpaceX - previewSize) / 2;
             basePreviewOffsetY = topPadding + (allAppsIconSize - previewSize) / 2;
         } else {
-            previewSize = grid.folderIconSizePx;
+            previewSize = grid.getFolderProfile().getFolderIconSizePx();
 
             basePreviewOffsetX = (availableSpaceX - previewSize) / 2;
-            basePreviewOffsetY = topPadding + grid.folderIconOffsetYPx;
+            basePreviewOffsetY = topPadding + grid.getFolderProfile().getFolderIconOffsetYPx();
         }
 
         // Stroke width is 1dp
@@ -277,10 +275,6 @@ public class PreviewBackground extends DelegatedCellDrawing {
 
     public int getBgColor() {
         return mBgColor;
-    }
-
-    public int getDotColor() {
-        return mDotColor;
     }
 
     public void drawBackground(Canvas canvas) {

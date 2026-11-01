@@ -25,7 +25,7 @@ import static android.util.RotationUtils.rotateBounds;
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
 import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
 import static com.android.wm.shell.desktopmode.DesktopModeUtils.calculateInitialBounds;
-import static com.android.wm.shell.desktopmode.DesktopTasksController.DESKTOP_MODE_INITIAL_BOUNDS_SCALE;
+import static com.android.wm.shell.desktopmode.DesktopModeUtils.DESKTOP_MODE_INITIAL_BOUNDS_SCALE;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN;
@@ -64,7 +64,6 @@ import android.view.Choreographer;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
-import android.window.DesktopExperienceFlags;
 import android.window.DisplayAreaInfo;
 import android.window.TaskOrganizer;
 import android.window.TaskSnapshot;
@@ -87,8 +86,8 @@ import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.PipUtils;
-import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopUserRepositories;
+import com.android.wm.shell.desktopmode.data.DesktopRepository;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.animation.Interpolators;
@@ -734,8 +733,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     // TODO(b/377581840): Update this check to include non-minimized cases, e.g. split to PiP etc.
     private boolean isPipExitingToDesktopMode() {
         DesktopRepository currentRepo = getCurrentRepo();
-        return DesktopExperienceFlags.ENABLE_DESKTOP_WINDOWING_PIP.isTrue() && currentRepo != null
-                && (currentRepo.isAnyDeskActive(mTaskInfo.displayId)
+        return currentRepo != null && (currentRepo.isAnyDeskActive(mTaskInfo.displayId)
                     || isDisplayInFreeform());
     }
 
@@ -838,7 +836,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPipUiEventLoggerLogger.log(uiEventEnum);
 
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "onTaskAppeared: %s, state=%s, taskId=%s", mTaskInfo.topActivity,
+                "onTaskAppeared: %s, state=%s, taskId=%d", mTaskInfo.topActivity,
                 mPipTransitionState, mTaskInfo.taskId);
         if (mPipTransitionState.getInSwipePipToHomeTransition()) {
             if (mWaitForFixedRotation) {
@@ -1098,7 +1096,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     /** Explicitly set the visibility of PiP window. */
     public void setPipVisibility(boolean visible) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "setPipVisibility: %s, state=%s visible=%s",
+                "setPipVisibility: %s, state=%s visible=%b",
                 (mTaskInfo != null ? mTaskInfo.topActivity : null), mPipTransitionState, visible);
         if (!isInPip()) {
             return;

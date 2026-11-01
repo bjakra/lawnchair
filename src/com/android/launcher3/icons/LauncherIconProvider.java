@@ -70,7 +70,9 @@ public class LauncherIconProvider extends IconProvider {
     @Override
     public void updateSystemState() {
         super.updateSystemState();
-        mSystemState += "," + mThemeManager.getIconState().toUniqueId();
+        mSystemState = mSystemState.withTheme(
+                mThemeManager.getIconState().getThemeCode(),
+                mThemeManager.getIconState().isCircle());
     }
 
     protected Map<String, ThemeData> getThemedIconMap() {

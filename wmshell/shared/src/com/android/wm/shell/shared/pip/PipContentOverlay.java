@@ -144,12 +144,13 @@ public abstract class PipContentOverlay {
         @Override
         public void attach(SurfaceControl.Transaction tx, SurfaceControl parentLeash) {
             final float taskSnapshotScaleX = (float) mSnapshot.getTaskSize().x
-                    / mSnapshot.getHardwareBuffer().getWidth();
+                    / mSnapshot.getHardwareBufferWidth();
             final float taskSnapshotScaleY = (float) mSnapshot.getTaskSize().y
-                    / mSnapshot.getHardwareBuffer().getHeight();
+                    / mSnapshot.getHardwareBufferHeight();
+            mSnapshot.setBufferToSurface(tx, mLeash);
+
             tx.show(mLeash);
             tx.setLayer(mLeash, Integer.MAX_VALUE);
-            tx.setBuffer(mLeash, mSnapshot.getHardwareBuffer());
             // Relocate the content to parentLeash's coordinates.
             tx.setPosition(mLeash, -mSourceRectHint.left, -mSourceRectHint.top);
             tx.setScale(mLeash, taskSnapshotScaleX, taskSnapshotScaleY);

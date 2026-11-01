@@ -16,7 +16,9 @@
 package com.android.launcher3.widget;
 
 import static android.app.Activity.RESULT_CANCELED;
+import static android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID;
 
+import static com.android.launcher3.BuildConfig.WIDGETS_ENABLED;
 import static com.android.launcher3.BuildConfigs.WIDGETS_ENABLED;
 import static com.android.launcher3.Flags.enableWorkspaceInflation;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
@@ -33,7 +35,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
-import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
 
@@ -74,8 +75,6 @@ import app.lawnchair.LawnchairAppWidgetHostView;
  */
 public class LauncherWidgetHolder {
 
-    private static final String TAG = "LauncherWidgetHolder";
-
     public static final int APPWIDGET_HOST_ID = 1024;
 
     protected static final int FLAG_LISTENING = 1;
@@ -112,8 +111,14 @@ public class LauncherWidgetHolder {
     @Nullable IntConsumer mAppWidgetRemovedCallback;
 
     @AssistedInject
-    protected LauncherWidgetHolder(@Assisted("UI_CONTEXT") @NonNull Context context) {
+    protected LauncherWidgetHolder(
+            @Assisted("UI_CONTEXT") @NonNull Context context,
+            ProvidersUpdateDispatcher updateDispatcher) {
         this(context, APPWIDGET_HOST_ID);
+        // In case of Launcher3, there is no central widget host, but there can only be one active
+        // host at a time. Adding a dispatcher to every created host ensures and the active host
+        // eventually dispatches the update
+        mWidgetHost.registerUpdateDispatcher(updateDispatcher);
     }
 
     public LauncherWidgetHolder(@NonNull Context context, int hostId) {
@@ -152,6 +157,13 @@ public class LauncherWidgetHolder {
             MAIN_EXECUTOR.execute(this::updateDeferredView);
         });
     }
+
+    /**
+     * Tries to start listening for widget updates from a non-primary surface. Widget host only
+     * support listener and adding another listener removes previous listener. Some implementations
+     * like QuickstepWidgetHolder support multiple listener by adding another layer of delegation
+     */
+    public void startListeningForSharedUpdate() { }
 
     /** Update any views which have been deferred because the host was not listening */
     protected void updateDeferredView() {
@@ -200,14 +212,10 @@ public class LauncherWidgetHolder {
      * Called when the launcher is destroyed
      */
     public void destroy() {
-        try {
-            MAIN_EXECUTOR.submit(() -> {
-                clearViews();
-                mWidgetHost.getHolders().remove(this);
-            }).get();
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to remove self from holder list", e);
-        }
+        MAIN_EXECUTOR.execute(() -> {
+            clearViews();
+            mWidgetHost.getHolders().remove(this);
+        });
     }
 
     /**
@@ -215,7 +223,7 @@ public class LauncherWidgetHolder {
      */
     public int allocateAppWidgetId() {
         if (!WIDGETS_ENABLED) {
-            return AppWidgetManager.INVALID_APPWIDGET_ID;
+            return INVALID_APPWIDGET_ID;
         }
 
         return mWidgetHost.allocateAppWidgetId();
@@ -242,6 +250,12 @@ public class LauncherWidgetHolder {
      */
     public void setOnViewCreationCallback(@Nullable Consumer<LauncherAppWidgetHostView> callback) {
         mOnViewCreationCallback = callback;
+    }
+
+    /** Returns a previously set view creation callback */
+    @Nullable
+    public Consumer<LauncherAppWidgetHostView> getOnViewCreationCallback() {
+        return mOnViewCreationCallback;
     }
 
     /** Sets a callback for listening app widget removals */
@@ -424,16 +438,13 @@ public class LauncherWidgetHolder {
     public AppWidgetHostView createView(
             int appWidgetId, @NonNull LauncherAppWidgetProviderInfo appWidget) {
         if (appWidget.isCustomWidget()) {
-            LauncherAppWidgetHostView lahv = new LauncherAppWidgetHostView(mContext);
-            lahv.setAppWidget(0, appWidget);
-            CustomWidgetManager.INSTANCE.get(mContext).onViewCreated(lahv);
-            return lahv;
+            return CustomWidgetManager.INSTANCE.get(mContext).createView(mContext, appWidget);
         }
 
         LauncherAppWidgetHostView view = createViewInternal(appWidgetId, appWidget);
         if (mOnViewCreationCallback != null) mOnViewCreationCallback.accept(view);
         // Do not update mViews on a background thread call, as the holder is not thread safe.
-        if (!enableWorkspaceInflation() || Looper.myLooper() == Looper.getMainLooper()) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
             mViews.put(appWidgetId, view);
         }
         return view;
@@ -499,7 +510,7 @@ public class LauncherWidgetHolder {
             // RemoteViews from system process.
             return new PendingAppWidgetHostView(mContext, this, appWidgetId, appWidget);
         } else {
-            if (enableWorkspaceInflation() && Looper.myLooper() != Looper.getMainLooper()) {
+            if (Looper.myLooper() != Looper.getMainLooper()) {
                 // Widget is being inflated a background thread, just create and
                 // return a placeholder view
                 ListenableHostView hostView = new ListenableHostView(mContext);
@@ -575,6 +586,14 @@ public class LauncherWidgetHolder {
      */
     protected boolean shouldListen(int flags) {
         return (flags & FLAGS_SHOULD_LISTEN) == FLAGS_SHOULD_LISTEN;
+    }
+
+    /**
+     * Get the widget views, mapped by widget ID. This should only be called on the main thread.
+     */
+    @NonNull
+    public SparseArray<LauncherAppWidgetHostView> getViews() {
+        return mViews;
     }
 
     /**

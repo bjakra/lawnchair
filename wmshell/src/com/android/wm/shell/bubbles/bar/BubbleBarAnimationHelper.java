@@ -27,6 +27,7 @@ import static android.view.View.Y;
 
 import static com.android.wm.shell.bubbles.bar.BubbleBarExpandedView.CORNER_RADIUS;
 import static com.android.wm.shell.bubbles.bar.BubbleBarExpandedView.TASK_VIEW_ALPHA;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES_NOISY;
 import static com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED;
 import static com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED_DECELERATE;
@@ -35,19 +36,21 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.Log;
 import android.view.SurfaceControl;
 import android.widget.FrameLayout;
+import android.window.WindowAnimationState;
 
 import androidx.annotation.Nullable;
-import androidx.dynamicanimation.animation.FloatPropertyCompat;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.protolog.ProtoLog;
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.SizeChangeAnimation;
 import com.android.wm.shell.bubbles.Bubble;
@@ -55,8 +58,11 @@ import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.animation.AnimatableScaleMatrix;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.shared.animation.PhysicsAnimator;
+import com.android.wm.shell.shared.bubbles.logging.BubbleLog;
 import com.android.wm.shell.shared.magnetictarget.MagnetizedObject.MagneticTarget;
+import com.android.wm.shell.taskview.TaskView;
 
 /**
  * Helper class to animate a {@link BubbleBarExpandedView} on a bubble.
@@ -112,11 +118,15 @@ public class BubbleBarAnimationHelper {
 
     // TODO(b/381936992): remove expanded bubble state from this helper class
     private BubbleViewProvider mExpandedBubble;
+    private BubbleBarExpandedView mExpandedViewWithPendingAnimation;
+    private final ShellExecutor mMainExecutor;
 
-    public BubbleBarAnimationHelper(Context context, BubblePositioner positioner) {
+    public BubbleBarAnimationHelper(Context context, BubblePositioner positioner,
+            ShellExecutor mainExecutor) {
         mPositioner = positioner;
         mSwitchAnimPositionOffset = context.getResources().getDimensionPixelSize(
                 R.dimen.bubble_bar_expanded_view_switch_offset);
+        mMainExecutor = mainExecutor;
     }
 
     /**
@@ -127,34 +137,30 @@ public class BubbleBarAnimationHelper {
      */
     public void animateExpansion(BubbleViewProvider expandedBubble,
             @Nullable Runnable endRunnable) {
-        ProtoLog.d(WM_SHELL_BUBBLES_NOISY, "BBAnimationHelper.animateExpansion()");
+        BubbleLog.d("BBAnimationHelper.animateExpansion() key=%s", expandedBubble.getKey());
         mExpandedBubble = expandedBubble;
         final BubbleBarExpandedView bbev = getExpandedView();
         if (bbev == null) {
             return;
         }
 
-        mExpandedViewContainerMatrix.setScaleX(0f);
-        mExpandedViewContainerMatrix.setScaleY(0f);
-
         prepareForAnimateIn(bbev);
 
         setScaleFromBubbleBar(mExpandedViewContainerMatrix,
                 1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT);
 
-        bbev.setAnimationMatrix(mExpandedViewContainerMatrix);
+        Animator alphaAnim = createAlphaAnimator(bbev, /* visible= */ true);
+        alphaAnim.setDuration(EXPANDED_VIEW_EXPAND_ALPHA_DURATION);
+        alphaAnim.setInterpolator(Interpolators.PANEL_CLOSE_ACCELERATED);
+        alphaAnim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                bbev.setAnimating(false);
+            }
+        });
 
-        bbev.animateExpansionWhenTaskViewVisible(() -> {
+        Runnable animationRunnable = () -> {
             bbev.getHandleView().setAlpha(1);
-            ObjectAnimator alphaAnim = createAlphaAnimator(bbev, /* visible= */ true);
-            alphaAnim.setDuration(EXPANDED_VIEW_EXPAND_ALPHA_DURATION);
-            alphaAnim.setInterpolator(Interpolators.PANEL_CLOSE_ACCELERATED);
-            alphaAnim.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    bbev.setAnimating(false);
-                }
-            });
             startNewAnimator(alphaAnim);
 
             PhysicsAnimator.getInstance(mExpandedViewContainerMatrix).cancel();
@@ -168,19 +174,18 @@ public class BubbleBarAnimationHelper {
                     .addUpdateListener((target, values) -> {
                         bbev.setAnimationMatrix(mExpandedViewContainerMatrix);
                     })
-                    .withEndActions(() -> {
+                    .withEndOrCancelActions(() -> {
                         bbev.setAnimationMatrix(null);
                         updateExpandedView(bbev);
-                    })
-                    .withEndOrCancelActions(() -> {
                         ProtoLog.d(WM_SHELL_BUBBLES_NOISY,
-                                "BBAnimationHelper.animateExpansion(): finished");
+                                "BBAnimationHelper.animateExpansion.withEndOrCancelActions()");
                         if (endRunnable != null) {
                             endRunnable.run();
                         }
                     })
                     .start();
-        });
+        };
+        animateExpansionWhenTaskViewVisible(bbev, animationRunnable, endRunnable);
     }
 
     private void prepareForAnimateIn(BubbleBarExpandedView bbev) {
@@ -209,14 +214,12 @@ public class BubbleBarAnimationHelper {
             Log.w(TAG, "Trying to animate collapse without a bubble");
             return;
         }
-        bbev.setScaleX(1f);
-        bbev.setScaleY(1f);
-
-        setScaleFromBubbleBar(mExpandedViewContainerMatrix, 1f);
 
         bbev.setAnimating(true);
 
-        ObjectAnimator alphaAnim = createAlphaAnimator(bbev, /* visible= */ false);
+        setScaleFromBubbleBar(mExpandedViewContainerMatrix, 1f);
+
+        Animator alphaAnim = createAlphaAnimator(bbev, /* visible= */ false);
         alphaAnim.setDuration(EXPANDED_VIEW_EXPAND_ALPHA_DURATION);
         alphaAnim.setInterpolator(Interpolators.PANEL_CLOSE_ACCELERATED);
         alphaAnim.addListener(new AnimatorListenerAdapter() {
@@ -225,8 +228,8 @@ public class BubbleBarAnimationHelper {
                 bbev.setAnimating(false);
             }
         });
-        startNewAnimator(alphaAnim);
 
+        startNewAnimator(alphaAnim);
         PhysicsAnimator.getInstance(mExpandedViewContainerMatrix).cancel();
         PhysicsAnimator.getInstance(mExpandedViewContainerMatrix)
                 .spring(AnimatableScaleMatrix.SCALE_X,
@@ -240,13 +243,11 @@ public class BubbleBarAnimationHelper {
                 .addUpdateListener((target, values) -> {
                     bbev.setAnimationMatrix(mExpandedViewContainerMatrix);
                 })
-                .withEndActions(() -> {
+                .withEndOrCancelActions(() -> {
                     bbev.setAnimationMatrix(null);
                     bbev.resetBottomClip();
-                })
-                .withEndOrCancelActions(() -> {
                     ProtoLog.d(WM_SHELL_BUBBLES_NOISY,
-                            "BBAnimationHelper.animateCollapse(): finished");
+                            "BBAnimationHelper.animateCollapse.withEndOrCancelActions()");
                     if (endRunnable != null) {
                         endRunnable.run();
                     }
@@ -267,12 +268,13 @@ public class BubbleBarAnimationHelper {
      *
      * @param fromBubble bubble to hide
      * @param toBubble bubble to show
+     * @param shouldApplyAsJumpcut whether or not to skip the animation to act like as jumpcut.
      * @param endRunnable optional runnable after animation finishes (even if the animation is
      *                    canceled)
      */
     public void animateSwitch(BubbleViewProvider fromBubble, BubbleViewProvider toBubble,
-            @Nullable Runnable endRunnable) {
-        ProtoLog.d(WM_SHELL_BUBBLES_NOISY, "BBAnimationHelper.animateSwitch(): from=%s to=%s",
+            boolean shouldApplyAsJumpcut, @Nullable Runnable endRunnable) {
+        BubbleLog.d("BBAnimationHelper.animateSwitch(): from=%s to=%s",
                 fromBubble.getKey(), toBubble.getKey());
         /*
          * Switch animation
@@ -296,25 +298,66 @@ public class BubbleBarAnimationHelper {
         prepareForAnimateIn(toBbev);
         final float endTx = toBbev.getTranslationX();
         final float startTx = getSwitchAnimationInitialTx(endTx);
-        toBbev.setTranslationX(startTx);
-        toBbev.getHandleView().setAlpha(0f);
-        toBbev.getHandleView().setHandleInitialColor(fromBbev.getHandleView().getHandleColor());
 
-        toBbev.animateExpansionWhenTaskViewVisible(() -> {
-            AnimatorSet switchAnim = new AnimatorSet();
-            switchAnim.playTogether(switchOutAnimator(fromBbev), switchInAnimator(toBbev, endTx));
-            switchAnim.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    ProtoLog.d(WM_SHELL_BUBBLES_NOISY,
-                            "BBAnimationHelper.animateSwitch(): finished");
-                    if (endRunnable != null) {
+        AnimatorSet switchAnim = new AnimatorSet();
+        switchAnim.playTogether(
+                switchOutAnimator(fromBbev), switchInAnimator(toBbev, startTx, endTx));
+
+        final Runnable animationRunnable;
+        if (shouldApplyAsJumpcut) {
+            // For jumpcut animation, we need to wait until the TaskView update transaction is
+            // applied; otherwise, it will remove the closing Task surface before the opening
+            // TaskView is visible.
+            animationRunnable = () -> {
+                // The executeOnTaskViewDraw need to be added when the runnable is executed to make
+                // sure it won't be triggered before #animateExpansionWhenTaskViewVisible.
+                if (endRunnable != null) {
+                    toBbev.executeOnTaskViewDraw(mMainExecutor,
+                            () -> {
+                                ProtoLog.d(WM_SHELL_BUBBLES_NOISY,
+                                        "BBAnimationHelper.animateSwitch(): finished");
+                                endRunnable.run();
+                            });
+                }
+                startNewAnimator(switchAnim);
+                // Immediately jump to the ending stage as jumpcut.
+                switchAnim.end();
+                toBbev.getCaptionView().setAlpha(1f);
+                toBbev.getHandleView().setAlpha(1f);
+            };
+        } else {
+            // For normal animation, the end runnable can be added to onAnimationEnd directly since
+            // the TaskView visible update should have been done early.
+            if (endRunnable != null) {
+                switchAnim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        toBbev.getCaptionView().setAlpha(1f);
+                        toBbev.getHandleView().setAlpha(1f);
+                        ProtoLog.d(WM_SHELL_BUBBLES_NOISY,
+                                "BBAnimationHelper.animateSwitch(): finished");
                         endRunnable.run();
                     }
-                }
-            });
-            startNewAnimator(switchAnim);
-        });
+                });
+            }
+            animationRunnable = () -> startNewAnimator(switchAnim);
+        }
+
+        animateExpansionWhenTaskViewVisible(toBbev, animationRunnable, endRunnable);
+    }
+
+    private void animateExpansionWhenTaskViewVisible(@NonNull BubbleBarExpandedView bbev,
+            @NonNull Runnable animationRunnable, @Nullable Runnable endRunnable) {
+        // When a new animation is requested, the old pending animation should be canceled,
+        // regardless of whether the new animation is run immediately or not.
+        cancelPendingAnimation();
+        boolean pending = bbev.animateExpansionWhenTaskViewVisible(() -> {
+            mExpandedViewWithPendingAnimation = null;
+            animationRunnable.run();
+        }, endRunnable);
+        if (pending) {
+            mExpandedViewWithPendingAnimation = bbev;
+        }
     }
 
     private float getSwitchAnimationInitialTx(float endTx) {
@@ -335,7 +378,7 @@ public class BubbleBarAnimationHelper {
         scaleAnim.setInterpolator(Interpolators.ACCELERATE);
         scaleAnim.setDuration(SWITCH_OUT_SCALE_DURATION);
 
-        ObjectAnimator alphaAnim = createAlphaAnimator(bbev, /* visible= */ false);
+        Animator alphaAnim = createAlphaAnimator(bbev, /* visible= */ false);
         alphaAnim.setStartDelay(SWITCH_OUT_HANDLE_ALPHA_DURATION);
         alphaAnim.setDuration(SWITCH_OUT_ALPHA_DURATION);
 
@@ -354,8 +397,9 @@ public class BubbleBarAnimationHelper {
         return animator;
     }
 
-    private Animator switchInAnimator(BubbleBarExpandedView bbev, float restingTx) {
-        ObjectAnimator positionAnim = ObjectAnimator.ofFloat(bbev, TRANSLATION_X, restingTx);
+    private Animator switchInAnimator(BubbleBarExpandedView bbev, float startTx, float restingTx) {
+        ObjectAnimator positionAnim =
+                ObjectAnimator.ofFloat(bbev, TRANSLATION_X, startTx, restingTx);
         positionAnim.setInterpolator(Interpolators.EMPHASIZED_DECELERATE);
         positionAnim.setStartDelay(SWITCH_IN_ANIM_DELAY);
         positionAnim.setDuration(SWITCH_IN_TX_DURATION);
@@ -368,6 +412,7 @@ public class BubbleBarAnimationHelper {
             @Override
             public void onAnimationStart(Animator animation) {
                 bbev.setSurfaceZOrderedOnTop(true);
+                bbev.setVisibility(VISIBLE);
             }
 
             @Override
@@ -379,6 +424,12 @@ public class BubbleBarAnimationHelper {
             }
         });
 
+        bbev.getCaptionView().setAlpha(0f);
+        ObjectAnimator captionAlphaAnim = ObjectAnimator.ofFloat(bbev.getCaptionView(), ALPHA, 1f);
+        captionAlphaAnim.setStartDelay(SWITCH_IN_ANIM_DELAY);
+        captionAlphaAnim.setDuration(SWITCH_IN_ALPHA_DURATION);
+
+        bbev.getHandleView().setAlpha(0f);
         ObjectAnimator handleAlphaAnim = ObjectAnimator.ofFloat(bbev.getHandleView(), ALPHA, 1f);
         handleAlphaAnim.setStartDelay(SWITCH_IN_HANDLE_ALPHA_DELAY);
         handleAlphaAnim.setDuration(SWITCH_IN_HANDLE_ALPHA_DURATION);
@@ -391,7 +442,7 @@ public class BubbleBarAnimationHelper {
         });
 
         AnimatorSet animator = new AnimatorSet();
-        animator.playTogether(positionAnim, alphaAnim, handleAlphaAnim);
+        animator.playTogether(positionAnim, alphaAnim, captionAlphaAnim, handleAlphaAnim);
 
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -450,6 +501,7 @@ public class BubbleBarAnimationHelper {
 
         int[] location = bbev.getLocationOnScreen();
         int diffFromBottom = mPositioner.getScreenRect().bottom - location[1];
+        final String key = mExpandedBubble != null ? mExpandedBubble.getKey() : "null";
 
         ObjectAnimator animator = ObjectAnimator.ofFloat(
                 bbev, TRANSLATION_Y, bbev.getTranslationY() + (diffFromBottom * 2));
@@ -457,10 +509,17 @@ public class BubbleBarAnimationHelper {
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                ProtoLog.d(WM_SHELL_BUBBLES_NOISY, "BBAnimationHelper.animateDismiss(): finished");
+                BubbleLog.d("BubbleBarAnimationHelper#animateDismiss(): onAnimationEnd key=%s",
+                        key);
                 if (endRunnable != null) {
                     endRunnable.run();
                 }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                BubbleLog.d("BubbleBarAnimationHelper#animateDismiss(): onAnimationCancel key=%s",
+                        key);
             }
         });
         startNewAnimator(animator);
@@ -634,7 +693,8 @@ public class BubbleBarAnimationHelper {
         }
 
         bbev.setTaskViewAlpha(1f);
-        SurfaceControl tvSf = ((Bubble) mExpandedBubble).getTaskView().getSurfaceControl();
+        TaskView taskView = ((Bubble) mExpandedBubble).getTaskView();
+        SurfaceControl tvSf = taskView.getSurfaceControl();
 
         final boolean isOverflow = mExpandedBubble.getKey().equals(BubbleOverflow.KEY);
         final Rect restBounds = new Rect();
@@ -656,6 +716,13 @@ public class BubbleBarAnimationHelper {
             snapshot.release();
             bbev.setSurfaceZOrderedOnTop(false);
             bbev.setAnimating(false);
+            if (Flags.bbevSquareCornersFix()) {
+                try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
+                    t.setWindowCrop(tvSf, taskView.getWidth(), taskView.getHeight());
+                    t.setCornerRadius(tvSf, bbev.getCornerRadius());
+                    t.apply();
+                }
+            }
             if (endRunnable != null) {
                 endRunnable.run();
             }
@@ -664,15 +731,18 @@ public class BubbleBarAnimationHelper {
         bbev.setSurfaceZOrderedOnTop(true);
         a.setDuration(EXPANDED_VIEW_ANIMATE_TO_REST_DURATION);
         a.setInterpolator(EMPHASIZED);
-        a.start();
+        if (Flags.enableBubbleTransitionPlanner()) {
+            startNewAnimator(a);
+        } else {
+            a.start();
+        }
     }
 
-    /**
-     * Cancel current animations
-     */
+    /** Cancel current animations */
     public void cancelAnimations() {
-        ProtoLog.d(WM_SHELL_BUBBLES_NOISY, "BBAnimationHelper.cancelAnimations(): "
-                + "hasRunningAnimator=%b",
+        ProtoLog.d(
+                WM_SHELL_BUBBLES_NOISY,
+                "BBAnimationHelper.cancelAnimations(): hasRunningAnimator=%b",
                 (mRunningAnimator != null && mRunningAnimator.isRunning()));
         PhysicsAnimator.getInstance(mExpandedViewContainerMatrix).cancel();
         if (mRunningAnimator != null) {
@@ -681,6 +751,34 @@ public class BubbleBarAnimationHelper {
             }
             mRunningAnimator = null;
         }
+        cancelPendingAnimation();
+    }
+
+    /** Cancel current animations and return window state */
+    @Nullable
+    public WindowAnimationState cancelAnimationsAndReturnState() {
+        if (!Flags.enableBubbleTransitionPlanner()) {
+            throw new IllegalStateException(
+                    "cancelAnimationsAndReturnState() should not be called if guarding flag is"
+                        + " disabled");
+        }
+        ProtoLog.d(
+                WM_SHELL_BUBBLES,
+                "BBAnimationHelper.cancelAnimationsAndReturnState(): hasRunningAnimator=%b",
+                (mRunningAnimator != null && mRunningAnimator.isRunning()));
+        WindowAnimationState state = null;
+        BubbleBarExpandedView bbev = getExpandedView();
+        if (bbev != null
+                && ((mRunningAnimator != null && mRunningAnimator.isRunning())
+                        || PhysicsAnimator.getInstance(mExpandedViewContainerMatrix).isRunning())) {
+            state = new WindowAnimationState();
+            state.scale = bbev.getScaleX();
+            state.bounds =
+                    new RectF(bbev.getLeft(), bbev.getTop(), bbev.getRight(), bbev.getBottom());
+            state.timestamp = System.currentTimeMillis();
+        }
+        cancelAnimations();
+        return state;
     }
 
     /** Handles IME position changes. */
@@ -693,12 +791,28 @@ public class BubbleBarAnimationHelper {
         bbev.onImeTopChanged(imeTop);
     }
 
+    /**
+     * Cancels the pending animations. This also executes the endRunnable for the animation.
+     * Canceling pending animations prevents out-of-order animation execution.
+     */
+    private void cancelPendingAnimation() {
+        if (mExpandedViewWithPendingAnimation != null) {
+            mExpandedViewWithPendingAnimation.cancelPendingAnimation();
+            mExpandedViewWithPendingAnimation = null;
+        }
+    }
+
     private @Nullable BubbleBarExpandedView getExpandedView() {
         BubbleViewProvider bubble = mExpandedBubble;
         if (bubble != null) {
             return bubble.getBubbleBarExpandedView();
         }
         return null;
+    }
+
+    @VisibleForTesting
+    BubbleBarExpandedView getExpandedViewWithPendingAnimation() {
+        return mExpandedViewWithPendingAnimation;
     }
 
     private void updateExpandedView(BubbleBarExpandedView bbev) {
@@ -718,7 +832,6 @@ public class BubbleBarAnimationHelper {
         bbev.setY(rect.top);
         bbev.setScaleX(1f);
         bbev.setScaleY(1f);
-        bbev.updateLocation();
         bbev.maybeShowOverflow();
     }
 
@@ -735,11 +848,13 @@ public class BubbleBarAnimationHelper {
      * be called before alpha can be applied.
      * Only supports alpha of 1 or 0. Otherwise we can't reset surface z-order at the end.
      */
-    private ObjectAnimator createAlphaAnimator(BubbleBarExpandedView bubbleBarExpandedView,
+    private Animator createAlphaAnimator(BubbleBarExpandedView bubbleBarExpandedView,
             boolean visible) {
-        ObjectAnimator animator = ObjectAnimator.ofFloat(bubbleBarExpandedView, TASK_VIEW_ALPHA,
-                visible ? 1f : 0f);
-        animator.addListener(new AnimatorListenerAdapter() {
+        float startAlpha = visible ? 0f : 1f;
+        float endAlpha = visible ? 1f : 0f;
+        ObjectAnimator alphaAnim = ObjectAnimator.ofFloat(bubbleBarExpandedView, TASK_VIEW_ALPHA,
+                endAlpha);
+        alphaAnim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
                 // Move task view to the top of the window so alpha can be applied to it
@@ -756,6 +871,14 @@ public class BubbleBarAnimationHelper {
                 bubbleBarExpandedView.setSurfaceZOrderedOnTop(false);
             }
         });
+
+        bubbleBarExpandedView.getCaptionView().setAlpha(startAlpha);
+        ObjectAnimator captionAlphaAnim = ObjectAnimator.ofFloat(
+                bubbleBarExpandedView.getCaptionView(), ALPHA, endAlpha);
+
+        AnimatorSet animator = new AnimatorSet();
+        animator.playTogether(alphaAnim, captionAlphaAnim);
+
         return animator;
     }
 

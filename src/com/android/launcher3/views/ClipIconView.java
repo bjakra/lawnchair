@@ -65,6 +65,7 @@ public class ClipIconView extends View implements ClipPathView {
 
     private @Nullable Drawable mForeground;
     private @Nullable Drawable mBackground;
+    private ShapeDelegate mCurrentShape;
 
     private boolean mIsAdaptiveIcon = false;
     private boolean mIsFolderIcon = false;
@@ -172,14 +173,19 @@ public class ClipIconView extends View implements ClipPathView {
 
         mTaskCornerRadius = cornerRadius / scale;
         if (mIsAdaptiveIcon) {
-            final ThemeManager themeManager = ThemeManager.INSTANCE.get(getContext());
             if ((!isOpening || Flags.enableLauncherIconShapes())
                     && progress >= shapeProgressStart) {
                 if (mRevealAnimator == null) {
-                    ShapeDelegate shape = mIsFolderIcon ? themeManager.getFolderShape()
-                            : themeManager.getIconShape();
+                    ShapeDelegate shape;
+                    if (Flags.enableLauncherIconShapes()) {
+                        shape = mCurrentShape;
+                    } else {
+                        final ThemeManager themeManager = ThemeManager.INSTANCE.get(getContext());
+                        shape = mIsFolderIcon ? themeManager.getFolderShape()
+                                : themeManager.getIconShape();
+                    }
                     mRevealAnimator = shape.createRevealAnimator(this, mStartRevealRect,
-                                    mOutline, mTaskCornerRadius, !isOpening);
+                            mOutline, mTaskCornerRadius, !isOpening);
                     mRevealAnimator.addListener(forEndCallback(() -> mRevealAnimator = null));
                     mRevealAnimator.start();
                     // We pause here so we can set the current fraction ourselves.
@@ -229,10 +235,18 @@ public class ClipIconView extends View implements ClipPathView {
      * Sets the icon for this view as part of initial setup
      */
     public void setIcon(@Nullable Drawable drawable, int iconOffset, MarginLayoutParams lp,
-            boolean isOpening, DeviceProfile dp) {
+            boolean isOpening, boolean usingCustomShape, DeviceProfile dp) {
         mIsAdaptiveIcon = drawable instanceof AdaptiveIconDrawable;
         if (mIsAdaptiveIcon) {
             mIsFolderIcon = drawable instanceof FolderAdaptiveIcon;
+            final ThemeManager themeManager = ThemeManager.INSTANCE.get(getContext());
+            if (mIsFolderIcon) {
+                mCurrentShape = themeManager.getFolderShape();
+            } else if (usingCustomShape) {
+                mCurrentShape = themeManager.getIconShape();
+            } else {
+                mCurrentShape = ThemeManager.DEFAULT_SHAPE_DELEGATE;
+            }
 
             AdaptiveIconDrawable adaptiveIcon = (AdaptiveIconDrawable) drawable;
             Drawable background = adaptiveIcon.getBackground();

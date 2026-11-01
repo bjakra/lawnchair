@@ -18,6 +18,7 @@ package com.android.launcher3.provider
 import android.content.ContentValues
 import android.content.Context
 import android.content.pm.ShortcutInfo
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.graphics.Bitmap
@@ -25,20 +26,25 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.Icon
 import android.os.PersistableBundle
 import android.os.Process
-import android.os.UserManager
 import android.text.TextUtils
+import androidx.annotation.WorkerThread
 import com.android.launcher3.LauncherSettings
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT
 import com.android.launcher3.LauncherSettings.Favorites.SCREEN
 import com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME
 import com.android.launcher3.LauncherSettings.Favorites._ID
 import com.android.launcher3.Utilities
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
+import com.android.launcher3.icons.GraphicsUtils
+import com.android.launcher3.icons.GraphicsUtils.flattenBitmap
 import com.android.launcher3.icons.IconCache
-import com.android.launcher3.model.UserManagerState
+import com.android.launcher3.logging.FileLog
 import com.android.launcher3.pm.PinRequestHelper
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.shortcuts.ShortcutKey
@@ -47,6 +53,8 @@ import com.android.launcher3.util.IntSet
 
 /** A set of utility methods for Launcher DB used for DB updates and migration. */
 object LauncherDbUtils {
+    const val TAG = "LauncherDbUtils"
+
     /**
      * Returns a string which can be used as a where clause for DB query to match the given itemId
      */
@@ -158,21 +166,9 @@ object LauncherDbUtils {
      */
     @JvmStatic
     fun migrateLegacyShortcuts(context: Context, db: SQLiteDatabase) {
-        val c =
-            db.query(
-                LauncherSettings.Favorites.TABLE_NAME,
-                null,
-                "itemType = 1",
-                null,
-                null,
-                null,
-                null,
-            )
-        val ums = UserManagerState()
-        ums.run {
-            init(UserCache.INSTANCE[context], context.getSystemService(UserManager::class.java))
-        }
-        val lc = context.appComponent.loaderCursorFactory.createLoaderCursor(c, ums, null)
+        val c = db.query(TABLE_NAME, null, "itemType = 1", null, null, null, null)
+        val ums = UserCache.INSTANCE[context].userManagerState
+        val lc = context.appComponent.loaderCursorFactory.createLoaderCursor(c, ums, null)!!
         val deletedShortcuts = IntSet()
 
         while (lc.moveToNext()) {
@@ -208,7 +204,7 @@ object LauncherDbUtils {
                 ShortcutInfo.Builder(context, "migrated_shortcut-${lc.id}")
                     .setIntent(intent)
                     .setExtras(extras)
-                    .setShortLabel(lc.title)
+                    .setShortLabel(lc.title!!)
 
             var bitmap: Bitmap? = null
             val iconData = lc.iconBlob
@@ -231,26 +227,18 @@ object LauncherDbUtils {
             }
             val update =
                 ContentValues().apply {
-                    put(
-                        LauncherSettings.Favorites.ITEM_TYPE,
-                        LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT,
-                    )
+                    put(ITEM_TYPE, ITEM_TYPE_DEEP_SHORTCUT)
                     put(
                         LauncherSettings.Favorites.INTENT,
                         ShortcutKey.makeIntent(info.id, context.packageName).toUri(0),
                     )
                 }
-            db.update(
-                LauncherSettings.Favorites.TABLE_NAME,
-                update,
-                "_id = ?",
-                arrayOf(lc.id.toString()),
-            )
+            db.update(TABLE_NAME, update, "_id = ?", arrayOf(lc.id.toString()))
         }
         lc.close()
         if (deletedShortcuts.isEmpty.not()) {
             db.delete(
-                /* table = */ LauncherSettings.Favorites.TABLE_NAME,
+                /* table = */ TABLE_NAME,
                 /* whereClause = */ Utilities.createDbSelectionQuery(
                     LauncherSettings.Favorites._ID,
                     deletedShortcuts.array,
@@ -260,33 +248,65 @@ object LauncherDbUtils {
         }
 
         // Drop the unused columns
-        try {
-            db.run {
-                execSQL("ALTER TABLE ${LauncherSettings.Favorites.TABLE_NAME} DROP COLUMN iconPackage;")
-                execSQL(
-                    "ALTER TABLE ${LauncherSettings.Favorites.TABLE_NAME} DROP COLUMN iconResource;"
-                )
-            }
-        } catch (ignored: SQLiteException) {
-            // Compat users upgrade from Lawnchair 13, see https://github.com/LawnchairLauncher/lawnchair/issues/3881.
-            removeColumn(db, TABLE_NAME, "iconPackage")
-            removeColumn(db, TABLE_NAME, "iconResource")
+        db.run {
+            execSQL("ALTER TABLE $TABLE_NAME DROP COLUMN iconPackage;")
+            execSQL("ALTER TABLE $TABLE_NAME DROP COLUMN iconResource;")
         }
     }
 
-    // Compat users upgrade from Lawnchair 13, see https://github.com/LawnchairLauncher/lawnchair/issues/3881.
-    private fun removeColumn(db: SQLiteDatabase, tableName: String, columnName: String) {
-        val columns = ArrayList<String>()
-
-        // Get all column names from the table
-        db.rawQuery("PRAGMA table_info($tableName)", null).use { c ->
-            while (c.moveToNext()) {
-                val nameIndex = c.getColumnIndex("name")
-                val column = c.getString(nameIndex)
-                if (column != columnName) {
-                    columns.add(column)
+    @JvmStatic
+    @WorkerThread
+    fun updateBackupIcons(context: Context, db: SQLiteDatabase, useDefaultShape: Boolean) {
+        val cursor =
+            db.query(
+                TABLE_NAME,
+                null,
+                /* selection */ "itemType = ? OR itemType = ?",
+                /* selectionArgs */ arrayOf(
+                    ITEM_TYPE_APPLICATION.toString(),
+                    ITEM_TYPE_DEEP_SHORTCUT.toString(),
+                ),
+                null,
+                null,
+                null,
+            )
+        val userManagerState = UserCache.INSTANCE[context].userManagerState
+        val loaderCursor =
+            context.appComponent.loaderCursorFactory.createLoaderCursor(
+                cursor,
+                userManagerState,
+                /* restoreEventLogger */ null,
+            )!!
+        try {
+            SQLiteTransaction(db).use {
+                while (loaderCursor.moveToNext()) {
+                    val intent = loaderCursor.parseIntent() ?: continue
+                    val itemInfo =
+                        loaderCursor.getAppShortcutInfo(
+                            intent,
+                            /* allowMissingTarget */ false,
+                            /* useLowResIcon */ false,
+                        )
+                    if (itemInfo == null) continue
+                    val update =
+                        ContentValues().apply {
+                            put(
+                                Favorites.ICON,
+                                if (useDefaultShape) {
+                                    GraphicsUtils.createDefaultFlatBitmap(itemInfo.bitmap)
+                                } else {
+                                    flattenBitmap(itemInfo.bitmap.icon)
+                                },
+                            )
+                        }
+                    db.update(TABLE_NAME, update, "_id = ?", arrayOf(loaderCursor.id.toString()))
                 }
+                it.commit()
             }
+        } catch (e: Exception) {
+            FileLog.e(TAG, "updateBackupIcons: Failed to update backup icons in Launcher db.", e)
+        } finally {
+            loaderCursor.close()
         }
 
         // Create a new table without the column
@@ -311,4 +331,7 @@ object LauncherDbUtils {
 
         override fun close() = db.endTransaction()
     }
+
+    /** Utility method to simplify iterating over cursor */
+    fun Cursor.asSequence() = generateSequence { if (moveToNext()) this else null }
 }

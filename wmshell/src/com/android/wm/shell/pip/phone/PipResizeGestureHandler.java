@@ -39,7 +39,6 @@ import android.view.InputEventReceiver;
 import android.view.InputMonitor;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
-import android.window.DesktopExperienceFlags;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -69,6 +68,7 @@ public class PipResizeGestureHandler {
     private static final float PINCH_RESIZE_AUTO_MAX_RATIO = 0.9f;
 
     private final Context mContext;
+    private final InputManager mInputManager;
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
     private final PipMotionHelper mMotionHelper;
     private final PipBoundsState mPipBoundsState;
@@ -108,7 +108,7 @@ public class PipResizeGestureHandler {
     private boolean mIsAttached;
     private boolean mIsEnabled;
     private boolean mEnablePinchResize;
-    private boolean mEnableDragCornerResize;
+    private boolean mEnableDragCornerResize = true;
     private boolean mIsSysUiStateValid;
     private boolean mThresholdCrossed;
     private boolean mOngoingPinchToResize = false;
@@ -136,6 +136,7 @@ public class PipResizeGestureHandler {
             PipUiEventLogger pipUiEventLogger, PhonePipMenuController menuActivityController,
             ShellExecutor mainExecutor, @Nullable PipPerfHintController pipPerfHintController) {
         mContext = context;
+        mInputManager = mContext.getSystemService(InputManager.class);
         mDisplayId = context.getDisplayId();
         mMainExecutor = mainExecutor;
         mPipPerfHintController = pipPerfHintController;
@@ -183,7 +184,6 @@ public class PipResizeGestureHandler {
     private void reloadResources() {
         final Resources res = mContext.getResources();
         mDelta = res.getDimensionPixelSize(R.dimen.pip_resize_edge_size);
-        mEnableDragCornerResize = DesktopExperienceFlags.ENABLE_DESKTOP_WINDOWING_PIP.isTrue();
         mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
     }
 
@@ -227,8 +227,7 @@ public class PipResizeGestureHandler {
 
         if (mIsEnabled) {
             // Register input event receiver
-            mInputMonitor = mContext.getSystemService(InputManager.class).monitorGestureInput(
-                    "pip-resize", mDisplayId);
+            mInputMonitor = mInputManager.monitorGestureInput("pip-resize", mDisplayId);
             try {
                 mMainExecutor.executeBlocking(() -> {
                     mInputEventReceiver = new PipResizeInputEventReceiver(
@@ -509,7 +508,7 @@ public class PipResizeGestureHandler {
                         mThresholdCrossed = true;
                         // Reset the down to begin resizing from this point
                         mDownPoint.set(x, y);
-                        mInputMonitor.pilferPointers();
+                        mInputManager.pilferPointers(mInputEventReceiver.getToken());
                     }
                     if (mThresholdCrossed) {
                         if (mPhonePipMenuController.isMenuVisible()) {
@@ -637,9 +636,8 @@ public class PipResizeGestureHandler {
 
     @VisibleForTesting
     void pilferPointers() {
-        mInputMonitor.pilferPointers();
+        mInputManager.pilferPointers(mInputEventReceiver.getToken());
     }
-
 
     @VisibleForTesting public void updateMaxSize(int maxX, int maxY) {
         mMaxSize.set(maxX, maxY);

@@ -54,3 +54,12 @@ val TaskInfo.requestingImmersive: Boolean
         // Considered to be requesting immersive when requesting to hide the status bar.
         return (requestedVisibleTypes and WindowInsets.Type.statusBars()) == 0
     }
+
+/** Whether the task can be resized via dragging the edges of the task. */
+fun TaskInfo.isDragResizable(inFullImmersive: Boolean): Boolean =
+    if (inFullImmersive) {
+        // Task cannot be resized in full immersive.
+        false
+    } else {
+        isFreeform && isVisibleRequested
+    }

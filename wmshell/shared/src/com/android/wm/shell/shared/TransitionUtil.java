@@ -16,8 +16,9 @@
 
 package com.android.wm.shell.shared;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.RemoteAnimationTarget.MODE_CHANGING;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
@@ -31,11 +32,14 @@ import static android.view.WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_CHANGED_INTERACTIVE;
 import static android.window.TransitionInfo.FLAG_FIRST_CUSTOM;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
+import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
+import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
 import android.annotation.NonNull;
@@ -54,6 +58,7 @@ import android.window.TransitionInfo;
 
 import org.chickenhook.restrictionbypass.RestrictionBypass;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 /** Various utility functions for transitions. */
@@ -109,6 +114,21 @@ public class TransitionUtil {
         return false;
     }
 
+    /**
+     * Returns {@code true} if the transition has a display change that is not just an order-change.
+     */
+    public static boolean hasStationaryOnlyDisplayChange(@NonNull TransitionInfo info) {
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            if (change.getMode() == TRANSIT_CHANGE
+                    && change.hasFlags(FLAG_IS_DISPLAY)
+                    && !isStationary(change)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** Returns `true` if `change` is a wallpaper. */
     public static boolean isWallpaper(TransitionInfo.Change change) {
         return (change.getTaskInfo() == null)
@@ -128,12 +148,6 @@ public class TransitionUtil {
         return isNonApp(change) && change.hasFlags(FLAG_IS_DIVIDER_BAR);
     }
 
-    /** Returns `true` if `change` is a pinned Task. */
-    private static boolean isPipTask(TransitionInfo.Change change) {
-        return change.getTaskInfo() != null
-                && change.getTaskInfo().getWindowingMode() == WINDOWING_MODE_PINNED;
-    }
-
     /** Returns `true` if `change` is an app's dim layer. */
     public static boolean isDimLayer(TransitionInfo.Change change) {
         return isNonApp(change) && change.hasFlags(FLAG_IS_DIM_LAYER);
@@ -141,19 +155,26 @@ public class TransitionUtil {
 
     /** Returns `true` if `change` is only re-ordering. */
     public static boolean isOrderOnly(TransitionInfo.Change change) {
-        return change.getMode() == TRANSIT_CHANGE
-                && (change.getFlags() & FLAG_MOVED_TO_TOP) != 0
-                && change.getStartAbsBounds().equals(change.getEndAbsBounds())
-                && (change.getLastParent() == null
-                        || change.getLastParent().equals(change.getParent()));
+        return isStationary(change) && (change.getFlags() & FLAG_MOVED_TO_TOP) != 0;
     }
 
     /**
-     * Check if all changes in this transition are only ordering changes. If so, we won't animate.
+     * Returns `true` if a `change` is stationary. Stationary changes are those that do not change
+     * task's visual representation and don't need an animation, but do not prevent them either.
      */
-    public static boolean isAllOrderOnly(TransitionInfo info) {
+    public static boolean isStationary(TransitionInfo.Change change) {
+        return change.getMode() == TRANSIT_CHANGE
+                && (change.getFlags() & (FLAG_MOVED_TO_TOP | FLAG_CHANGED_INTERACTIVE)) != 0
+                && change.getStartAbsBounds().equals(change.getEndAbsBounds())
+                && (change.getLastParent() == null
+                || change.getLastParent().equals(change.getParent()))
+                && (change.getStartRotation() == change.getEndRotation());
+    }
+
+    /** Returns true if all changes in this transition are stationary. */
+    public static boolean isAllStationary(TransitionInfo info) {
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
-            if (!isOrderOnly(info.getChanges().get(i))) return false;
+            if (!isStationary(info.getChanges().get(i))) return false;
         }
         return true;
     }
@@ -176,12 +197,13 @@ public class TransitionUtil {
                 // animate.
                 continue;
             }
-            if (change.hasFlags(TransitionInfo.FLAG_NO_ANIMATION)) {
+            if (change.hasFlags(FLAG_NO_ANIMATION)) {
                 hasNoAnimation = true;
-            } else if (!isOrderOnly(change) && !change.hasFlags(TransitionInfo.FLAG_IS_OCCLUDED)) {
-                // Ignore the order only or occluded changes since they shouldn't be visible during
-                // animation. For anything else, we need to animate if at-least one relevant
-                // participant *is* animated,
+            } else if (!isStationary(change) && !change.hasFlags(
+                    TransitionInfo.FLAG_IS_OCCLUDED)) {
+                // Ignore the non-stationary or occluded changes since they shouldn't be visible
+                // during animation. For anything else, we need to animate if at-least one relevant
+                // participant *is* animated.
                 return false;
             }
         }
@@ -189,23 +211,73 @@ public class TransitionUtil {
     }
 
     /**
-     * Filter that selects leaf-tasks only. THIS IS ORDER-DEPENDENT! For it to work properly, you
-     * MUST call `test` in the same order that the changes appear in the TransitionInfo.
+     * Checks if the transition contains a change transitioning to the Home task on the
+     * specific display.
+     *
+     * <p>Note: In Shell, a "Go Home" transition from split-screen is often handled within
+     * {@code RecentsMixedTransition}. This helper identifies those
+     * transitions so split-screen can coordinate its state (like suppressing local dimming) during
+     * the animation to Home.
+     */
+    public static boolean isHomeTransitionEndingOnDisplay(@Nullable TransitionInfo info,
+            int displayId) {
+        if (info == null || info.getChanges() == null) {
+            return false;
+        }
+        for (int i = 0; i < info.getChanges().size(); ++i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            if (change.getEndDisplayId() == displayId && change.getTaskInfo() != null
+                    && change.getTaskInfo().getActivityType() == ACTIVITY_TYPE_HOME) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if {@link TransitionInfo} contains a change related to Dream.
+     */
+    public static boolean isDreamTransition(@NonNull TransitionInfo info) {
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            if (change.getTaskInfo() != null
+                    && change.getTaskInfo().topActivityType == ACTIVITY_TYPE_DREAM) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Filter that selects leaf-tasks only.
      */
     public static class LeafTaskFilter implements Predicate<TransitionInfo.Change> {
-        private final SparseBooleanArray mChildTaskTargets = new SparseBooleanArray();
+        private final SparseBooleanArray mTaskTargetsWithChildren = new SparseBooleanArray();
+
+        /**
+         * Constructs a task filter for leaf task changes in {@code info}.
+         */
+        public LeafTaskFilter(TransitionInfo info) {
+            final List<TransitionInfo.Change> changes = info.getChanges();
+            final int n = changes.size();
+
+            // The special case for cyclic references should never happen in practice, but
+            // does happen in tests sometimes.
+            for (int i = 0; i < n; i++) {
+                final ActivityManager.RunningTaskInfo taskInfo = changes.get(i).getTaskInfo();
+                if (taskInfo != null && taskInfo.hasParentTask()
+                        && taskInfo.parentTaskId != taskInfo.taskId) {
+                    mTaskTargetsWithChildren.put(taskInfo.parentTaskId, true);
+                }
+            }
+        }
 
         @Override
         public boolean test(TransitionInfo.Change change) {
-            final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-            if (taskInfo == null) return false;
-            // Children always come before parent since changes are in top-to-bottom z-order.
-            boolean hasChildren = mChildTaskTargets.get(taskInfo.taskId);
-            if (taskInfo.hasParentTask()) {
-                mChildTaskTargets.put(taskInfo.parentTaskId, true);
-            }
             // If it has children, it's not a leaf.
-            return !hasChildren;
+            return change.getTaskInfo() != null
+                    && !mTaskTargetsWithChildren.get(change.getTaskInfo().taskId);
         }
     }
 
@@ -220,6 +292,97 @@ public class TransitionUtil {
                 return MODE_CLOSING;
             default:
                 return MODE_CHANGING;
+        }
+    }
+
+    /**
+     * Checks whether a transition change should be skipped when setting up surfaces and leashes,
+     * based on whether it is independent or a stationary display-level change.
+     */
+    public static boolean skipReparenting(
+            @NonNull TransitionInfo.Change change, @NonNull TransitionInfo info) {
+        // Don't reparent anything that isn't independent within its parents.
+        if (!TransitionInfo.isIndependent(change, info)) {
+            return true;
+        }
+
+        // Don't reparent display level if the change is stationary (since root will be inside it).
+        if (change.hasFlags(FLAG_IS_DISPLAY) && TransitionUtil.isStationary(change)
+                && change.getStartRotation() == change.getEndRotation()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Reparents a transition participant into its transition root, and orders it based on: the
+     * global transit type, their transit mode, and their destination z-order.
+     */
+    public static void setUpSurface(@NonNull TransitionInfo.Change change,
+            @NonNull TransitionInfo info, int order, @NonNull SurfaceControl.Transaction t) {
+        final SurfaceControl leash = change.getLeash();
+
+        if (skipReparenting(change, info)) {
+            return;
+        }
+
+        boolean hasParent = change.getParent() != null;
+
+        final TransitionInfo.Root root = TransitionUtil.getRootFor(change, info);
+        if (!hasParent) {
+            t.reparent(leash, root.getLeash());
+            t.setPosition(leash,
+                    change.getStartAbsBounds().left - root.getOffset().x,
+                    change.getStartAbsBounds().top - root.getOffset().y);
+        }
+        final int layer =
+                calculateAnimLayer(change, order, info.getChanges().size(), info.getType());
+        t.setLayer(leash, layer);
+    }
+
+    /**
+     * Calculates the appropriate layer for a given transition participant based on the transition
+     * type, mode, and destination z-order.
+     * TODO(b/452329563): consolidate with the similar logic in {@link TransitionUtil#setupLeash}.
+     */
+    public static int calculateAnimLayer(@NonNull TransitionInfo.Change change, int order,
+            int numChanges, @WindowManager.TransitionType int transitType) {
+        // Put animating stuff above this line and put static stuff below it.
+        final int zSplitLine = numChanges + 1;
+        final boolean isOpening = isOpeningType(transitType);
+        final boolean isClosing = isClosingType(transitType);
+        final int mode = change.getMode();
+        // Put all the OPEN/SHOW on top
+        if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
+            if (isOpening) {
+                // put on top
+                return zSplitLine + numChanges - order;
+            } else if (isClosing) {
+                // put on bottom
+                return zSplitLine - order;
+            } else {
+                // maintain relative ordering (put all changes in the animating layer)
+                return zSplitLine + numChanges - order;
+            }
+        } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
+            if (isOpening || change.hasFlags(FLAG_IS_WALLPAPER)
+                    || (com.android.window.flags.Flags.keepShowWallpaperOnBottom()
+                    && change.hasFlags(FLAG_SHOW_WALLPAPER))) {
+                // put on bottom and leave visible
+                return zSplitLine - order;
+            } else {
+                // put on top
+                return zSplitLine + numChanges - order;
+            }
+        } else { // CHANGE or other
+            if (isClosing || TransitionUtil.isStationary(change)) {
+                // Put below CLOSE mode (in the "static" section).
+                return zSplitLine - order;
+            } else {
+                // Put above CLOSE mode.
+                return zSplitLine + numChanges - order;
+            }
         }
     }
 
@@ -252,14 +415,6 @@ public class TransitionUtil {
             t.setPosition(leash, 0, 0);
             t.setLayer(leash, Integer.MAX_VALUE);
             return;
-        }
-        if (isDimLayer(change)) {
-            // When a dim layer gets reparented onto the transition root, we need to zero out its
-            // position so that it's in line with everything else on the transition root. Also,
-            // we need to set a crop because we don't want it applying MATCH_PARENT on the whole
-            // root surface.
-            t.setPosition(leash, 0, 0);
-            t.setCrop(leash, change.getEndAbsBounds());
         }
 
         // Put all the OPEN/SHOW on top
@@ -295,7 +450,7 @@ public class TransitionUtil {
     }
 
     @SuppressLint("NewApi")
-    private static SurfaceControl createLeash(TransitionInfo info, TransitionInfo.Change change,
+    public static SurfaceControl createLeash(TransitionInfo info, TransitionInfo.Change change,
             int order, SurfaceControl.Transaction t) {
         // TODO: once we can properly sync transactions across process, then get rid of this leash.
         if (change.getParent() != null && (change.getFlags() & FLAG_IS_WALLPAPER) != 0) {
@@ -314,16 +469,11 @@ public class TransitionUtil {
         // Copied Transitions setup code (which expects bottom-to-top order, so we swap here)
         setupLeash(leashSurface, change, info.getChanges().size() - order, info, t);
         t.reparent(change.getLeash(), leashSurface);
-        if (!isDimLayer(change)) {
-            // Most leashes going onto the transition root should have their alpha set here to make
-            // them visible. But dim layers should be left untouched (their alpha value is their
-            // actual dim value).
-            t.setAlpha(change.getLeash(), 1.0f);
-        }
-        if (!isDividerBar(change) && !isPipTask(change)) {
-            // For certain components such as Divider and PiP, don't modify its inner leash
-            // position when creating the outer leash for the transition. In case the position
-            // being wrong after the transition finished.
+
+        t.setAlpha(change.getLeash(), 1.0f);
+        if (!isDividerBar(change)) {
+            // For divider, don't modify its inner leash position when creating the outer leash
+            // for the transition. In case the position being wrong after the transition finished.
             t.setPosition(change.getLeash(), 0, 0);
         }
         t.setLayer(change.getLeash(), 0);

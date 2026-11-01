@@ -30,19 +30,18 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
-import android.os.Flags.allowPrivateProfile
 import android.os.IBinder
 import android.os.UserHandle
-import android.os.UserManager
-import android.util.ArrayMap
+import android.view.DragAndDropPermissions
+import android.view.DragEvent
 import android.view.SurfaceControlViewHost
 import android.widget.Toast
 import android.window.RemoteTransition
-import android.window.ScreenCapture
+import android.window.ScreenCapture.ScreenCaptureParams
+import android.window.ScreenCaptureInternal
 import com.android.launcher3.BaseActivity
 import androidx.annotation.RequiresApi
 import com.android.launcher3.Flags.enablePrivateSpace
-import com.android.launcher3.Flags.privateSpaceSysAppsSeparation
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.dagger.ApplicationContext
@@ -52,7 +51,6 @@ import com.android.launcher3.uioverrides.touchcontrollers.StatusBarTouchControll
 import com.android.launcher3.util.ApiWrapper
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.StartActivityParams
-import com.android.launcher3.util.UserIconInfo
 import com.android.quickstep.util.FadeOutRemoteTransition
 import java.util.function.Supplier
 import javax.inject.Inject
@@ -84,97 +82,46 @@ open class SystemApiWrapper @Inject constructor(@ApplicationContext context: Con
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
-    override fun queryAllUsers(): Map<UserHandle, UserIconInfo> {
-        if (!enablePrivateSpace() || !LawnchairApp.isRecentsEnabled) {
-            return super.queryAllUsers()
-        }
-        return try {
-            val users = ArrayMap<UserHandle, UserIconInfo>()
-            mContext.getSystemService(UserManager::class.java)!!.userProfiles?.forEach { user ->
-                mContext.getSystemService(LauncherApps::class.java)!!.getLauncherUserInfo(user)?.apply {
-                    users[user] =
-                        UserIconInfo(
-                            user,
-                            when (userType) {
-                                UserManager.USER_TYPE_PROFILE_MANAGED -> UserIconInfo.TYPE_WORK
-                                UserManager.USER_TYPE_PROFILE_CLONE -> UserIconInfo.TYPE_CLONED
-                                UserManager.USER_TYPE_PROFILE_PRIVATE -> UserIconInfo.TYPE_PRIVATE
-                                else -> UserIconInfo.TYPE_MAIN
-                            },
-                            userSerialNumber.toLong()
-                        )
-                }
-            }
-            return users
-        } catch (t : Throwable) {
-            return super.queryAllUsers()
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
-    override fun getPreInstalledSystemPackages(user: UserHandle): List<String> {
-       return try {
-           if (enablePrivateSpace() && privateSpaceSysAppsSeparation())
-               mContext
-                   .getSystemService(LauncherApps::class.java)!!
-                   .getPreInstalledSystemPackages(user)
-           else ArrayList()
-       } catch (t: Throwable) {
-           super.getPreInstalledSystemPackages(user)
-       }
-    }
-
-    override fun getAppMarketActivityIntent(packageName: String, user: UserHandle): Intent {
-        return try {
-            if (allowPrivateProfile() && enablePrivateSpace())
-                ProxyActivityStarter.getLaunchIntent(
-                    mContext,
-                    StartActivityParams(null as PendingIntent?, 0).apply {
-                        intentSender =
-                            mContext
-                                .getSystemService(LauncherApps::class.java)!!
-                                .getAppMarketActivityIntent(packageName, user)
-                        options =
-                            ActivityOptions.makeBasic()
-                                .setPendingIntentBackgroundActivityStartMode(
-                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
-                                )
-                                .toBundle()
-                        requireActivityResult = false
-                    },
-                )
-            else super.getAppMarketActivityIntent(packageName, user)
-        } catch (t: Throwable) {
-            super.getAppMarketActivityIntent(packageName, user)
-        }
-    }
+    override fun getAppMarketActivityIntent(packageName: String, user: UserHandle): Intent =
+        if (enablePrivateSpace())
+            ProxyActivityStarter.getLaunchIntent(
+                mContext,
+                StartActivityParams(null as PendingIntent?, 0).apply {
+                    intentSender =
+                        mContext
+                            .getSystemService(LauncherApps::class.java)!!
+                            .getAppMarketActivityIntent(packageName, user)
+                    options =
+                        ActivityOptions.makeBasic()
+                            .setPendingIntentBackgroundActivityStartMode(
+                                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                            )
+                            .toBundle()
+                    requireActivityResult = false
+                },
+            )
+        else super.getAppMarketActivityIntent(packageName, user)
 
     /** Returns an intent which can be used to open Private Space Settings. */
-    override fun getPrivateSpaceSettingsIntent(): Intent? {
-        return try {
-            if (allowPrivateProfile() && enablePrivateSpace())
-                ProxyActivityStarter.getLaunchIntent(
-                    mContext,
-                    StartActivityParams(null as PendingIntent?, 0).apply {
-                        intentSender =
-                            mContext
-                                .getSystemService(LauncherApps::class.java)
-                                ?.privateSpaceSettingsIntent ?: return null
-                        options =
-                            ActivityOptions.makeBasic()
-                                .setPendingIntentBackgroundActivityStartMode(
-                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
-                                )
-                                .toBundle()
-                        requireActivityResult = false
-                    }
-                )
-            else null
-        } catch (t: Throwable) {
-            super.privateSpaceSettingsIntent
-        }
-    }
+    override fun getPrivateSpaceSettingsIntent(): Intent? =
+        if (enablePrivateSpace())
+            ProxyActivityStarter.getLaunchIntent(
+                mContext,
+                StartActivityParams(null as PendingIntent?, 0).apply {
+                    intentSender =
+                        mContext
+                            .getSystemService(LauncherApps::class.java)
+                            ?.privateSpaceSettingsIntent ?: return null
+                    options =
+                        ActivityOptions.makeBasic()
+                            .setPendingIntentBackgroundActivityStartMode(
+                                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                            )
+                            .toBundle()
+                    requireActivityResult = false
+                },
+            )
+        else null
 
     override fun isNonResizeableActivity(lai: LauncherActivityInfo): Boolean {
         return try {
@@ -249,17 +196,17 @@ open class SystemApiWrapper @Inject constructor(@ApplicationContext context: Con
         return StatusBarTouchController(launcher, isEnabledCheck)
     }
 
-    override fun isFileDrawable(shortcutInfo: ShortcutInfo) =
-        shortcutInfo.hasIconFile() || (Utilities.ATLEAST_U && shortcutInfo.hasIconUri())
-
     override fun captureSnapshot(host: SurfaceControlViewHost, width: Int, height: Int): Bitmap =
-        ScreenCapture.captureLayers(
-                ScreenCapture.LayerCaptureArgs.Builder(host.surfacePackage!!.surfaceControl)
+        ScreenCaptureInternal.captureLayers(
+                ScreenCaptureInternal.LayerCaptureArgs.Builder(host.surfacePackage!!.surfaceControl)
                     .setSourceCrop(Rect(0, 0, width, height))
-                    .setAllowProtected(true)
-                    .setHintForSeamlessTransition(true)
+                    .setProtectedContentPolicy(ScreenCaptureParams.PROTECTED_CONTENT_POLICY_CAPTURE)
+                    .setPreserveDisplayColors(true)
                     .build()
             )
             .asBitmap()
             .copy(Bitmap.Config.ARGB_8888, true)
+
+    override fun requestDragAndDropPermissions(event: DragEvent): DragAndDropPermissions? =
+        DragAndDropPermissions.obtain(event)
 }

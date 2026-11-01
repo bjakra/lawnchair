@@ -76,6 +76,7 @@ import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.pip.IPip;
 import com.android.wm.shell.common.pip.IPipAnimationListener;
+import com.android.wm.shell.common.pip.IPipAnimationListener.PipResources;
 import com.android.wm.shell.common.pip.PipAppOpsListener;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
@@ -90,6 +91,7 @@ import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
+import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
@@ -104,8 +106,9 @@ import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.sysui.UserChangeListener;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -146,6 +149,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private PipParamsChangedForwarder mPipParamsChangedForwarder;
     private DisplayInsetsController mDisplayInsetsController;
     private TabletopModeController mTabletopModeController;
+    private PipSurfaceTransactionHelper mPipSurfaceTransactionHelper;
     private Optional<OneHandedController> mOneHandedController;
     private final ShellCommandHandler mShellCommandHandler;
     private final ShellController mShellController;
@@ -216,7 +220,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private boolean mIsKeyguardShowingOrAnimating;
 
-    private final List<Consumer<Boolean>> mOnIsInPipStateChangedListeners = new ArrayList<>();
+    private final Map<Consumer<Boolean>, Executor> mOnIsInPipStateChangedListeners =
+            new HashMap<>();
 
     @VisibleForTesting
     interface PipAnimationListener {
@@ -229,10 +234,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
          * Notifies the listener about PiP resource dimensions changed.
          * Listener can expect an immediate callback the first time they attach.
          *
-         * @param cornerRadius the pixel value of the corner radius, zero means it's disabled.
-         * @param shadowRadius the pixel value of the shadow radius, zero means it's disabled.
+         * @param res {@code PipResources} instances contains shadow and corner radius
          */
-        void onPipResourceDimensionsChanged(int cornerRadius, int shadowRadius);
+        void onPipResourceDimensionsChanged(PipResources res);
 
         /**
          * Notifies the listener that user leaves PiP by tapping on the expand button.
@@ -411,7 +415,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             TabletopModeController pipTabletopController,
             Optional<OneHandedController> oneHandedController,
             ShellExecutor mainExecutor,
-            Handler handler) {
+            Handler handler,
+            PipSurfaceTransactionHelper pipSurfaceTransactionHelper) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Device doesn't support Pip feature", TAG);
@@ -425,7 +430,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 pipTaskOrganizer, pipTransitionState, pipTouchHandler, pipTransitionController,
                 windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
                 displayInsetsController, pipTabletopController, oneHandedController, mainExecutor,
-                handler)
+                handler, pipSurfaceTransactionHelper)
                 .mImpl;
     }
 
@@ -454,7 +459,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             TabletopModeController tabletopModeController,
             Optional<OneHandedController> oneHandedController,
             ShellExecutor mainExecutor,
-            @ShellMainThread Handler handler
+            @ShellMainThread Handler handler,
+            PipSurfaceTransactionHelper pipSurfaceTransactionHelper
     ) {
         mContext = context;
         mShellCommandHandler = shellCommandHandler;
@@ -485,6 +491,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipParamsChangedForwarder = pipParamsChangedForwarder;
         mDisplayInsetsController = displayInsetsController;
         mTabletopModeController = tabletopModeController;
+        mPipSurfaceTransactionHelper = pipSurfaceTransactionHelper;
 
         if (!PipFlags.isPip2ExperimentEnabled()) {
             shellInit.addInitCallback(this::onInit, this);
@@ -506,9 +513,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             final boolean wasInPip = PipTransitionState.isInPip(oldState);
             final boolean nowInPip = PipTransitionState.isInPip(newState);
             if (nowInPip != wasInPip) {
-                for (Consumer<Boolean> listener : mOnIsInPipStateChangedListeners) {
-                    listener.accept(nowInPip);
-                }
+                mOnIsInPipStateChangedListeners.forEach(
+                        (listener, executor) -> executor.execute(() -> listener.accept(nowInPip)));
             }
         });
         mPipBoundsState.setOnMinimalSizeChangeCallback(
@@ -725,10 +731,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     });
         });
 
-        if (!ShellController.FIX_MISSING_USER_CHANGE_CALLBACKS_FLAG.isTrue()) {
-            mMediaController.registerSessionListenerForCurrentUser();
-        }
-
         mShellController.addConfigurationChangeListener(this);
         mShellController.addKeyguardChangeListener(this);
         mShellController.addUserChangeListener(this);
@@ -776,7 +778,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         onDisplayChanged(new DisplayLayout(mContext, mContext.getDisplay()),
                 false /* saveRestoreSnapFraction */);
 
-        if (Flags.enablePipBoxShadows()) {
+        if (Flags.enablePipBoxShadowsV2()) {
             mPipTaskOrganizer.onThemeChanged(mContext);
         }
     }
@@ -902,7 +904,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     }
 
     /**
-     * If {@param keyguardShowing} is {@code false} and {@param animating} is {@code true},
+     * If {@code keyguardShowing} is {@code false} and {@code animating} is {@code true},
      * we would wait till the dismissing animation of keyguard and surfaces behind to be
      * finished first to reset the visibility of PiP window.
      * See also {@link #onKeyguardDismissAnimationFinished()}
@@ -972,9 +974,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipBoundsState.getLauncherState().setAppIconSizePx(iconSizePx);
     }
 
-    private void addOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
+    private void addOnIsInPipStateChangedListener(
+            @NonNull Executor executor,
+            @NonNull Consumer<Boolean> callback) {
         if (callback != null) {
-            mOnIsInPipStateChangedListeners.add(callback);
+            mOnIsInPipStateChangedListeners.put(callback, executor);
             callback.accept(mPipTransitionState.isInPip());
         }
     }
@@ -1004,8 +1008,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private void onPipResourceDimensionsChanged() {
         if (mPinnedStackAnimationRecentsCallback != null) {
             mPinnedStackAnimationRecentsCallback.onPipResourceDimensionsChanged(
-                    mContext.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius),
-                    mContext.getResources().getDimensionPixelSize(R.dimen.pip_shadow_radius));
+                    mPipSurfaceTransactionHelper.getResources());
         }
     }
 
@@ -1241,9 +1244,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void addOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
+        public void addOnIsInPipStateChangedListener(
+                @NonNull Executor executor,
+                @NonNull Consumer<Boolean> callback) {
             mMainExecutor.execute(() -> {
-                PipController.this.addOnIsInPipStateChangedListener(callback);
+                PipController.this.addOnIsInPipStateChangedListener(executor, callback);
             });
         }
 
@@ -1255,17 +1260,16 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void addPipExclusionBoundsChangeListener(Consumer<Rect> listener) {
-            mMainExecutor.execute(() -> {
-                mPipBoundsState.addPipExclusionBoundsChangeCallback(listener);
-            });
+        public void addPipExclusionBoundsChangeListener(
+                Executor executor, Consumer<Rect> listener) {
+            mMainExecutor.execute(
+                    () -> mPipBoundsState.addPipExclusionBoundsChangeCallback(executor, listener));
         }
 
         @Override
         public void removePipExclusionBoundsChangeListener(Consumer<Rect> listener) {
-            mMainExecutor.execute(() -> {
-                mPipBoundsState.removePipExclusionBoundsChangeCallback(listener);
-            });
+            mMainExecutor.execute(
+                    () -> mPipBoundsState.removePipExclusionBoundsChangeCallback(listener));
         }
 
         @Override
@@ -1299,8 +1303,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             }
 
             @Override
-            public void onPipResourceDimensionsChanged(int cornerRadius, int shadowRadius) {
-                mListener.call(l -> l.onPipResourceDimensionsChanged(cornerRadius, shadowRadius));
+            public void onPipResourceDimensionsChanged(PipResources res) {
+                mListener.call(l -> l.onPipResourceDimensionsChanged(res));
             }
 
             @Override

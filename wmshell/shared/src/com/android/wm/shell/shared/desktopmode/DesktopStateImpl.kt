@@ -30,13 +30,15 @@ import android.window.DesktopModeFlags
 import com.android.internal.R
 import com.android.internal.annotations.VisibleForTesting
 import com.android.window.flags.Flags
-import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper
+import com.android.wm.shell.shared.bubbles.BubbleFlagHelper
 
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 class DesktopStateImpl(context: Context) : DesktopState {
 
     private val windowManager = context.getSystemService(WindowManager::class.java)
     private val displayManager = context.getSystemService(DisplayManager::class.java)
+
+    private val projectedModeState by lazy { ProjectedModeState(context, this) }
 
     private val enforceDeviceRestrictions =
         SystemProperties.getBoolean(ENFORCE_DEVICE_RESTRICTIONS_SYS_PROP, true)
@@ -90,12 +92,8 @@ class DesktopStateImpl(context: Context) : DesktopState {
     override val canEnterDesktopMode: Boolean = run {
         val isEligibleForDesktopMode =
             isDeviceEligibleForDesktopMode &&
-                    (if (false) {
-                        // LC-Ignored: Intentional, all Android desktop flags are disabled
-                        DesktopExperienceFlags.ENABLE_PROJECTED_DISPLAY_DESKTOP_MODE.isTrue
-                    } else {
-                        false
-                    } || canInternalDisplayHostDesktops)
+                (DesktopExperienceFlags.ENABLE_PROJECTED_DISPLAY_DESKTOP_MODE.isTrue ||
+                    canInternalDisplayHostDesktops)
         val desktopModeEnabled =
             isEligibleForDesktopMode && if (false) {
                 // LC-Ignored: Intentional, all Android desktop flags are disabled
@@ -116,19 +114,13 @@ class DesktopStateImpl(context: Context) : DesktopState {
         } && isDeviceEligibleForDesktopExperienceDevOption
 
     override val enterDesktopByDefaultOnFreeformDisplay: Boolean =
-        if (false) {
-            // LC-Ignored: Intentional, all Android desktop flags are disabled
-            DesktopExperienceFlags.ENABLE_DESKTOP_FIRST_BASED_DEFAULT_TO_DESKTOP_BUGFIX.isTrue ||
-            DesktopExperienceFlags.ENTER_DESKTOP_BY_DEFAULT_ON_FREEFORM_DISPLAYS.isTrue &&
-                SystemProperties.getBoolean(
-                    ENTER_DESKTOP_BY_DEFAULT_ON_FREEFORM_DISPLAY_SYS_PROP,
-                    context
-                        .getResources()
-                        .getBoolean(R.bool.config_enterDesktopByDefaultOnFreeformDisplay),
-                )
-        } else {
-            false
-        }
+        DesktopExperienceFlags.ENABLE_DESKTOP_FIRST_BASED_DEFAULT_TO_DESKTOP_BUGFIX.isTrue ||
+            SystemProperties.getBoolean(
+                ENTER_DESKTOP_BY_DEFAULT_ON_FREEFORM_DISPLAY_SYS_PROP,
+                context
+                    .getResources()
+                    .getBoolean(R.bool.config_enterDesktopByDefaultOnFreeformDisplay),
+            )
 
     override val isDeviceEligibleForDesktopMode: Boolean
         get() {
@@ -143,30 +135,10 @@ class DesktopStateImpl(context: Context) : DesktopState {
             return isDesktopModeSupported || desktopModeSupportedByDevOptions
         }
 
-    override val enableMultipleDesktops: Boolean =
-        if (false) {
-            // LC-Ignored: Intentional, all Android desktop flags are disabled
-            DesktopExperienceFlags.ENABLE_MULTIPLE_DESKTOPS_BACKEND.isTrue
-                    && DesktopExperienceFlags.ENABLE_MULTIPLE_DESKTOPS_FRONTEND.isTrue
-        } else {
-            false
-        } && canEnterDesktopMode
-
-    override fun isMultipleDesktopFrontendEnabledOnDisplay(display: Display): Boolean =
-        if (false) {
-            // LC-Ignored: Intentional, all Android desktop flags are disabled
-            DesktopExperienceFlags.ENABLE_MULTIPLE_DESKTOPS_FRONTEND.isTrue
-                    && DesktopExperienceFlags.ENABLE_MULTIPLE_DESKTOPS_BACKEND.isTrue
-        } else {
-            false
-        } && isDesktopModeSupportedOnDisplay(display)
-
-    override fun isMultipleDesktopFrontendEnabledOnDisplay(displayId: Int): Boolean =
-        displayManager.getDisplay(displayId)?.let { isMultipleDesktopFrontendEnabledOnDisplay(it) }
-            ?: false
+    override val enableMultipleDesktops: Boolean = canEnterDesktopMode
 
     override fun isDesktopModeSupportedOnDisplay(displayId: Int): Boolean =
-        displayManager.getDisplay(displayId)?.let { isDesktopModeSupportedOnDisplay(it) } ?: false
+        displayManager?.getDisplay(displayId)?.let { isDesktopModeSupportedOnDisplay(it) } ?: false
 
     override fun isDesktopModeSupportedOnDisplay(display: Display): Boolean {
         if (!canEnterDesktopMode) return false
@@ -180,45 +152,19 @@ class DesktopStateImpl(context: Context) : DesktopState {
         return windowManager?.isEligibleForDesktopMode(display.displayId) ?: false
     }
 
-    override fun isProjectedMode(): Boolean {
-        if (!if (false) {
-                // LC-Ignored: Intentional, all Android desktop flags are disabled
-                DesktopExperienceFlags.ENABLE_PROJECTED_DISPLAY_DESKTOP_MODE.isTrue
-            } else {
-                false
-            }
-        ) {
-            return false
-        }
-
-        if (isDesktopModeSupportedOnDisplay(Display.DEFAULT_DISPLAY)) {
-            return false
-        }
-
-        return displayManager.displays
-            ?.any { display -> isDesktopModeSupportedOnDisplay(display)
-            } ?: false
-    }
+    override fun isProjectedMode(): Boolean = projectedModeState.isProjectedMode
 
     private val deviceHasLargeScreen =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
-            displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)
-                ?.filter { display -> display.type == Display.TYPE_INTERNAL }
-                ?.any { display ->
-                    display.minSizeDimensionDp >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP
-                } ?: false
-        } else {
-            false
-        }
+        displayManager
+            ?.getDisplays(DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)
+            ?.filter { display -> display.type == Display.TYPE_INTERNAL }
+            ?.any { display ->
+                display.minSizeDimensionDp >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP
+            } ?: false
 
     override val overridesShowAppHandle: Boolean =
-        if (false) {
-            // LC-Ignored: Intentional, all Android desktop flags are disabled
-            (Flags.showAppHandleLargeScreens() ||
-                BubbleAnythingFlagHelper.enableBubbleToFullscreen()) && deviceHasLargeScreen
-        } else {
-            false
-        }
+        (Flags.showAppHandleLargeScreens() || BubbleFlagHelper.enableBubbleToFullscreen()) &&
+            deviceHasLargeScreen
 
     private val hasFreeformFeature =
         context.getPackageManager().hasSystemFeature(FEATURE_FREEFORM_WINDOW_MANAGEMENT)
@@ -226,19 +172,21 @@ class DesktopStateImpl(context: Context) : DesktopState {
         Settings.Global.getInt(
             context.getContentResolver(),
             Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT,
-            0
+            0,
         ) != 0
     override val isFreeformEnabled: Boolean = hasFreeformFeature || hasFreeformDevOption
 
     override val shouldShowHomeBehindDesktop: Boolean =
-        if (false) {
-            // LC-Ignored: Intentional, all Android desktop flags are disabled
-            Flags.showHomeBehindDesktop() && context.resources.getBoolean(
-                R.bool.config_showHomeBehindDesktop
+        Flags.showHomeBehindDesktop() &&
+            SystemProperties.getBoolean(
+                SHOW_HOME_BEHIND_DESKTOP_SYS_PROP,
+                context.resources.getBoolean(R.bool.config_showHomeBehindDesktop),
             )
-        } else {
-            false
-        }
+
+    /** Clean's up any registered listeners */
+    override fun destroy() {
+        projectedModeState.destroy()
+    }
 
     companion object {
         @VisibleForTesting
@@ -248,5 +196,25 @@ class DesktopStateImpl(context: Context) : DesktopState {
         @VisibleForTesting
         const val ENTER_DESKTOP_BY_DEFAULT_ON_FREEFORM_DISPLAY_SYS_PROP =
             "persist.wm.debug.enter_desktop_by_default_on_freeform_display"
+
+        private const val SHOW_HOME_BEHIND_DESKTOP_SYS_PROP =
+            "persist.wm.debug.show_home_behind_desktop"
+
+        @Volatile private var instance: DesktopState? = null
+
+        /**
+         * Get or create the [DesktopState] singleton.
+         *
+         * This method should not be used if Dagger is used to inject the singleton.
+         */
+        fun getInstance(context: Context): DesktopState {
+            return instance
+                ?: synchronized(this) {
+                    if (instance == null) {
+                        instance = DesktopStateImpl(context)
+                    }
+                    instance!!
+                }
+        }
     }
 }

@@ -47,9 +47,9 @@ import android.view.WindowManager;
 import android.view.WindowRelayoutResult;
 import android.view.WindowlessWindowManager;
 import android.view.inputmethod.ImeTracker;
-import android.window.InputTransferToken;
 
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.view.WindowClientTransactionHandler;
 
 import java.util.HashMap;
 
@@ -134,7 +134,7 @@ public class SystemWindows {
     }
 
     /**
-     * Sets the accessibility window for the given {@param shellRootLayer}.
+     * Sets the accessibility window for the given {@code shellRootLayer}.
      */
     public void setShellRootAccessibilityWindow(int displayId,
             @WindowManager.ShellRootLayer int shellRootLayer, View view) {
@@ -193,16 +193,16 @@ public class SystemWindows {
     }
 
     /**
-     * Gets a token associated with the view that can be used to grant the view focus.
+     * Requests input focus for the specified window.
      */
-    public InputTransferToken getFocusGrantToken(View view) {
+    public boolean requestInputFocus(View view, boolean focused) {
         SurfaceControlViewHost root = mViewRoots.get(view);
         if (root == null) {
             Slog.e(TAG, "Couldn't get focus grant token since view does not exist in "
                     + "SystemWindow:" + view);
-            return null;
+            return false;
         }
-        return root.getInputTransferToken();
+        return root.requestInputFocus(focused);
     }
 
     private class PerDisplay {
@@ -339,7 +339,7 @@ public class SystemWindows {
         }
     }
 
-    static class ContainerWindow extends IWindow.Stub {
+    static class ContainerWindow extends WindowClientTransactionHandler {
         ContainerWindow() {}
 
         @Override
@@ -373,18 +373,15 @@ public class SystemWindows {
 
         @Override
         public void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep,
-                float zoom, boolean sync) {}
+                float zoom) {}
 
         @Override
         public void dispatchWallpaperCommand(String action, int x, int y,
-                int z, Bundle extras, boolean sync) {}
+                int z, Bundle extras) {}
 
         /* Drag/drop */
         @Override
         public void dispatchDragEvent(DragEvent event) {}
-
-        @Override
-        public void dispatchWindowShown() {}
 
         @Override
         public void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId) {}
@@ -406,5 +403,19 @@ public class SystemWindows {
         public void dumpWindow(ParcelFileDescriptor pfd) {
 
         }
+
+        @Override
+        public void dispatchScrollToTop(int x) {
+            // no-op
+        }
+
+        @Override
+        public void requestHardwareRendererOutputDisabled(boolean disabled) {}
+
+        @Override
+        public void requestViewAnimationsDisabled(boolean disabled) {}
+
+        @Override
+        public void requestAccessibilityEmbeddedConnection(IResultReceiver receiver) {}
     }
 }

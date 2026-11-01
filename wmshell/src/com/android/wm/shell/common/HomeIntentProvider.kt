@@ -23,43 +23,57 @@ import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.content.Context
 import android.content.Intent
 import android.os.UserHandle
+import android.view.Display
 import android.view.Display.DEFAULT_DISPLAY
 import android.window.DesktopExperienceFlags.ENABLE_PER_DISPLAY_DESKTOP_WALLPAPER_ACTIVITY
 import android.window.WindowContainerTransaction
+import com.android.internal.protolog.ProtoLog
+import com.android.wm.shell.protolog.ShellProtoLogGroup
 
-/** Creates home intent **/
-class HomeIntentProvider(
-    private val context: Context,
-) {
+/** Creates home intent */
+class HomeIntentProvider(private val context: Context) {
     fun addLaunchHomePendingIntent(
-        wct: WindowContainerTransaction, displayId: Int, userId: Int? = null
+        wct: WindowContainerTransaction,
+        displayId: Int,
+        userId: Int? = null,
     ) {
+        if (displayId == Display.INVALID_DISPLAY) {
+            ProtoLog.w(
+                ShellProtoLogGroup.WM_SHELL,
+                "HomeIntentProvider: attempted to add launch home intent for invalid display",
+            )
+            return
+        }
         val userHandle =
-            if (userId != null) UserHandle.of(userId) else UserHandle.of(ActivityManager.getCurrentUser())
+            if (userId != null) UserHandle.of(userId)
+            else UserHandle.of(ActivityManager.getCurrentUser())
 
-        val launchHomeIntent = Intent(Intent.ACTION_MAIN).apply {
-            if (displayId != DEFAULT_DISPLAY) {
-                addCategory(Intent.CATEGORY_SECONDARY_HOME)
-            } else {
-                addCategory(Intent.CATEGORY_HOME)
+        val launchHomeIntent =
+            Intent(Intent.ACTION_MAIN).apply {
+                if (displayId != DEFAULT_DISPLAY) {
+                    addCategory(Intent.CATEGORY_SECONDARY_HOME)
+                } else {
+                    addCategory(Intent.CATEGORY_HOME)
+                }
             }
-        }
-        val options = ActivityOptions.makeBasic().apply {
-            launchWindowingMode = WINDOWING_MODE_FULLSCREEN
-            pendingIntentBackgroundActivityStartMode =
-                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
-            if (ENABLE_PER_DISPLAY_DESKTOP_WALLPAPER_ACTIVITY.isTrue) {
-                launchDisplayId = displayId
+        val options =
+            ActivityOptions.makeBasic().apply {
+                launchWindowingMode = WINDOWING_MODE_FULLSCREEN
+                pendingIntentBackgroundActivityStartMode =
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
+                if (ENABLE_PER_DISPLAY_DESKTOP_WALLPAPER_ACTIVITY.isTrue) {
+                    launchDisplayId = displayId
+                }
             }
-        }
-        val pendingIntent = PendingIntent.getActivityAsUser(
-            context,
-            /* requestCode= */ 0,
-            launchHomeIntent,
-            PendingIntent.FLAG_IMMUTABLE,
-            /* options= */ null,
-            userHandle,
-        )
+        val pendingIntent =
+            PendingIntent.getActivityAsUser(
+                context,
+                /* requestCode= */ 0,
+                launchHomeIntent,
+                PendingIntent.FLAG_IMMUTABLE,
+                /* options= */ null,
+                userHandle,
+            )
         wct.sendPendingIntent(pendingIntent, launchHomeIntent, options.toBundle())
     }
 }

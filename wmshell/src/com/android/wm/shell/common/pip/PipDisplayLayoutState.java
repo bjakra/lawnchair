@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.common.pip;
 
+import static android.view.Surface.ROTATION_0;
+
 import static com.android.wm.shell.common.pip.PipUtils.dpToPx;
 
 import static java.lang.Math.max;
@@ -25,6 +27,7 @@ import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.util.RotationUtils;
 import android.util.Size;
 import android.view.Surface;
 
@@ -55,6 +58,7 @@ public class PipDisplayLayoutState {
     @NonNull private DisplayLayout mDisplayLayout;
     @NonNull private final DisplayController mDisplayController;
     private Point mScreenEdgeInsets = null;
+    private boolean mEnableNavigationBarsInsets;
     private Insets mNavigationBarsInsets = Insets.NONE;
     private final List<DisplayIdListener> mDisplayIdListeners = new ArrayList<>();
 
@@ -103,18 +107,20 @@ public class PipDisplayLayoutState {
     }
 
     /**
-     * Returns the inset bounds the PIP window can be visible on a given {@param displayLayout}
+     * Returns the inset bounds the PIP window can be visible on a given {@code displayLayout}
      */
     public Rect getInsetBounds(DisplayLayout displayLayout) {
         final Rect insetBounds = new Rect();
         final Rect stableInsets = displayLayout.stableInsets();
         final Point screenEdgeInsets = getScreenEdgeInsets();
-        final int left = max(stableInsets.left, mNavigationBarsInsets.left) + screenEdgeInsets.x;
-        final int top = max(stableInsets.top, mNavigationBarsInsets.top) + screenEdgeInsets.y;
+        final Insets navigationBarsInsets = mEnableNavigationBarsInsets
+                ? mNavigationBarsInsets : Insets.NONE;
+        final int left = max(stableInsets.left, navigationBarsInsets.left) + screenEdgeInsets.x;
+        final int top = max(stableInsets.top, navigationBarsInsets.top) + screenEdgeInsets.y;
         final int right = displayLayout.width()
-                - max(stableInsets.right, mNavigationBarsInsets.right) - screenEdgeInsets.x;
+                - max(stableInsets.right, navigationBarsInsets.right) - screenEdgeInsets.x;
         final int bottom = displayLayout.height()
-                - max(stableInsets.bottom, mNavigationBarsInsets.bottom) - screenEdgeInsets.y;
+                - max(stableInsets.bottom, navigationBarsInsets.bottom) - screenEdgeInsets.y;
         insetBounds.set(left, top, right, bottom);
         return insetBounds;
     }
@@ -141,7 +147,12 @@ public class PipDisplayLayoutState {
      * @param targetRotation
      */
     public void rotateTo(@Surface.Rotation int targetRotation) {
+        final int fromRotation = getRotation();
         mDisplayLayout.rotateTo(mUiContext.getResources(), targetRotation);
+        final int rotation = RotationUtils.deltaRotation(fromRotation, targetRotation);
+        if (rotation != ROTATION_0) {
+            mNavigationBarsInsets = RotationUtils.rotateInsets(mNavigationBarsInsets, rotation);
+        }
     }
 
     /** Returns the current display rotation of this layout state. */
@@ -191,6 +202,11 @@ public class PipDisplayLayoutState {
         mDisplayIdListeners.add(listener);
     }
 
+    /** Enable/disable the usage of {@link #mNavigationBarsInsets}. */
+    public void setEnableNavigationBarsInsets(boolean enabled) {
+        mEnableNavigationBarsInsets = enabled;
+    }
+
     /** Set the navigationBars side and widthOrHeight. */
     public void setNavigationBarsInsets(Insets insets) {
         mNavigationBarsInsets = insets;
@@ -202,7 +218,9 @@ public class PipDisplayLayoutState {
         pw.println(prefix + TAG);
         pw.println(innerPrefix + "mDisplayId=" + mDisplayId);
         pw.println(innerPrefix + "getDisplayBounds=" + getDisplayBounds());
+        pw.println(innerPrefix + "getDisplayLayout#densityDpi=" + getDisplayLayout().densityDpi());
         pw.println(innerPrefix + "mScreenEdgeInsets=" + mScreenEdgeInsets);
+        pw.println(innerPrefix + "mEnableNavigationBarsInsets=" + mEnableNavigationBarsInsets);
         pw.println(innerPrefix + "mNavigationBarsInsets=" + mNavigationBarsInsets);
     }
 

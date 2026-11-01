@@ -17,18 +17,19 @@
 package com.android.systemui.plugins;
 
 import android.app.PendingIntent;
+import android.app.WallpaperColors.ColorsHints;
 import android.app.smartspace.SmartspaceAction;
 import android.app.smartspace.SmartspaceTarget;
 import android.app.smartspace.SmartspaceTargetEvent;
 import android.app.smartspace.uitemplatedata.TapAction;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
 
@@ -77,11 +78,12 @@ public interface BcSmartspaceDataPlugin extends Plugin {
      * Create a view to be shown within the parent. Do not add the view, as the parent
      * will be responsible for correctly setting the LayoutParams
      */
-    default SmartspaceView getView(ViewGroup parent) {
+    default SmartspaceView getView(Context context) {
         throw new UnsupportedOperationException("Not implemented by " + getClass());
     }
 
-    default SmartspaceView getLargeClockView(ViewGroup parent) {
+    /** Similar to getView, but for the large-clock version of a target view */
+    default SmartspaceView getLargeClockView(Context context) {
         throw new UnsupportedOperationException("Not implemented by " + getClass());
     }
 
@@ -103,15 +105,6 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         void onSmartspaceTargetsUpdated(List<? extends Parcelable> targets);
     }
 
-    /**
-     * Sets {@link BcSmartspaceConfigPlugin}.
-     *
-     * TODO: b/259566300 - Remove once isViewPager2Enabled is fully rolled out
-     */
-    default void registerConfigProvider(BcSmartspaceConfigPlugin configProvider) {
-        throw new UnsupportedOperationException("Not implemented by " + getClass());
-    }
-
     /** View to which this plugin can be registered, in order to get updates. */
     interface SmartspaceView {
         void registerDataProvider(BcSmartspaceDataPlugin plugin);
@@ -122,6 +115,11 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         default void registerConfigProvider(BcSmartspaceConfigPlugin configProvider) {
             throw new UnsupportedOperationException("Not implemented by " + getClass());
         }
+
+        /**
+         * Background color for non-RemoteViews cards, when high contrast background is enabled.
+         */
+        default void setHighContrastBackgroundColor(@ColorsHints int wallpaperColorHints) {}
 
         /**
          * Primary color for unprotected text
@@ -190,7 +188,7 @@ public interface BcSmartspaceDataPlugin extends Plugin {
          * Set or clear device media playing
          */
         default void setMediaTarget(@Nullable SmartspaceTarget target) {
-            throw new UnsupportedOperationException("Not implemented by " + getClass());
+            // No-op by default for most view implementations
         }
 
         /**

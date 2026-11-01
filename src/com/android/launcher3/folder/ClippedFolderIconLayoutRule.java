@@ -92,15 +92,15 @@ public class ClippedFolderIconLayoutRule {
      * @param params         params to update for icon
      */
     public PreviewItemDrawingParams computeSpringAnimationItemParams(int index, int numItemsInPage,
-            int page, PreviewItemDrawingParams params) {
+            int page, int numFolderColumns, PreviewItemDrawingParams params) {
         float totalScale = scaleForItem(numItemsInPage, page);
         float transX;
         float transY;
 
-        if (numItemsInPage <= MAX_NUM_ITEMS_IN_PREVIEW) {
+        if (numItemsInPage <= MAX_NUM_ITEMS_IN_PREVIEW && page == 0) {
             getPosition(index, numItemsInPage, mTmpPoint);
         } else {
-            getGridPosition(index / mNumFolderColumns, index % mNumFolderColumns, mTmpPoint);
+            getGridPosition(index / numFolderColumns, index % numFolderColumns, mTmpPoint);
         }
 
         transX = mTmpPoint[0];

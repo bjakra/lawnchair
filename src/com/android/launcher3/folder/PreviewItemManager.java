@@ -22,9 +22,10 @@ import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.ENTER_IND
 import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.EXIT_INDEX;
 import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.MAX_NUM_ITEMS_IN_PREVIEW;
 import static com.android.launcher3.folder.FolderIcon.DROP_IN_ANIMATION_DURATION;
-import static com.android.launcher3.graphics.PreloadIconDrawable.newPendingIcon;
+import static com.android.launcher3.graphics.AutomatedIconDelegate.newAutomatedIcon;
+import static com.android.launcher3.graphics.PreloadIconDelegate.newPendingIcon;
 import static com.android.launcher3.icons.BitmapInfo.FLAG_THEMED;
-import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_SHOW_DOWNLOAD_PROGRESS_MASK;
+import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_AUTOMATED;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -32,6 +33,7 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.util.FloatProperty;
 import android.util.Log;
 import android.view.View;
 
@@ -45,6 +47,8 @@ import com.android.launcher3.Utilities;
 import com.android.launcher3.apppairs.AppPairIcon;
 import com.android.launcher3.apppairs.AppPairIconDrawingParams;
 import com.android.launcher3.apppairs.AppPairIconGraphic;
+import com.android.launcher3.graphics.AutomatedIconDelegate;
+import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.model.data.AppPairInfo;
 import com.android.launcher3.model.data.FolderInfo;
 import com.android.launcher3.model.data.ItemInfo;
@@ -63,6 +67,22 @@ import app.lawnchair.preferences.PreferenceManager;
  * {@link FolderIcon}.
  */
 public class PreviewItemManager {
+
+    private static final String TAG = "PreviewItemManager";
+
+    private static final FloatProperty<PreviewItemManager> CURRENT_PAGE_ITEMS_TRANS_X =
+            new FloatProperty<PreviewItemManager>("currentPageItemsTransX") {
+                @Override
+                public void setValue(PreviewItemManager manager, float v) {
+                    manager.mCurrentPageItemsTransX = v;
+                    manager.onParamsChanged();
+                }
+
+                @Override
+                public Float get(PreviewItemManager manager) {
+                    return manager.mCurrentPageItemsTransX;
+                }
+            };
 
     private final Context mContext;
     private final FolderIcon mIcon;
@@ -89,7 +109,8 @@ public class PreviewItemManager {
         mContext = icon.getContext();
         mIcon = icon;
         mIconSize = ActivityContext.lookupContext(
-                mContext).getDeviceProfile().folderChildIconSizePx;
+                mContext).getDeviceProfile().getFolderProfile().getChildIconSizePx();
+        mClipThreshold = dpToPx(1f);
     }
 
     /**
@@ -135,7 +156,7 @@ public class PreviewItemManager {
             mIcon.mPreviewLayoutRule.init(
                     mIcon.mBackground.previewSize, mIntrinsicIconSize,
                     Utilities.isRtl(mIcon.getResources()),
-                    mIcon.mActivity.getDeviceProfile().numFolderColumns
+                    mIcon.mActivity.getDeviceProfile().getFolderProfile().getNumColumns()
             );
             updatePreviewItems(false);
         }
@@ -153,7 +174,7 @@ public class PreviewItemManager {
     }
 
     private PreviewItemDrawingParams getFinalIconParams(PreviewItemDrawingParams params) {
-        float iconSize = mIcon.mActivity.getDeviceProfile().iconSizePx;
+        float iconSize = mIcon.mActivity.getDeviceProfile().getWorkspaceProfile().getIconSizePx();
 
         final float scale = iconSize / mReferenceDrawable.getIntrinsicWidth();
         final float trans = (mIcon.mBackground.previewSize - iconSize) / 2;
@@ -183,8 +204,19 @@ public class PreviewItemManager {
         // The items are drawn in coordinates relative to the preview offset
         PreviewBackground bg = mIcon.getFolderBackground();
         Path clipPath = bg.getClipPath().getPath();
-        PointF firstPageOffset = new PointF(bg.basePreviewOffsetX, bg.basePreviewOffsetY);
-        drawParams(canvas, mFirstPageParams, firstPageOffset, /* shouldClipPath */ false, clipPath);
+        float firstPageItemsTransX = 0;
+        if (mShouldSlideInFirstPage) {
+            PointF firstPageOffset = new PointF(bg.basePreviewOffsetX + mCurrentPageItemsTransX,
+                    bg.basePreviewOffsetY);
+            boolean shouldClip = mCurrentPageItemsTransX > mClipThreshold;
+            drawParams(canvas, mCurrentPageParams, firstPageOffset, shouldClip, clipPath);
+            firstPageItemsTransX = -ITEM_SLIDE_IN_OUT_DISTANCE_PX + mCurrentPageItemsTransX;
+        }
+
+        PointF firstPageOffset = new PointF(bg.basePreviewOffsetX + firstPageItemsTransX,
+                bg.basePreviewOffsetY);
+        boolean shouldClipFirstPage = firstPageItemsTransX < -mClipThreshold;
+        drawParams(canvas, mFirstPageParams, firstPageOffset, shouldClipFirstPage, clipPath);
         canvas.restoreToCount(saveCount);
     }
 
@@ -405,12 +437,20 @@ public class PreviewItemManager {
      */
     @VisibleForTesting
     public void setDrawable(PreviewItemDrawingParams p, ItemInfo item) {
+        setDrawableInternal(p, item, true /* loadHighResIcon */);
+    }
+
+    private void setDrawableInternal(
+            PreviewItemDrawingParams p, ItemInfo item, boolean loadHighResIcon) {
         // Lawnchair: Find the correct folder size depending on which parent owned them
         int iconSize = getChildIconSize();
         if (item instanceof WorkspaceItemInfo wii) {
-            if (isActivePendingIcon(wii)) {
-                p.drawable = newPendingIcon(mContext, wii);
-            } else {
+            if (wii.shouldShowPendingIcon()) {
+                p.drawable = newPendingIcon(wii, mContext, FLAG_THEMED);
+            } else if (Flags.enableAppAutomationIndicator()
+                    && (wii.runtimeStatusFlags & FLAG_AUTOMATED) != 0) {
+                p.drawable = newAutomatedIcon(mContext, wii, FLAG_THEMED);
+            } else if (!maybeHandleAutomationExit(wii, p)) {
                 p.drawable = wii.newIcon(mContext, FLAG_THEMED);
             }
             p.drawable.setBounds(0, 0, iconSize, iconSize);
@@ -437,23 +477,36 @@ public class PreviewItemManager {
         // Verify high res
         if (item instanceof ItemInfoWithIcon info
                 && info.getMatchingLookupFlag().isVisuallyLessThan(DESKTOP_ICON_FLAG)) {
-            LauncherAppState.getInstance(mContext).getIconCache().updateIconInBackground(
-                    newInfo -> {
-                        if (p.item == newInfo) {
-                            setDrawable(p, newInfo);
-                            mIcon.invalidate();
-                        }
-                    }, info, DESKTOP_ICON_FLAG);
+            if (loadHighResIcon) {
+                LauncherAppState.getInstance(mContext).getIconCache().updateIconInBackground(
+                        mContext.getMainExecutor(),
+                        newInfo -> {
+                            if (p.item == newInfo) {
+                                setDrawableInternal(p, newInfo, false /* loadHighResIcon */);
+                                mIcon.invalidate();
+                            }
+                        }, info, DESKTOP_ICON_FLAG);
+            } else {
+                Log.d(TAG, "Skipping high res icon load with flags: " + info.getMatchingLookupFlag()
+                        + " for " + info);
+            }
         }
     }
 
-    /**
-     * Returns true if item is a Promise Icon or actively downloading, and the item is not an
-     * inactive archived app.
-     */
-    private boolean isActivePendingIcon(WorkspaceItemInfo item) {
-        return (item.hasPromiseIconUi()
-                || (item.runtimeStatusFlags & FLAG_SHOW_DOWNLOAD_PROGRESS_MASK) != 0)
-                && !(Flags.useNewIconForArchivedApps() && item.isInactiveArchive());
+    private boolean maybeHandleAutomationExit(WorkspaceItemInfo wii, PreviewItemDrawingParams p) {
+        if ((wii.runtimeStatusFlags & FLAG_AUTOMATED) == 0
+                && p.drawable instanceof FastBitmapDrawable fbd
+                && fbd.getDelegate() instanceof AutomatedIconDelegate aid) {
+            aid.startExitAnimation(() -> {
+                p.drawable = wii.newIcon(mContext, FLAG_THEMED);
+                if (p.drawable != null) {
+                    p.drawable.setBounds(0, 0, mIconSize, mIconSize);
+                    p.drawable.setCallback(mIcon);
+                }
+                mIcon.invalidate();
+            });
+            return true;
+        }
+        return false;
     }
 }

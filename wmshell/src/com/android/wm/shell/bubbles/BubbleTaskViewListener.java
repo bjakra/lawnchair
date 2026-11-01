@@ -20,10 +20,10 @@ import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_A
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.wm.shell.bubbles.util.BubbleUtils.getEnterBubbleTransaction;
 import static com.android.wm.shell.bubbles.util.BubbleUtils.getExitBubbleTransaction;
-import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -41,8 +41,9 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.Nullable;
 
-import com.android.internal.protolog.ProtoLog;
-import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
+import com.android.wm.shell.Flags;
+import com.android.wm.shell.shared.bubbles.BubbleFlagHelper;
+import com.android.wm.shell.shared.bubbles.logging.BubbleLog;
 import com.android.wm.shell.taskview.TaskView;
 import com.android.wm.shell.taskview.TaskViewTaskController;
 
@@ -67,9 +68,6 @@ public class BubbleTaskViewListener implements TaskView.Listener {
 
         /** Called when back is pressed on the task root. */
         void onBackPressed();
-
-        /** Called when task removal has started. */
-        void onTaskRemovalStarted();
 
         /** Called when the task's info has changed. */
         void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo);
@@ -105,7 +103,7 @@ public class BubbleTaskViewListener implements TaskView.Listener {
 
     @Override
     public void onInitialized() {
-        ProtoLog.d(WM_SHELL_BUBBLES, "onInitialized: destroyed=%b initialized=%b bubble=%s",
+        BubbleLog.d("BubbleTaskViewListener.onInitialized() destroyed=%b initialized=%b bubble=%s",
                 mDestroyed, mInitialized, getBubbleKey());
 
         if (mDestroyed || mInitialized) {
@@ -123,18 +121,26 @@ public class BubbleTaskViewListener implements TaskView.Listener {
         // Post to keep the lifecycle normal
         // TODO - currently based on type, really it's what the "launch item" is.
         mParentView.post(() -> {
-            ProtoLog.d(WM_SHELL_BUBBLES,
-                    "onInitialized: calling startActivity, bubble=%s hasPreparingTransition=%b",
-                    getBubbleKey(), mBubble.getPreparingTransition() != null);
+            BubbleLog.d("BubbleTaskViewListener.onInitialized() calling startActivity, bubble=%s"
+                    + " hasCurrentTransition=%b",
+                    getBubbleKey(), mBubble.getCurrentTransition() != null);
             try {
-                options.setTaskAlwaysOnTop(true /* alwaysOnTop */);
+                final WindowContainerToken rootToken =
+                        mExpandedViewManager.getBubbleHelper().getAppBubbleRootTaskToken();
+                if (rootToken == null || mBubble.isChat()) {
+                    options.setTaskAlwaysOnTop(true /* alwaysOnTop */);
+                }
                 options.setPendingIntentBackgroundActivityStartMode(
                         MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
+                // Force the bubble to launch on the main display.
+                if (Flags.launchBubbleOnMainDisplay()) {
+                    options.setLaunchDisplayId(DEFAULT_DISPLAY);
+                }
                 final boolean isShortcutBubble = (mBubble.hasMetadataShortcutId()
                         || (mBubble.isShortcut()
-                        && BubbleAnythingFlagHelper.enableCreateAnyBubble()));
-                if (mBubble.getPreparingTransition() != null) {
-                    mBubble.getPreparingTransition().surfaceCreated();
+                        && BubbleFlagHelper.enableCreateAnyBubble()));
+                if (mBubble.getCurrentTransition() != null) {
+                    mBubble.getCurrentTransition().surfaceCreated();
                 } else if (mBubble.isApp() || mBubble.isNote()) {
                     Context context =
                             mContext.createContextAsUser(
@@ -152,8 +158,6 @@ public class BubbleTaskViewListener implements TaskView.Listener {
                                 PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT,
                                 /* options= */ null);
                     }
-                    final WindowContainerToken rootToken =
-                            mExpandedViewManager.getAppBubbleRootTaskToken();
                     if (rootToken != null) {
                         options.setLaunchRootTask(rootToken);
                     } else {
@@ -165,8 +169,6 @@ public class BubbleTaskViewListener implements TaskView.Listener {
                         options.setLaunchedFromBubble(true);
                         options.setApplyActivityFlagsForBubbles(true);
                     } else {
-                        final WindowContainerToken rootToken =
-                                mExpandedViewManager.getAppBubbleRootTaskToken();
                         if (rootToken != null) {
                             options.setLaunchRootTask(rootToken);
                         } else {
@@ -203,9 +205,9 @@ public class BubbleTaskViewListener implements TaskView.Listener {
 
     @Override
     public void onSurfaceAlreadyCreated() {
-        ProtoLog.d(WM_SHELL_BUBBLES, "onSurfaceCreated: bubble=%s", getBubbleKey());
-        if (mBubble.getPreparingTransition() != null) {
-            mBubble.getPreparingTransition().surfaceCreated();
+        BubbleLog.d("BubbleTaskViewListener.onSurfaceAlreadyCreated() bubble=%s", getBubbleKey());
+        if (mBubble.getCurrentTransition() != null) {
+            mBubble.getCurrentTransition().surfaceCreated();
         }
     }
 
@@ -216,7 +218,7 @@ public class BubbleTaskViewListener implements TaskView.Listener {
 
     @Override
     public void onTaskCreated(int taskId, ComponentName name) {
-        ProtoLog.d(WM_SHELL_BUBBLES, "onTaskCreated: taskId=%d bubble=%s",
+        BubbleLog.d("BubbleTaskViewListener.onTaskCreated() taskId=%d bubble=%s",
                 taskId, getBubbleKey());
         // The taskId is saved to use for removeTask, preventing appearance in recent tasks.
         mTaskId = taskId;
@@ -228,8 +230,11 @@ public class BubbleTaskViewListener implements TaskView.Listener {
 
         final TaskViewTaskController tvc = mTaskView.getController();
         final boolean isAppBubble = mBubble != null && (mBubble.isApp() || mBubble.isShortcut());
+        Rect launchBounds = new Rect();
+        mTaskView.getBoundsOnScreen(launchBounds);
         final WindowContainerTransaction wct = getEnterBubbleTransaction(
-                tvc.getTaskToken(), isAppBubble);
+                mExpandedViewManager.getBubbleHelper(), tvc.getTaskToken(), launchBounds,
+                isAppBubble);
         tvc.getTaskOrganizer().applyTransaction(wct);
 
         // With the task org, the taskAppeared callback will only happen once the task has
@@ -244,30 +249,40 @@ public class BubbleTaskViewListener implements TaskView.Listener {
 
     @Override
     public void onTaskRemovalStarted(int taskId) {
-        ProtoLog.d(WM_SHELL_BUBBLES, "onTaskRemovalStarted: taskId=%d bubble=%s",
-                taskId, getBubbleKey());
+        BubbleLog.d(
+                "BubbleTaskViewListener.onTaskRemovalStarted() taskId=%d bubble=%s bubbleTaskId=%s",
+                taskId, getBubbleKey(), (mBubble != null ? mBubble.getTaskId() : "null"));
         if (mBubble != null) {
-            mExpandedViewManager.removeBubble(mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
+            if (Flags.fixVerifyBubbleTaskIdOnRemoval()) {
+                mExpandedViewManager.removeBubble(mBubble.getKey(), taskId,
+                        Bubbles.DISMISS_TASK_FINISHED);
+            } else {
+                mExpandedViewManager.removeBubble(mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
+            }
         }
         if (mTaskView != null) {
             final TaskViewTaskController tvc = mTaskView.getController();
             final ActivityManager.RunningTaskInfo taskInfo = tvc.getTaskInfo();
             if (taskInfo != null && taskInfo.isRunning
-                    && mExpandedViewManager.shouldBeAppBubble(taskInfo)) {
-                final WindowContainerTransaction wct = getExitBubbleTransaction(taskInfo.token,
-                        mTaskView.getCaptionInsetsOwner());
+                    && mExpandedViewManager.getBubbleHelper().isAppBubbleTask(taskInfo)) {
+                // this task is being removed and this WCT is not applied in a transition, so don't
+                // reparent the task to TDA, keep it in the root task, otherwise it may cause a
+                // flicker
+                final WindowContainerTransaction wct = getExitBubbleTransaction(
+                        mExpandedViewManager.getBubbleHelper(), taskInfo.token,
+                        mTaskView.getCaptionInsetsOwner(), /* resetBounds= */ true,
+                        /* reparentToTda= */ false);
                 tvc.getTaskOrganizer().applyTransaction(wct);
             }
             mTaskView.release();
             ((ViewGroup) mParentView).removeView(mTaskView);
             mTaskView = null;
         }
-        mCallback.onTaskRemovalStarted();
     }
 
     @Override
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
-        if (BubbleAnythingFlagHelper.enableCreateAnyBubble()) {
+        if (BubbleFlagHelper.enableCreateAnyBubble()) {
             mCallback.onTaskInfoChanged(taskInfo);
         }
     }

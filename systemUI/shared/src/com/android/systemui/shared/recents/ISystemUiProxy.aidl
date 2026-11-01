@@ -39,8 +39,10 @@ interface ISystemUiProxy {
 
     /**
      * Notifies SystemUI that Overview is shown.
+     *
+     * @deprecated use {@link #onOverviewShown(int displayId) instead.
      */
-    oneway void onOverviewShown(boolean fromHome) = 6;
+    oneway void onOverviewShownDeprecated(boolean fromHome) = 6;
 
     /**
      * Proxies motion events from the homescreen UI to the status bar. Only called when
@@ -103,9 +105,10 @@ interface ISystemUiProxy {
     oneway void expandNotificationPanel() = 29;
 
     /**
-     * Notifies SystemUI of a back KeyEvent.
+     * Notifies SystemUI of KEYCODE_BACK. If the passed KeyEvent is not null, SystemUI may use it to
+     * show a predictive back animation, otherwise it will send a ACTION_DOWN followed by ACTION_UP.
      */
-    oneway void onBackEvent(in KeyEvent keyEvent) = 44;
+    oneway void onBackEvent(in KeyEvent keyEvent, int displayId) = 44;
 
     /** Sets home rotation enabled. */
     oneway void setHomeRotationEnabled(boolean enabled) = 45;
@@ -183,5 +186,20 @@ interface ISystemUiProxy {
      */
     oneway void notifyRecentsButtonPositionChanged(in Rect position) = 59;
 
-    // Next id = 60
+    /**
+     * Notifies SystemUI of a KeyEvent of the specified type (e.g. KEYCODE_BACK, KEYCODE_HOME).
+     */
+    oneway void onKeyEvent(int keycode, int displayId) = 60;
+
+    /**
+     * Notifies SystemUI that Overview is shown in the given display.
+     */
+    oneway void onOverviewShown(int displayId) = 61;
+
+    /**
+     * Notifies SystemUI that Overview is shown in the given display.
+     */
+    oneway void onOverviewHidden(int displayId) = 62;
+
+    // Next id = 63
 }

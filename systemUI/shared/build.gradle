@@ -24,7 +24,7 @@ ksp {
     arg("dagger.hilt.disableModulesHaveInstallInCheck", "true")
 }
 
-addFrameworkJar('framework-16.jar')
+addFrameworkJar('framework-17.jar')
 compileOnlyCommonJars()
 
 dependencies {

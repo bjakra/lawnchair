@@ -43,9 +43,12 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -134,7 +137,8 @@ public class PipBoundsState implements PipDisplayLayoutState.DisplayIdListener {
 
     @Nullable private Runnable mOnMinimalSizeChangeCallback;
     @Nullable private TriConsumer<Boolean, Integer, Boolean> mOnShelfVisibilityChangeCallback;
-    private final List<Consumer<Rect>> mOnPipExclusionBoundsChangeCallbacks = new ArrayList<>();
+    private final Map<Consumer<Rect>, Executor> mOnPipExclusionBoundsChangeCallbacks =
+            new HashMap<>();
     private final List<Consumer<Float>> mOnAspectRatioChangedCallbacks = new ArrayList<>();
 
     /**
@@ -156,11 +160,6 @@ public class PipBoundsState implements PipDisplayLayoutState.DisplayIdListener {
         mSizeSpecSource = sizeSpecSource;
         mPipDisplayLayoutState = pipDisplayLayoutState;
         mPipDisplayLayoutState.addDisplayIdListener(this);
-
-        // Update the relative proportion of the bounds compared to max possible size. Max size
-        // spec takes the aspect ratio of the bounds into account, so both width and height
-        // scale by the same factor.
-        addPipExclusionBoundsChangeCallback((bounds) -> updateBoundsScale());
     }
 
     /** Reloads the resources. */
@@ -189,9 +188,14 @@ public class PipBoundsState implements PipDisplayLayoutState.DisplayIdListener {
     /** Set the current PIP bounds. */
     public void setBounds(@NonNull Rect bounds) {
         mBounds.set(bounds);
-        for (Consumer<Rect> callback : mOnPipExclusionBoundsChangeCallbacks) {
-            callback.accept(bounds);
-        }
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "Update exclusion bounds to %s", bounds);
+        mOnPipExclusionBoundsChangeCallbacks.forEach(
+                (callback, executor) -> executor.execute(() -> callback.accept(bounds)));
+        // Update the relative proportion of the bounds compared to max possible size. Max size
+        // spec takes the aspect ratio of the bounds into account, so both width and height
+        // scale by the same factor.
+        updateBoundsScale();
     }
 
     /** Get the current PIP bounds. */
@@ -294,7 +298,8 @@ public class PipBoundsState implements PipDisplayLayoutState.DisplayIdListener {
         mStashedState = stashedState;
         try {
             ActivityTaskManager.getService().onPictureInPictureUiStateChanged(
-                    new PictureInPictureUiState(stashedState != STASH_TYPE_NONE /* isStashed */)
+                    new PictureInPictureUiState(stashedState != STASH_TYPE_NONE /* isStashed */),
+                    mPipDisplayLayoutState.getDisplayId()
             );
         } catch (RemoteException | IllegalStateException e) {
             ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
@@ -595,10 +600,11 @@ public class PipBoundsState implements PipDisplayLayoutState.DisplayIdListener {
      * Back-gesture handler, to avoid conflicting with PiP when it's stashed.
      */
     public void addPipExclusionBoundsChangeCallback(
-            @Nullable Consumer<Rect> onPipExclusionBoundsChangeCallback) {
-        mOnPipExclusionBoundsChangeCallbacks.add(onPipExclusionBoundsChangeCallback);
-        for (Consumer<Rect> callback : mOnPipExclusionBoundsChangeCallbacks) {
-            callback.accept(getBounds());
+            @NonNull Executor executor,
+            @NonNull Consumer<Rect> onPipExclusionBoundsChangeCallback) {
+        if (onPipExclusionBoundsChangeCallback != null) {
+            mOnPipExclusionBoundsChangeCallbacks.put(onPipExclusionBoundsChangeCallback, executor);
+            executor.execute(() -> onPipExclusionBoundsChangeCallback.accept(getBounds()));
         }
     }
 
@@ -606,8 +612,10 @@ public class PipBoundsState implements PipDisplayLayoutState.DisplayIdListener {
      * Remove a callback that was previously added.
      */
     public void removePipExclusionBoundsChangeCallback(
-            @Nullable Consumer<Rect> onPipExclusionBoundsChangeCallback) {
-        mOnPipExclusionBoundsChangeCallbacks.remove(onPipExclusionBoundsChangeCallback);
+            @NonNull Consumer<Rect> onPipExclusionBoundsChangeCallback) {
+        if (onPipExclusionBoundsChangeCallback != null) {
+            mOnPipExclusionBoundsChangeCallbacks.remove(onPipExclusionBoundsChangeCallback);
+        }
     }
 
     /** Adds callback to listen on aspect ratio change. */

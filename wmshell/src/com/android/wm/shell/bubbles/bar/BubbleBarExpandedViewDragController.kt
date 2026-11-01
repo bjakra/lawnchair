@@ -34,14 +34,13 @@ import com.android.wm.shell.shared.magnetictarget.MagnetizedObject
 /** Controller for handling drag interactions with [BubbleBarExpandedView] */
 @SuppressLint("ClickableViewAccessibility")
 class BubbleBarExpandedViewDragController(
-    private val context: Context,
+    val context: Context,
     private val expandedView: BubbleBarExpandedView,
     private val dismissView: DismissView,
     private val animationHelper: BubbleBarAnimationHelper,
     private val bubblePositioner: BubblePositioner,
-    private val pinController: BubbleExpandedViewPinController,
-    private val dropTargetManager: DropTargetManager?,
-    private val dragZoneFactory: DragZoneFactory?,
+    private val dropTargetManager: DropTargetManager,
+    var dragZoneFactory: DragZoneFactory,
     @get:VisibleForTesting val dragListener: DragListener,
 ) {
 
@@ -75,8 +74,7 @@ class BubbleBarExpandedViewDragController(
             MagnetizedObject.MagneticTarget(dismissView.circle, dismissView.circle.width)
         magnetizedExpandedView.addTarget(magnetizedDismissTarget)
 
-        draggedBubbleElevation = context.resources.getDimension(
-            R.dimen.dragged_bubble_elevation)
+        draggedBubbleElevation = context.resources.getDimension(R.dimen.dragged_bubble_elevation)
         val dragMotionEventHandler = HandleDragListener()
 
         expandedView.handleView.setOnTouchListener { view, event ->
@@ -84,12 +82,7 @@ class BubbleBarExpandedViewDragController(
                 expandedViewInitialTranslationX = expandedView.translationX
                 expandedViewInitialTranslationY = expandedView.translationY
             }
-            val magnetConsumed = magnetizedExpandedView.maybeConsumeMotionEvent(event)
-            // Move events can be consumed by the magnetized object
-            if (event.actionMasked == MotionEvent.ACTION_MOVE && magnetConsumed) {
-                return@setOnTouchListener true
-            }
-            return@setOnTouchListener dragMotionEventHandler.onTouch(view, event) || magnetConsumed
+            dragMotionEventHandler.onTouch(view, event)
         }
     }
 
@@ -111,22 +104,22 @@ class BubbleBarExpandedViewDragController(
             // While animating, don't allow new touch events
             if (expandedView.isAnimating) return false
             expandedView.z = draggedBubbleElevation
-            if (dropTargetManager != null && dragZoneFactory != null) {
-                val draggedObject = DraggedObject.ExpandedView(
+            val draggedObject =
+                DraggedObject.ExpandedView(
                     if (bubblePositioner.isBubbleBarOnLeft) {
                         BubbleBarLocation.LEFT
                     } else {
                         BubbleBarLocation.RIGHT
                     }
                 )
-                dropTargetManager.onDragStarted(
-                    draggedObject,
-                    dragZoneFactory.createSortedDragZones(draggedObject)
-                )
-            } else {
-                pinController.onDragStart(bubblePositioner.isBubbleBarOnLeft)
-            }
+            dropTargetManager.onDragStarted(
+                draggedObject,
+                dragZoneFactory.createSortedDragZones(draggedObject),
+            )
             isDragged = true
+            // pass the down event to the magnetized object to make sure that positions on the
+            // screen are updated in case they changed, e.g. after rotation
+            magnetizedExpandedView.maybeConsumeMotionEvent(ev)
             return true
         }
 
@@ -142,14 +135,17 @@ class BubbleBarExpandedViewDragController(
                 isMoving = true
                 animationHelper.animateStartDrag()
             }
+            dropTargetManager.onDragUpdated(ev.rawX.toInt(), ev.rawY.toInt())
+
+            // If we're dragging within the dismiss target, return immediately; the dragged object
+            // is manipulated by the dismiss target
+            if (magnetizedExpandedView.maybeConsumeMotionEvent(ev)) {
+                return
+            }
+
             expandedView.translationX = expandedViewInitialTranslationX + dx
             expandedView.translationY = expandedViewInitialTranslationY + dy
             dismissView.show()
-            if (dropTargetManager != null) {
-                dropTargetManager.onDragUpdated(ev.rawX.toInt(), ev.rawY.toInt())
-            } else {
-                pinController.onDragUpdate(ev.rawX, ev.rawY)
-            }
         }
 
         override fun onUp(
@@ -162,6 +158,9 @@ class BubbleBarExpandedViewDragController(
             velX: Float,
             velY: Float,
         ) {
+            // if we're releasing in the dismiss target, return early since we'll handle this in the
+            // magnet listener
+            if (magnetizedExpandedView.maybeConsumeMotionEvent(ev)) return
             v.translationZ = 0f
             finishDrag()
         }
@@ -174,11 +173,7 @@ class BubbleBarExpandedViewDragController(
 
         private fun finishDrag() {
             if (!isStuckToDismiss) {
-                if (dropTargetManager != null) {
-                    dropTargetManager.onDragEnded()
-                } else {
-                    pinController.onDragEnd()
-                }
+                dropTargetManager.onDragEnded()
                 dragListener.onReleased(inDismiss = false)
                 animationHelper.animateToRestPosition()
                 dismissView.hide()
@@ -194,7 +189,6 @@ class BubbleBarExpandedViewDragController(
             draggedObject: MagnetizedObject<*>,
         ) {
             isStuckToDismiss = true
-            pinController.onStuckToDismissTarget()
         }
 
         override fun onUnstuckFromTarget(
@@ -212,12 +206,8 @@ class BubbleBarExpandedViewDragController(
             target: MagnetizedObject.MagneticTarget,
             draggedObject: MagnetizedObject<*>,
         ) {
+            dropTargetManager.onDragEnded()
             dragListener.onReleased(inDismiss = true)
-            if (dropTargetManager != null) {
-                dropTargetManager.onDragEnded()
-            } else {
-                pinController.onDragEnd()
-            }
             dismissView.hide()
         }
     }

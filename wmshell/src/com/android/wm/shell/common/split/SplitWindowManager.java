@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.common.split;
 
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
@@ -56,6 +57,9 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     private SurfaceControl mLeash;
     private DividerView mDividerView;
 
+    // The dynamically calculated amount to expand the window bounds to fit decorative elements.
+    private int mWindowExpansionPx = 0;
+
     // Used to "pass" a transaction to WWM.remove so that view removal can be synchronized.
     private SurfaceControl.Transaction mSyncTransaction = null;
 
@@ -89,6 +93,19 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     @Override
     public SurfaceControl getSurfaceControl(IWindow window) {
         return super.getSurfaceControl(window);
+    }
+
+    /**
+     * Update the display Context if the previous one's display and the new one are different.
+     *
+     * Since changing the display almost certainly means the {@link DividerView} is out of date,
+     * also call on release to teardown the {@link DividerView}.
+     */
+    public void updateDisplayContext(Context displayContext) {
+        if (displayContext.getDisplayId() != mContext.getDisplayId()) {
+            mContext = displayContext;
+            release(null /* Transaction */);
+        }
     }
 
     @Override
@@ -125,9 +142,28 @@ public final class SplitWindowManager extends WindowlessWindowManager {
                 .inflate(R.layout.split_divider, null /* root */);
 
         final Rect dividerBounds = splitLayout.getDividerBounds();
+
+        int buttonSize = mContext.getResources()
+                .getDimensionPixelSize(R.dimen.split_divider_button_size);
+        int buttonGap = mContext.getResources()
+                .getDimensionPixelSize(R.dimen.split_divider_button_margin);
+        int handleThickness = mContext.getResources().getDimensionPixelSize(
+                splitLayout.isLeftRightSplit()
+                        ? R.dimen.split_divider_handle_height : R.dimen.split_divider_handle_width);
+
+        int requiredThickness = handleThickness + 2 * (buttonSize + buttonGap);
+        int currentThickness = splitLayout.isLeftRightSplit()
+                ? dividerBounds.width() : dividerBounds.height();
+        mWindowExpansionPx = Math.max(0, requiredThickness - currentThickness);
+
+        int widthExpansion = splitLayout.isLeftRightSplit() ? mWindowExpansionPx : 0;
+        int heightExpansion = splitLayout.isLeftRightSplit() ? 0 : mWindowExpansionPx;
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                dividerBounds.width(), dividerBounds.height(), TYPE_DOCK_DIVIDER,
-                FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL | FLAG_WATCH_OUTSIDE_TOUCH,
+                dividerBounds.width() + widthExpansion,
+                dividerBounds.height() + heightExpansion,
+                TYPE_DOCK_DIVIDER,
+                FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL | FLAG_WATCH_OUTSIDE_TOUCH
+                        | FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT);
         lp.token = new Binder();
         lp.setTitle(mWindowName);
@@ -139,6 +175,11 @@ public final class SplitWindowManager extends WindowlessWindowManager {
             mDividerView.setInteractive(mLastDividerInteractive, mLastDividerHandleHidden,
                     "restore_setup");
         }
+    }
+
+    /** Returns the expansion size of the divider window. */
+    int getWindowExpansion() {
+        return mWindowExpansionPx;
     }
 
     /**
@@ -161,14 +202,14 @@ public final class SplitWindowManager extends WindowlessWindowManager {
             mViewHost = null;
         }
 
-        if (mLeash != null) {
+        if (mLeash != null && mLeash.isValid()) {
             if (t == null) {
                 new SurfaceControl.Transaction().remove(mLeash).apply();
             } else {
                 t.remove(mLeash);
             }
-            mLeash = null;
         }
+        mLeash = null;
     }
 
     @Override

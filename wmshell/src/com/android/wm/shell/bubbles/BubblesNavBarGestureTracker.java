@@ -18,7 +18,6 @@ package com.android.wm.shell.bubbles;
 
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 
 import android.content.Context;
 import android.hardware.input.InputManager;
@@ -29,27 +28,29 @@ import android.view.InputMonitor;
 
 import androidx.annotation.Nullable;
 
-import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.bubbles.BubblesNavBarMotionEventHandler.MotionEventListener;
+import com.android.wm.shell.shared.bubbles.logging.BubbleLog;
 
 /**
  * Set up tracking bubbles gestures that begin in navigation bar
  */
-class BubblesNavBarGestureTracker {
+public class BubblesNavBarGestureTracker {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubblesGestureTracker" : TAG_BUBBLES;
 
     private static final String GESTURE_MONITOR = "bubbles-gesture";
     private final Context mContext;
     private final BubblePositioner mPositioner;
+    private final InputManager mInputManager;
 
     @Nullable
     private InputMonitor mInputMonitor;
     @Nullable
     private InputEventReceiver mInputEventReceiver;
 
-    BubblesNavBarGestureTracker(Context context, BubblePositioner positioner) {
+    public BubblesNavBarGestureTracker(Context context, BubblePositioner positioner) {
         mContext = context;
+        mInputManager = mContext.getSystemService(InputManager.class);
         mPositioner = positioner;
     }
 
@@ -58,13 +59,13 @@ class BubblesNavBarGestureTracker {
      *
      * @param listener listener that is notified of touch events
      */
-    void start(MotionEventListener listener) {
-        ProtoLog.d(WM_SHELL_BUBBLES, "start monitoring bubbles swipe up gesture");
+    public void start(MotionEventListener listener) {
+        BubbleLog.d(
+                "BubblesNavBarGestureTracker.start() start monitoring bubbles swipe up gesture");
 
         stopInternal();
 
-        mInputMonitor = mContext.getSystemService(InputManager.class)
-                .monitorGestureInput(GESTURE_MONITOR, mContext.getDisplayId());
+        mInputMonitor = mInputManager.monitorGestureInput(GESTURE_MONITOR, mContext.getDisplayId());
         InputChannel inputChannel = mInputMonitor.getInputChannel();
 
         BubblesNavBarMotionEventHandler motionEventHandler =
@@ -74,26 +75,33 @@ class BubblesNavBarGestureTracker {
                 Choreographer.getInstance(), motionEventHandler);
     }
 
-    void stop() {
-        ProtoLog.d(WM_SHELL_BUBBLES, "stop monitoring bubbles swipe up gesture");
+    /**
+     * Stop tracking gestures
+     */
+    public void stop() {
+        BubbleLog.d("BubblesNavBarGestureTracker.stop() stop monitoring bubbles swipe up gesture");
         stopInternal();
     }
 
     private void stopInternal() {
         if (mInputEventReceiver != null) {
-            mInputEventReceiver.dispose();
+            // Clear the field before calling dispose() to guard against re-entrant calls from it
+            InputEventReceiver receiver = mInputEventReceiver;
             mInputEventReceiver = null;
+            receiver.dispose();
         }
         if (mInputMonitor != null) {
-            mInputMonitor.dispose();
+            // Clear the field before calling dispose() to guard against re-entrant calls from it
+            InputMonitor monitor = mInputMonitor;
             mInputMonitor = null;
+            monitor.dispose();
         }
     }
 
     private void onInterceptTouch() {
-        ProtoLog.d(WM_SHELL_BUBBLES, "intercept touch event");
-        if (mInputMonitor != null) {
-            mInputMonitor.pilferPointers();
+        BubbleLog.d("BubblesNavBarGestureTracker.onInterceptTouch() intercept touch event");
+        if (mInputEventReceiver != null) {
+            mInputManager.pilferPointers(mInputEventReceiver.getToken());
         }
     }
 }

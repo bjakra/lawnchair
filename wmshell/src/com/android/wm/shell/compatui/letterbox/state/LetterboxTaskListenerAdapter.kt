@@ -18,45 +18,50 @@ package com.android.wm.shell.compatui.letterbox.state
 
 import android.app.ActivityManager.RunningTaskInfo
 import android.view.SurfaceControl
-import com.android.window.flags.Flags.appCompatRefactoring
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTaskOrganizer.TaskAppearedListener
+import com.android.wm.shell.ShellTaskOrganizer.TaskInfoChangedListener
 import com.android.wm.shell.ShellTaskOrganizer.TaskVanishedListener
+import com.android.wm.shell.compatui.letterbox.lifecycle.isALeafTask
 import com.android.wm.shell.dagger.WMSingleton
 import com.android.wm.shell.sysui.ShellInit
 import javax.inject.Inject
 
 /**
- * [TaskAppearedListener] and [TaskVanishedListener] implementation to store [TaskInfo] data
- * useful for letterboxing.
+ * [TaskAppearedListener] and [TaskVanishedListener] implementation to store [TaskInfo] data useful
+ * for letterboxing.
  */
 @WMSingleton
-class LetterboxTaskListenerAdapter @Inject constructor(
+class LetterboxTaskListenerAdapter
+@Inject
+constructor(
     shellInit: ShellInit,
     shellTaskOrganizer: ShellTaskOrganizer,
-    private val letterboxTaskInfoRepository: LetterboxTaskInfoRepository
-) : TaskVanishedListener, TaskAppearedListener {
+    private val letterboxTaskInfoRepository: LetterboxTaskInfoRepository,
+) : TaskVanishedListener, TaskAppearedListener, TaskInfoChangedListener {
 
     init {
-        if (appCompatRefactoring()) {
-            shellInit.addInitCallback({
+        shellInit.addInitCallback(
+            {
                 shellTaskOrganizer.addTaskAppearedListener(this)
                 shellTaskOrganizer.addTaskVanishedListener(this)
-            }, this)
-        }
+                shellTaskOrganizer.addTaskInfoChangedListener(this)
+            },
+            this,
+        )
     }
 
-    override fun onTaskAppeared(
-        taskInfo: RunningTaskInfo,
-        leash: SurfaceControl
-    ) {
-        letterboxTaskInfoRepository.insert(
+    override fun onTaskAppeared(taskInfo: RunningTaskInfo, leash: SurfaceControl) {
+        letterboxTaskInfoRepository.updateTaskLeafState(taskInfo, leash)
+    }
+
+    override fun onTaskInfoChanged(taskInfo: RunningTaskInfo) {
+        if (!taskInfo.isALeafTask) {
+            letterboxTaskInfoRepository.delete(taskInfo.taskId)
+        }
+        letterboxTaskInfoRepository.update(
             key = taskInfo.taskId,
-            item = LetterboxTaskInfoState(
-                containerToken = taskInfo.token,
-                containerLeash = leash
-            ),
-            overrideIfPresent = true
+            updateItem = { item -> item.copy(configuration = taskInfo.configuration) },
         )
     }
 

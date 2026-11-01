@@ -17,7 +17,6 @@
 package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
@@ -39,10 +38,11 @@ import android.app.TaskInfo;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.util.ArraySet;
 import android.util.SparseArray;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
-import android.window.TaskOrganizer;
+import android.window.TaskCreationParams;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -52,6 +52,8 @@ import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.bubbles.BubbleController;
+import com.android.wm.shell.bubbles.BubbleHelper;
 import com.android.wm.shell.common.SurfaceUtils;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.split.SplitDecorManager;
@@ -87,16 +89,18 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     /** Callback interface for listening to changes in a split-screen stage. */
     public interface StageListenerCallbacks {
         /** Called when the root task on current display appears. */
-        void onRootTaskAppeared(ActivityManager.RunningTaskInfo taskInfo);
+        void onRootTaskAppeared();
 
         void onStageVisibilityChanged(StageTaskListener stageTaskListener);
 
         void onChildTaskStatusChanged(StageTaskListener stage, int taskId, boolean present,
                 boolean visible);
 
+        /** Called when a child task vanished and is now in a bubble. */
+        void onChildTaskMovedToBubble(StageTaskListener stage, int taskId);
 
         /** Called when the root task on current display vanishes. */
-        void onRootTaskVanished(ActivityManager.RunningTaskInfo taskInfo);
+        void onRootTaskVanished();
 
         void onNoLongerSupportMultiWindow(StageTaskListener stageTaskListener,
                 ActivityManager.RunningTaskInfo taskInfo);
@@ -107,6 +111,7 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     private final SyncTransactionQueue mSyncQueue;
     private final IconProvider mIconProvider;
     private final Optional<WindowDecorViewModel> mWindowDecorViewModel;
+    private final Optional<BubbleHelper> mBubbleHelper;
 
     /** Whether or not the root task has been created. */
     boolean mHasRootTask = false;
@@ -119,24 +124,27 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     protected SurfaceControl mDimLayer;
     protected SparseArray<ActivityManager.RunningTaskInfo> mChildrenTaskInfo = new SparseArray<>();
     private final SparseArray<SurfaceControl> mChildrenLeashes = new SparseArray<>();
+    private final ArraySet<Integer> mChildrenToBeVanished = new ArraySet<>();
     // TODO(b/204308910): Extracts SplitDecorManager related code to common package.
     private SplitDecorManager mSplitDecorManager;
 
     StageTaskListener(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
             IconProvider iconProvider,
-            Optional<WindowDecorViewModel> windowDecorViewModel, int id) {
+            Optional<WindowDecorViewModel> windowDecorViewModel, int id,
+            Optional<BubbleController> bubbleController) {
         mContext = context;
         mCallbacks = callbacks;
         mSyncQueue = syncQueue;
         mIconProvider = iconProvider;
         mWindowDecorViewModel = windowDecorViewModel;
-        taskOrganizer.createRootTask(
-                new TaskOrganizer.CreateRootTaskRequest()
-                        .setName(stageTypeToString(id).toLowerCase())
-                        .setDisplayId(displayId)
-                        .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW),
-                this);
+        mBubbleHelper = bubbleController.map(BubbleController::getBubbleHelper);
+        final TaskCreationParams params = new TaskCreationParams.Builder()
+                .setName(stageTypeToString(id).toLowerCase())
+                .setDisplayId(displayId)
+                .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW)
+                .build();
+        taskOrganizer.createTask(params, this);
         mId = id;
     }
 
@@ -185,6 +193,12 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         final ActivityManager.RunningTaskInfo taskInfo =
                 getChildTaskInfo(t -> t.topActivityInfo != null);
         return taskInfo != null ? taskInfo.topActivityInfo.applicationInfo.uid : 0;
+    }
+
+    int getTopChildTaskId() {
+        final ActivityManager.RunningTaskInfo taskInfo =
+                getChildTaskInfo(t -> t.topActivityInfo != null);
+        return taskInfo != null ? taskInfo.taskId : INVALID_TASK_ID;
     }
 
     /** @return {@code true} if this listener contains the currently focused task. */
@@ -253,10 +267,10 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @CallSuper
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskAppeared: taskId=%d taskParent=%d rootTask=%d "
-                        + "stageId=%s taskActivity=%s",
+                        + "stageId=%s taskActivity=%s displayId=%d",
                 taskInfo.taskId, taskInfo.parentTaskId,
                 mRootTaskInfo != null ? mRootTaskInfo.taskId : -1,
-                stageTypeToString(mId), taskInfo.baseActivity);
+                stageTypeToString(mId), taskInfo.baseActivity, taskInfo.displayId);
         if (mRootTaskInfo == null) {
             mRootLeash = leash;
             mRootTaskInfo = taskInfo;
@@ -264,7 +278,7 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                     mRootTaskInfo.configuration,
                     mIconProvider);
             mHasRootTask = true;
-            mCallbacks.onRootTaskAppeared(taskInfo);
+            mCallbacks.onRootTaskAppeared();
             if (mVisible != mRootTaskInfo.isVisible) {
                 mVisible = mRootTaskInfo.isVisible;
                 mCallbacks.onStageVisibilityChanged(this);
@@ -287,19 +301,18 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @CallSuper
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskInfoChanged: taskId=%d taskAct=%s "
-                        + "stageId=%s",
-                taskInfo.taskId, taskInfo.baseActivity, stageTypeToString(mId));
-        mWindowDecorViewModel.ifPresent(viewModel -> viewModel.onTaskInfoChanged(taskInfo));
+                        + "stageId=%s displayId=%d",
+                taskInfo.taskId, taskInfo.baseActivity, stageTypeToString(mId), taskInfo.displayId);
         if (mRootTaskInfo.taskId == taskInfo.taskId) {
             mRootTaskInfo = taskInfo;
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
-            if (!taskInfo.supportsMultiWindow
+            if (!taskInfo.supportsMultiWindowWithoutConstraints
                     || !ArrayUtils.contains(CONTROLLED_ACTIVITY_TYPES, taskInfo.getActivityType())
                     || !ArrayUtils.contains(CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE,
                     taskInfo.getWindowingMode())) {
                 ProtoLog.d(WM_SHELL_SPLIT_SCREEN,
-                        "onTaskInfoChanged: task=%d no longer supports multiwindow",
-                        taskInfo.taskId);
+                        "onTaskInfoChanged: task=%d no longer supports multiwindow on display=%d",
+                        taskInfo.taskId, taskInfo.displayId);
                 // Leave split screen if the task no longer supports multi window or have
                 // uncontrolled task.
                 mCallbacks.onNoLongerSupportMultiWindow(this, taskInfo);
@@ -312,20 +325,22 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
         }
+        // Only send onTaskInfoChanged signal after the split state is updated
+        mWindowDecorViewModel.ifPresent(viewModel -> viewModel.onTaskInfoChanged(taskInfo));
     }
 
     @Override
     @CallSuper
     public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskVanished: task=%d stageId=%s",
-                taskInfo.taskId, stageTypeToString(mId));
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskVanished: task=%d stageId=%s displayId=%d",
+                taskInfo.taskId, stageTypeToString(mId), taskInfo.displayId);
         final int taskId = taskInfo.taskId;
         mWindowDecorViewModel.ifPresent(vm -> vm.onTaskVanished(taskInfo));
         if (mRootTaskInfo.taskId == taskId) {
             mHasRootTask = false;
             mVisible = false;
             mHasChildren = false;
-            mCallbacks.onRootTaskVanished(taskInfo);
+            mCallbacks.onRootTaskVanished();
             mRootTaskInfo = null;
             mRootLeash = null;
             mSyncQueue.runInSync(t -> {
@@ -335,8 +350,14 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         } else if (mChildrenTaskInfo.contains(taskId)) {
             mChildrenTaskInfo.remove(taskId);
             mChildrenLeashes.remove(taskId);
-            mCallbacks.onChildTaskStatusChanged(this, taskId, false /* present */,
-                    taskInfo.isVisible);
+            mChildrenToBeVanished.remove(taskId);
+            if (mBubbleHelper.map(bubbleHelper -> bubbleHelper.isAppBubbleTask(taskInfo))
+                    .orElse(false)) {
+                mCallbacks.onChildTaskMovedToBubble(this, taskId);
+            } else {
+                mCallbacks.onChildTaskStatusChanged(this, taskId, false /* present */,
+                        taskInfo.isVisible);
+            }
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
@@ -479,8 +500,8 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     private void evictChild(@NonNull WindowContainerTransaction wct, @NonNull TaskInfo taskInfo,
             @NonNull String reason) {
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "Evict child: task=%d reason=%s", taskInfo.taskId,
-                reason);
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "Evict child: task=%d reason=%s displayId=%d",
+                taskInfo.taskId, reason, taskInfo.displayId);
         // We are reparenting the task, but not removing the task from mChildrenTaskInfo, so to
         // prevent this task from being considered as a top task for the roots, we need to override
         // the visibility of the soon-to-be-hidden task
@@ -492,7 +513,7 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     void reparentTopTask(WindowContainerTransaction wct) {
         wct.reparentTasks(null /* currentParent */, mRootTaskInfo.token,
                 CONTROLLED_WINDOWING_MODES, CONTROLLED_ACTIVITY_TYPES,
-                true /* onTop */, true /* reparentTopOnly */);
+                true /* onTop */, true /* reparentTopOnly */, true /* clearWindowingMode */);
     }
 
     void resetBounds(WindowContainerTransaction wct) {
@@ -534,10 +555,11 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     }
 
     void deactivate(WindowContainerTransaction wct) {
-        deactivate(wct, false /* toTop */);
+        deactivate(wct, false /* toTop */, null /* newParent */);
     }
 
-    void deactivate(WindowContainerTransaction wct, boolean reparentTasksToTop) {
+    void deactivate(WindowContainerTransaction wct, boolean reparentTasksToTop,
+            @Nullable WindowContainerToken newParent) {
         if (!mIsActive && !enableFlexibleSplit()) return;
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "deactivate: reparentTasksToTop=%b "
                         + "rootTaskInfo=%s stage=%s",
@@ -550,7 +572,7 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         final WindowContainerToken rootToken = mRootTaskInfo.token;
         wct.reparentTasks(
                 rootToken,
-                null /* newParent */,
+                newParent,
                 null /* windowingModes */,
                 null /* activityTypes */,
                 reparentTasksToTop);
@@ -558,14 +580,15 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     // --------
     // Previously only used in SideStage. With flexible split this is called for all stages
-    boolean removeAllTasks(WindowContainerTransaction wct, boolean toTop) {
+    boolean removeAllTasks(WindowContainerTransaction wct, boolean toTop,
+            @Nullable WindowContainerToken newParent) {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "remove all side stage tasks: childCount=%d toTop=%b "
                         + " stageI=%s",
                 mChildrenTaskInfo.size(), toTop, stageTypeToString(mId));
         if (mChildrenTaskInfo.size() == 0) return false;
         wct.reparentTasks(
                 mRootTaskInfo.token,
-                null /* newParent */,
+                newParent,
                 null /* windowingModes */,
                 null /* activityTypes */,
                 toTop);
@@ -581,13 +604,36 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         return true;
     }
 
+    /**
+     * Marks a task to be vanished.
+     *
+     * This method should be invoked when you request to close a task so that
+     * following checks with areAllTasksToBeVanished can correctly determine all the tasks in this
+     * stage will be closed and thus the split screen needs to be dismissed.
+     */
+    void markToBeVanished(int taskId) {
+        if (!mChildrenTaskInfo.contains(taskId)) return;
+        mChildrenToBeVanished.add(taskId);
+    }
+
+    boolean areAllTasksToBeVanished() {
+        for (int i = 0; i < mChildrenTaskInfo.size(); i++) {
+            if (!mChildrenToBeVanished.contains(mChildrenTaskInfo.valueAt(i).taskId)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public String toString() {
-        return "mId: " + stageTypeToString(mId)
-                + " mVisible: " + mVisible
-                + " mActive: " + mIsActive
-                + " mHasRootTask: " + mHasRootTask
-                + " childSize: " + mChildrenTaskInfo.size();
+        return TAG + "("
+                + "mId=" + stageTypeToString(mId) + ", "
+                + "mVisible=" + mVisible + ", "
+                + "mActive=" + mIsActive + ", "
+                + "mHasRootTask=" + mHasRootTask + ", "
+                + "childSize=" + mChildrenTaskInfo.size()
+                + ")";
     }
 
     @Override

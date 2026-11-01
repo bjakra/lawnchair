@@ -25,7 +25,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Trace;
 import android.util.Log;
-import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
@@ -40,7 +39,6 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
     private static final String TAG = TaskStackListenerImpl.class.getSimpleName();
 
     private static final int ON_TASK_STACK_CHANGED = 1;
-    private static final int ON_TASK_SNAPSHOT_CHANGED = 2;
     private static final int ON_ACTIVITY_PINNED = 3;
     private static final int ON_ACTIVITY_RESTART_ATTEMPT = 4;
     private static final int ON_ACTIVITY_FORCED_RESIZABLE = 5;
@@ -60,6 +58,7 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
     private static final int ON_TASK_DESCRIPTION_CHANGED = 19;
     private static final int ON_ACTIVITY_ROTATION = 20;
     private static final int ON_RECENT_TASK_REMOVED_FOR_ADD_TASK = 21;
+    private static final int ON_LOCK_TASK_MODE_CHANGE = 22;
 
     /**
      * List of {@link TaskStackListenerCallback} registered from {@link #addListener}.
@@ -138,6 +137,11 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
     }
 
     @Override
+    public void onLockTaskModeChanged(int mode) {
+        mMainHandler.obtainMessage(ON_LOCK_TASK_MODE_CHANGE, mode, 0 /* unused */).sendToTarget();
+    }
+
+    @Override
     public void onTaskStackChanged() {
         // Call the task changed callback for the non-ui thread listeners first. Copy to a set
         // of temp listeners so that we don't lock on mTaskStackListeners while calling all the
@@ -184,12 +188,6 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
     @Override
     public void onTaskDescriptionChanged(ActivityManager.RunningTaskInfo taskInfo) {
         mMainHandler.obtainMessage(ON_TASK_DESCRIPTION_CHANGED, taskInfo).sendToTarget();
-    }
-
-    @Override
-    public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) {
-        mMainHandler.obtainMessage(ON_TASK_SNAPSHOT_CHANGED, taskId, 0, snapshot)
-                .sendToTarget();
     }
 
     @Override
@@ -274,21 +272,6 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
                     Trace.beginSection("onTaskStackChanged");
                     for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                         mTaskStackListeners.get(i).onTaskStackChanged();
-                    }
-                    Trace.endSection();
-                    break;
-                }
-                case ON_TASK_SNAPSHOT_CHANGED: {
-                    Trace.beginSection("onTaskSnapshotChanged");
-                    final TaskSnapshot snapshot = (TaskSnapshot) msg.obj;
-                    boolean snapshotConsumed = false;
-                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        boolean consumed = mTaskStackListeners.get(i).onTaskSnapshotChanged(
-                                msg.arg1, snapshot);
-                        snapshotConsumed |= consumed;
-                    }
-                    if (!snapshotConsumed && snapshot.getHardwareBuffer() != null) {
-                        snapshot.getHardwareBuffer().close();
                     }
                     Trace.endSection();
                     break;
@@ -432,6 +415,12 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
                 case ON_ACTIVITY_ROTATION: {
                     for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                         mTaskStackListeners.get(i).onActivityRotation(msg.arg1);
+                    }
+                    break;
+                }
+                case ON_LOCK_TASK_MODE_CHANGE: {
+                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                        mTaskStackListeners.get(i).onLockTaskModeChanged(msg.arg1);
                     }
                     break;
                 }

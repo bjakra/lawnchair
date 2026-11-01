@@ -19,28 +19,21 @@ package com.android.wm.shell.windowdecor
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
-import android.widget.FrameLayout
+import android.widget.LinearLayout
 
-/**
- * View group that allows a hover listener to be set for the entire menu layout.
- */
-class CaptionMenuLayout : FrameLayout {
+/** View group that allows a hover listener to be set for the entire menu layout. */
+class CaptionMenuLayout : LinearLayout {
     /** Called when menu receives hover event without consuming the event. */
     var onInterceptHoverListener: ((MotionEvent) -> Unit)? = null
 
-    constructor(
-        context: Context
-    ) : super(context)
+    constructor(context: Context) : super(context)
 
-    constructor(
-        context: Context,
-        attrs: AttributeSet?
-    ) : super(context, attrs)
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
     constructor(
         context: Context,
         attrs: AttributeSet?,
-        defStyleAttr: Int
+        defStyleAttr: Int,
     ) : super(context, attrs, defStyleAttr)
 
     override fun onInterceptHoverEvent(ev: MotionEvent): Boolean {

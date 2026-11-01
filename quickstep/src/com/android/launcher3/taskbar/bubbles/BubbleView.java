@@ -21,10 +21,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -34,8 +32,10 @@ import android.widget.ImageView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.launcher3.R;
 import com.android.launcher3.icons.DotRenderer;
+import com.android.launcher3.icons.DotRenderer.IconShapeInfo;
 import com.android.wm.shell.shared.animation.Interpolators;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
 import com.android.wm.shell.shared.bubbles.BubbleInfo;
@@ -54,7 +54,6 @@ import java.util.EnumSet;
  */
 public class BubbleView extends ConstraintLayout {
 
-    public static final int DEFAULT_PATH_SIZE = 100;
     /** Duration for animating the scale of the dot and badge. */
     private static final int SCALE_ANIMATION_DURATION_MS = 200;
 
@@ -65,8 +64,9 @@ public class BubbleView extends ConstraintLayout {
     private float mDragTranslationX;
     private float mOffsetX;
 
+    @Nullable
     private DotRenderer mDotRenderer;
-    private DotRenderer.DrawParams mDrawParams;
+    private final DotRenderer.DrawParams mDrawParams;
     private int mDotColor;
     private Rect mTempBounds = new Rect();
 
@@ -78,22 +78,13 @@ public class BubbleView extends ConstraintLayout {
     private float mDotScale;
     private boolean mDotSuppressedForBubbleUpdate = false;
 
-    // TODO: (b/273310265) handle RTL
-    // Whether the bubbles are positioned on the left or right side of the screen
-    private boolean mOnLeft = false;
-
     private BubbleBarItem mBubble;
     private boolean mIsOverflow;
 
-    private Bitmap mIcon;
+    private boolean mSelected;
 
     @Nullable
     private Controller mController;
-
-    @Nullable
-    private BubbleBarBubbleIconsFactory mIconFactory = null;
-
-    PreferenceManager2 preferenceManager2;
 
     public BubbleView(Context context) {
         this(context, null);
@@ -120,6 +111,10 @@ public class BubbleView extends ConstraintLayout {
         preferenceManager2 = PreferenceManager2.INSTANCE.get(context);
 
         mDrawParams = new DotRenderer.DrawParams();
+        // TODO: (b/273310265) handle RTL
+        // Whether the bubbles are positioned on the left or right side of the screen
+        mDrawParams.leftAlign = false;
+        mDrawParams.shapeInfo = IconShapeInfo.DEFAULT_NORMALIZED;
 
         setFocusable(true);
         setClickable(true);
@@ -133,11 +128,15 @@ public class BubbleView extends ConstraintLayout {
         int updatedBubbleSize = Math.min(getWidth(), getHeight());
         if (updatedBubbleSize == mBubbleSize) return;
         mBubbleSize = updatedBubbleSize;
-        mIconFactory = new BubbleBarBubbleIconsFactory(mContext, mBubbleSize);
-        updateBubbleIcon();
         if (mBubble == null || mBubble instanceof BubbleBarOverflow) return;
-        Path dotPath = ((BubbleBarBubble) mBubble).getDotPath();
-        mDotRenderer = new DotRenderer(mBubbleSize, dotPath, DEFAULT_PATH_SIZE);
+        mDotRenderer = new DotRenderer(mBubbleSize);
+    }
+
+    /**
+     * Mark this bubble as the selected bubble.
+     */
+    public void setSelected(boolean selected) {
+        mSelected = selected;
     }
 
     /**
@@ -188,29 +187,35 @@ public class BubbleView extends ConstraintLayout {
         }
 
         getDrawingRect(mTempBounds);
-
-        mDrawParams.dotColor = mDotColor;
         mDrawParams.iconBounds = mTempBounds;
-        mDrawParams.leftAlign = mOnLeft;
         mDrawParams.scale = mDotScale;
 
-        mDotRenderer.draw(canvas, mDrawParams);
+        if (mDotRenderer != null) {
+            mDotRenderer.draw(canvas, mDrawParams);
+        }
     }
 
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.addAction(AccessibilityNodeInfo.ACTION_COLLAPSE);
-        if (mBubble instanceof BubbleBarBubble) {
-            info.addAction(AccessibilityNodeInfo.ACTION_DISMISS);
+        if (mSelected) {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE);
+        } else {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
         }
-        if (mController != null) {
-            if (mController.getBubbleBarLocation().isOnLeft(isLayoutRtl())) {
-                info.addAction(new AccessibilityNodeInfo.AccessibilityAction(R.id.action_move_right,
-                        getResources().getString(R.string.bubble_bar_action_move_right)));
-            } else {
-                info.addAction(new AccessibilityNodeInfo.AccessibilityAction(R.id.action_move_left,
-                        getResources().getString(R.string.bubble_bar_action_move_left)));
+        if (mBubble instanceof BubbleBarBubble) {
+            // These actions only apply to bubbles
+            info.addAction(AccessibilityNodeInfo.ACTION_DISMISS);
+            if (mController != null) {
+                final AccessibilityNodeInfo.AccessibilityAction action;
+                if (mController.getBubbleBarLocation().isOnLeft(isLayoutRtl())) {
+                    action = new AccessibilityNodeInfo.AccessibilityAction(R.id.action_move_right,
+                            getResources().getString(R.string.bubble_bar_action_move_right));
+                } else {
+                    action = new AccessibilityNodeInfo.AccessibilityAction(R.id.action_move_left,
+                            getResources().getString(R.string.bubble_bar_action_move_left));
+                }
+                info.addAction(action);
             }
         }
     }
@@ -226,6 +231,12 @@ public class BubbleView extends ConstraintLayout {
             }
             return true;
         }
+        if (action == AccessibilityNodeInfo.ACTION_EXPAND) {
+            if (mController != null) {
+                mController.expand(this);
+            }
+            return true;
+        }
         if (action == AccessibilityNodeInfo.ACTION_DISMISS) {
             if (mController != null) {
                 mController.dismiss(this);
@@ -237,60 +248,49 @@ public class BubbleView extends ConstraintLayout {
                 mController.updateBubbleBarLocation(BubbleBarLocation.LEFT,
                         BubbleBarLocation.UpdateSource.A11Y_ACTION_BUBBLE);
             }
+            return true;
         }
         if (action == R.id.action_move_right) {
             if (mController != null) {
                 mController.updateBubbleBarLocation(BubbleBarLocation.RIGHT,
                         BubbleBarLocation.UpdateSource.A11Y_ACTION_BUBBLE);
             }
+            return true;
         }
         return false;
     }
 
-    void setController(@Nullable Controller controller) {
+    @VisibleForTesting
+    public void setController(@Nullable Controller controller) {
         mController = controller;
     }
 
     /** Sets the bubble being rendered in this view. */
     public void setBubble(BubbleBarBubble bubble) {
         mBubble = bubble;
-        mIcon = bubble.getIcon();
-        updateBubbleIcon();
-        if (bubble.getInfo().showAppBadge()) {
-            mAppIcon.setImageBitmap(bubble.getBadge());
+        bubble.getIcon().setOnImageView(mBubbleIcon);
+        if (!bubble.getInfo().isApp()) {
+            mAppIcon.setImageDrawable(bubble.getBadge().newIcon(getContext()));
         } else {
             mAppIcon.setVisibility(GONE);
         }
         mDotColor = bubble.getDotColor();
-        ColorOption dotColorOption = PreferenceCacheExtensionsKt.firstCached(preferenceManager2.getNotificationDotColor());
-        int dotColor = dotColorOption.getColorPreferenceEntry().getLightColor().invoke(getContext());
-        ColorOption counterColorOption = PreferenceCacheExtensionsKt
-                .firstCached(preferenceManager2.getNotificationDotTextColor(), preferenceManager2);
-        int countColor = counterColorOption.getColorPreferenceEntry().getLightColor().invoke(getContext());
-        mDotRenderer = new DotRenderer(mBubbleSize, bubble.getDotPath(), DEFAULT_PATH_SIZE, false, null, dotColor,
-                countColor);
+        mDrawParams.setDotColor(mDotColor);
         String contentDesc = bubble.getInfo().getTitle();
         if (TextUtils.isEmpty(contentDesc)) {
             contentDesc = getResources().getString(R.string.bubble_bar_bubble_fallback_description);
         }
         String appName = bubble.getInfo().getAppName();
         if (!TextUtils.isEmpty(appName)) {
-            contentDesc = getResources().getString(R.string.bubble_bar_bubble_description,
-                    contentDesc, appName);
-        }
-        setContentDescription(contentDesc);
-    }
-
-    private void updateBubbleIcon() {
-        Bitmap icon = null;
-        if (mIcon != null) {
-            icon = mIcon;
-            if (mIconFactory != null) {
-                BitmapDrawable iconDrawable = new BitmapDrawable(getResources(), icon);
-                icon = mIconFactory.createShadowedIconBitmap(iconDrawable, /* scale = */ 1f);
+            if (bubble.getInfo().isChat()) {
+                contentDesc = getResources().getString(
+                        R.string.bubble_bar_bubble_description,
+                        contentDesc, appName);
+            } else {
+                contentDesc = appName;
             }
         }
-        mBubbleIcon.setImageBitmap(icon);
+        setContentDescription(contentDesc);
     }
 
     /**
@@ -302,8 +302,7 @@ public class BubbleView extends ConstraintLayout {
     public void setOverflow(BubbleBarOverflow overflow, Bitmap bitmap) {
         mBubble = overflow;
         mIsOverflow = true;
-        mIcon = bitmap;
-        updateBubbleIcon();
+        mBubbleIcon.setImageBitmap(bitmap);
         mAppIcon.setVisibility(GONE); // Overflow doesn't show the app badge
         setContentDescription(getResources().getString(R.string.bubble_bar_overflow_description));
     }
@@ -476,11 +475,10 @@ public class BubbleView extends ConstraintLayout {
      * Returns the distance from the top left corner of this bubble view to the center of its dot.
      */
     public PointF getDotCenter() {
-        float[] dotPosition =
-                mOnLeft ? mDotRenderer.getLeftDotPosition() : mDotRenderer.getRightDotPosition();
+        PointF dotPosition = mDrawParams.getDotPosition();
         getDrawingRect(mTempBounds);
-        float dotCenterX = mTempBounds.width() * dotPosition[0];
-        float dotCenterY = mTempBounds.height() * dotPosition[1];
+        float dotCenterX = mTempBounds.width() * dotPosition.x;
+        float dotCenterY = mTempBounds.height() * dotPosition.y;
         return new PointF(dotCenterX, dotCenterY);
     }
 
@@ -502,6 +500,9 @@ public class BubbleView extends ConstraintLayout {
 
         /** This bubble should be dismissed */
         void dismiss(BubbleView bubble);
+
+        /** Select the given bubble */
+        void expand(BubbleView bubble);
 
         /** Collapse the bubble bar */
         void collapse();

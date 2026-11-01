@@ -32,6 +32,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
+import android.app.UiModeManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -76,10 +77,13 @@ import com.android.internal.graphics.palette.Quantizer;
 import com.android.internal.graphics.palette.VariationalKMeansQuantizer;
 import com.android.internal.policy.PhoneWindow;
 import com.android.internal.protolog.ProtoLog;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.launcher3.icons.BaseIconFactory;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.TransactionPool;
+import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.UserChangeListener;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -114,6 +118,7 @@ public class SplashscreenContentDrawer {
      * to show before the icon animation finishes.
      */
     static final long MAX_ANIMATION_DURATION = MINIMAL_ANIMATION_DURATION + TIME_WINDOW_DURATION;
+    private final long mMinimumIconShowDuration;
 
     private final Context mContext;
     private final HighResIconProvider mHighResIconProvider;
@@ -131,11 +136,22 @@ public class SplashscreenContentDrawer {
     private final boolean mCanUseAppIconForSplashScreen;
     @VisibleForTesting
     final ColorCache mColorCache;
+    @Nullable
+    private final UiModeManager.ForceInvertStateChangeListener mForceInvertStateChangeListener =
+            forceInvertState -> mForceInvertState = forceInvertState;
+    @UiModeManager.ForceInvertType
+    private int mForceInvertState;
 
-    SplashscreenContentDrawer(Context context, IconProvider iconProvider, TransactionPool pool) {
+    private UiModeManager mUiModeManager = null;
+
+    private UserChangeListener mUserChangeListener;
+
+    SplashscreenContentDrawer(Context context, IconProvider iconProvider, TransactionPool pool,
+            long minimumIconShowDuration, ShellController shellController) {
         mContext = context;
         mHighResIconProvider = new HighResIconProvider(mContext, iconProvider);
         mTransactionPool = pool;
+        mMinimumIconShowDuration = minimumIconShowDuration;
 
         // Initialize Splashscreen worker thread
         // TODO(b/185288910) move it into WMShellConcurrencyModule and provide an executor to make
@@ -147,6 +163,27 @@ public class SplashscreenContentDrawer {
         mColorCache = new ColorCache(mContext, mSplashscreenWorkerHandler);
         mCanUseAppIconForSplashScreen = context.getResources().getBoolean(
                 com.android.wm.shell.R.bool.config_canUseAppIconForSplashScreen);
+        if (android.view.accessibility.Flags.forceInvertColor()) {
+            mUserChangeListener = new UserChangeListener() {
+                @Override
+                public void onUserChanged(int newUserId, @NonNull Context userContext) {
+                    if (mUiModeManager != null) {
+                        mUiModeManager.removeForceInvertStateChangeListener(
+                                mForceInvertStateChangeListener);
+                    }
+                    // We here don't use [context] but [userContext] to properly get the manager
+                    // linked with the current user.
+                    mUiModeManager = userContext.getSystemService(UiModeManager.class);
+                    if (mUiModeManager != null) {
+                        mForceInvertState = mUiModeManager.getForceInvertState();
+                        mUiModeManager.addForceInvertStateChangeListener(
+                                mSplashscreenWorkerHandler::post,
+                                mForceInvertStateChangeListener);
+                    }
+                }
+            };
+            shellController.addUserChangeListener(mUserChangeListener);
+        }
     }
 
     /**
@@ -350,7 +387,7 @@ public class SplashscreenContentDrawer {
     }
 
     /** Extract the window background color from {@code attrs}. */
-    private static int peekWindowBGColor(Context context, SplashScreenWindowAttrs attrs) {
+    private int peekWindowBGColor(Context context, SplashScreenWindowAttrs attrs) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "peekWindowBGColor");
         Drawable themeBGDrawable = null;
         if (attrs.mWindowBgColor != 0) {
@@ -371,16 +408,27 @@ public class SplashscreenContentDrawer {
         return estimatedWindowBGColor;
     }
 
-    private static int estimateWindowBGColor(Drawable themeBGDrawable) {
+    private int estimateWindowBGColor(Drawable themeBGDrawable) {
         final DrawableColorTester themeBGTester = new DrawableColorTester(
                 themeBGDrawable, DrawableColorTester.TRANSLUCENT_FILTER /* filterType */);
+        int backgroundColor;
         if (themeBGTester.passFilterRatio() < 0.5f) {
             // more than half pixels of the window background is translucent, unable to draw
             Slog.w(TAG, "Window background is translucent, fill background with black color");
-            return getSystemBGColor();
+            backgroundColor = getSystemBGColor();
         } else {
-            return themeBGTester.getDominateColor();
+            backgroundColor = themeBGTester.getDominateColor();
         }
+
+        if (android.view.accessibility.Flags.forceInvertColor()) {
+            if (mUiModeManager != null && mUiModeManager.getForceInvertState()
+                    == UiModeManager.FORCE_INVERT_TYPE_DARK) {
+                if (!ContrastColorUtil.isColorDarkLab(backgroundColor)) {
+                    backgroundColor = ContrastColorUtil.invertColorLightness(backgroundColor);
+                }
+            }
+        }
+        return backgroundColor;
     }
 
     private static Drawable peekLegacySplashscreenContent(Context context,
@@ -453,7 +501,8 @@ public class SplashscreenContentDrawer {
 
     private int getBGColorFromCache(ActivityInfo ai, IntSupplier windowBgColorSupplier) {
         return mColorCache.getWindowColor(ai.packageName, mLastPackageContextConfigHash,
-                mTmpAttrs.mWindowBgColor, mTmpAttrs.mWindowBgResId, windowBgColorSupplier).mBgColor;
+                mTmpAttrs.mWindowBgColor, mTmpAttrs.mWindowBgResId, mForceInvertState,
+                windowBgColorSupplier).mBgColor;
     }
 
     private static <T> T safeReturnAttrDefault(UnaryOperator<T> getMethod, T def) {
@@ -512,20 +561,20 @@ public class SplashscreenContentDrawer {
     }
 
     /**
-     * Get an optimal animation duration to keep the splash screen from showing.
+     * Get the optimal duration for showing the splash screen.
      *
-     * @param animationDuration The animation duration defined from app.
+     * @param iconShowDuration The icon duration defined from app or system.
      * @param appReadyDuration The real duration from the starting the app to the first app window
      *                         drawn.
      */
     @VisibleForTesting
-    static long getShowingDuration(long animationDuration, long appReadyDuration) {
-        if (animationDuration <= appReadyDuration) {
+    static long getShowingDuration(long iconShowDuration, long appReadyDuration) {
+        if (iconShowDuration <= appReadyDuration) {
             // app window ready took longer time than animation, it can be removed ASAP.
             return appReadyDuration;
         }
         if (appReadyDuration < MAX_ANIMATION_DURATION) {
-            if (animationDuration > MAX_ANIMATION_DURATION
+            if (iconShowDuration > MAX_ANIMATION_DURATION
                     || appReadyDuration < MINIMAL_ANIMATION_DURATION) {
                 // animation is too long or too short, cut off with minimal duration
                 return MINIMAL_ANIMATION_DURATION;
@@ -1133,10 +1182,11 @@ public class SplashscreenContentDrawer {
         }
 
         @NonNull WindowColor getWindowColor(String packageName, int configHash, int windowBgColor,
-                int windowBgResId, IntSupplier windowBgColorSupplier) {
+                int windowBgResId, int forceInvertState, IntSupplier windowBgColorSupplier) {
             Colors colors = mColorMap.get(packageName);
             int hash = 31 * configHash + windowBgColor;
             hash = 31 * hash + windowBgResId;
+            hash = 31 * hash + forceInvertState;
             final int[] leastUsedIndex = { 0 };
             if (colors != null) {
                 final WindowColor windowColor = getCache(colors.mWindowColors, hash,
@@ -1194,12 +1244,12 @@ public class SplashscreenContentDrawer {
             return;
         }
         final long appReadyDuration = SystemClock.uptimeMillis() - createTime;
-        final long animDuration = view.getIconAnimationDuration() != null
-                ? view.getIconAnimationDuration().toMillis() : 0;
-        final long minimumShowingDuration = getShowingDuration(animDuration, appReadyDuration);
+        final long iconShowDuration = view.getIconAnimationDuration() != null
+                ? view.getIconAnimationDuration().toMillis() : mMinimumIconShowDuration;
+        final long minimumShowingDuration = getShowingDuration(iconShowDuration, appReadyDuration);
         final long delayed = minimumShowingDuration - appReadyDuration;
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
-                "applyExitAnimation delayed: %s", delayed);
+                "applyExitAnimation delayed: %d", delayed);
         if (delayed > 0) {
             view.postDelayed(playAnimation, delayed);
         } else {

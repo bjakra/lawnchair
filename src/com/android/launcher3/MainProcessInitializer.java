@@ -37,6 +37,7 @@ import com.android.launcher3.graphics.BitmapCreationCheck;
 import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.util.LockedUserState;
 import com.android.launcher3.util.ResourceBasedOverride;
+import javax.inject.Inject;
 
 import org.chickenhook.restrictionbypass.Unseal;
 
@@ -45,13 +46,17 @@ import app.lawnchair.preferences.PreferenceManager;
 /**
  * Utility class to handle one time initializations of the main process
  */
-public class MainProcessInitializer implements ResourceBasedOverride {
+public class MainProcessInitializer {
 
     private static final String TAG = "MainProcessInitializer";
 
+    @Inject
+    public MainProcessInitializer() {
+    }
+
     private static final boolean DEBUG_STRICT_MODE = false;
 
-    public static void initialize(Context context) {
+    protected void init(Context context) {
         try {
             Unseal.unseal();
             Log.i(TAG, "Unseal success!");
@@ -59,21 +64,15 @@ public class MainProcessInitializer implements ResourceBasedOverride {
             Log.e(TAG, "Unseal fail!");
             e.printStackTrace();
         }
-        
+
         // LC-Note: SharedPreferences will initialise *after* Direct Boot is disengaged once the user has unlocked the Keyguard once.
-        // Attempting to call a prefs system while SharedPrefs are not initialised will result in a Java ISE crash 
+        // Attempting to call a prefs system while SharedPrefs are not initialised will result in a Java ISE crash
         // because it's in (CE) Credential Encrypted storage. (In other words, just wait till the user unlocked their phone once)
-        // 
-        // *Unless* your SharedPreferences instance is explicitly told to run in device-protected storage or (DE) Device Encrypted storage, 
+        //
+        // *Unless* your SharedPreferences instance is explicitly told to run in device-protected storage or (DE) Device Encrypted storage,
         // but in this case it's not, but it's something to keep in mind.
         LockedUserState.get(context).runOnUserUnlocked(() -> PreferenceManager.getInstance(context));
-        
-        Overrides.getObject(
-                MainProcessInitializer.class, context, R.string.main_process_initializer_class)
-                .init(context);
-    }
 
-    protected void init(Context context) {
         FileLog.setDir(context.getApplicationContext().getFilesDir());
 
         if (BitmapCreationCheck.ENABLED) {

@@ -24,6 +24,7 @@ import app.lawnchair.theme.color.tokens.ColorTokens;
 import app.lawnchair.util.LawnchairUtilsKt;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
+import com.android.launcher3.LauncherUiState;
 import com.android.launcher3.R;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.ScrimColors;
@@ -42,8 +43,8 @@ public class AllAppsState extends LauncherState {
     @Override
     public int getTransitionDuration(ActivityContext context, boolean isToState) {
         return isToState
-                ? context.getDeviceProfile().allAppsOpenDuration
-                : context.getDeviceProfile().allAppsCloseDuration;
+                ? context.getDeviceProfile().getAllAppsProfile().getOpenDuration()
+                : context.getDeviceProfile().getAllAppsProfile().getCloseDuration();
     }
 
     @Override
@@ -57,27 +58,31 @@ public class AllAppsState extends LauncherState {
     }
 
     @Override
-    public int getVisibleElements(Launcher launcher) {
+    public int getVisibleElements(LauncherUiState launcherUiState) {
         return ALL_APPS_CONTENT;
     }
 
     @Override
     public ScaleAndTranslation getWorkspaceScaleAndTranslation(Launcher launcher) {
-        return new ScaleAndTranslation(launcher.getDeviceProfile().workspaceContentScale, NO_OFFSET,
-                NO_OFFSET);
+        return new ScaleAndTranslation(
+                launcher.getDeviceProfile().getWorkspaceProfile().getWorkspaceContentScale(),
+                NO_OFFSET,
+                NO_OFFSET
+        );
     }
 
     @Override
     public ScaleAndTranslation getHotseatScaleAndTranslation(Launcher launcher) {
-        if (launcher.getDeviceProfile().getDeviceProperties().isTablet()) {
+        if (launcher.getDeviceProfile().getDeviceProperties().isLargeScreen()) {
             return getWorkspaceScaleAndTranslation(launcher);
         } else {
             ScaleAndTranslation overviewScaleAndTranslation = LauncherState.OVERVIEW
                     .getWorkspaceScaleAndTranslation(launcher);
             return new ScaleAndTranslation(
-                    launcher.getDeviceProfile().workspaceContentScale,
+                    launcher.getDeviceProfile().getWorkspaceProfile().getWorkspaceContentScale(),
                     overviewScaleAndTranslation.translationX,
-                    overviewScaleAndTranslation.translationY);
+                    overviewScaleAndTranslation.translationY
+            );
         }
     }
 
@@ -87,7 +92,7 @@ public class AllAppsState extends LauncherState {
         return new PageAlphaProvider(DECELERATE) {
             @Override
             public float getPageAlpha(int pageIndex) {
-                return launcher.getDeviceProfile().getDeviceProperties().isTablet()
+                return launcher.getDeviceProfile().getDeviceProperties().isLargeScreen()
                         ? superPageAlphaProvider.getPageAlpha(pageIndex)
                         : 0;
             }
@@ -102,10 +107,10 @@ public class AllAppsState extends LauncherState {
     @Override
     public ScrimColors getWorkspaceScrimColor(Launcher launcher) {
         return new ScrimColors(
-                /* backgroundColor */ launcher.getDeviceProfile().getDeviceProperties().isTablet()
-                ? LawnchairUtilsKt.getAllAppsBackgroundColor(launcher, 
-                        ColorTokens.WidgetsPickerScrim.resolveColor(launcher))
-                : ColorTokens.AllAppsScrimColor.resolveColor(launcher),
+                /* backgroundColor */
+                launcher.getDeviceProfile().getDeviceProperties().isLargeScreen()
+                        ? launcher.getResources().getColor(R.color.widgets_picker_scrim)
+                        : Themes.getAttrColor(launcher, R.attr.allAppsScrimColor),
                 /* foregroundColor */ Color.TRANSPARENT);
     }
 }

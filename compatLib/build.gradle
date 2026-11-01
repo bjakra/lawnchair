@@ -21,9 +21,9 @@ android {
     }
 }
 
-addFrameworkJar('framework-16.jar')
+addFrameworkJar('framework-17.jar')
 dependencies {
-    compileOnly files('../prebuilts/libs/framework-16.jar')
-    compileOnly files('../prebuilts/libs/WindowManager-Shell-16.jar')
-    compileOnly files('../prebuilts/libs/SystemUI-core-16.jar')
+    compileOnly files('../prebuilts/libs/framework-17.jar')
+    compileOnly files('../prebuilts/libs/WindowManager-Shell-17.jar')
+    compileOnly files('../prebuilts/libs/SystemUI-core-17.jar')
 }

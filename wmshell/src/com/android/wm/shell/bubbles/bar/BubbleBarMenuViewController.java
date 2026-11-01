@@ -15,6 +15,8 @@
  */
 package com.android.wm.shell.bubbles.bar;
 
+import static com.android.wm.shell.bubbles.bar.BubbleBarCaptionView.CAPTION_ELEVATION;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -22,15 +24,15 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.drawable.Icon;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.app.animation.Interpolators;
+import com.android.launcher3.icons.BitmapInfo;
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubble;
-import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
+import com.android.wm.shell.shared.bubbles.BubbleFlagHelper;
 
 import java.util.ArrayList;
 
@@ -84,16 +86,19 @@ class BubbleBarMenuViewController {
             setupMenu();
         }
         runOnMenuIsMeasured(() -> {
-            mMenuView.setVisibility(View.VISIBLE);
-            mScrimView.setVisibility(View.VISIBLE);
             if (mListener != null) {
                 mListener.onMenuVisibilityChanged(true /* isShown */);
             }
-            Runnable endActions = () -> mMenuView.getChildAt(0).requestAccessibilityFocus();
+            mScrimView.setVisibility(View.VISIBLE);
+            Runnable onCompleteActions = () -> {
+                mMenuView.setVisibility(View.VISIBLE);
+                mHandleView.setVisibility(View.GONE);
+                mMenuView.getChildAt(0).requestAccessibilityFocus();
+            };
             if (animated) {
-                animateTransition(true /* show */, endActions);
+                animateTransition(true /* show */, onCompleteActions);
             } else {
-                endActions.run();
+                onCompleteActions.run();
             }
         });
     }
@@ -105,7 +110,7 @@ class BubbleBarMenuViewController {
     void hideMenu(boolean animated) {
         if (mMenuView == null || mScrimView == null) return;
         runOnMenuIsMeasured(() -> {
-            Runnable endActions = () -> {
+            Runnable onCompleteActions = () -> {
                 mHandleView.restoreAnimationDefaults();
                 mMenuView.setVisibility(View.GONE);
                 mScrimView.setVisibility(View.GONE);
@@ -115,9 +120,9 @@ class BubbleBarMenuViewController {
                 }
             };
             if (animated) {
-                animateTransition(false /* show */, endActions);
+                animateTransition(false /* show */, onCompleteActions);
             } else {
-                endActions.run();
+                onCompleteActions.run();
             }
         });
     }
@@ -134,9 +139,9 @@ class BubbleBarMenuViewController {
     /**
      * Animate show/hide menu transition
      * @param show if should show or hide the menu
-     * @param endActions will be called when animation ends
+     * @param onCompleteActions will be called when animation ends
      */
-    private void animateTransition(boolean show, Runnable endActions) {
+    private void animateTransition(boolean show, Runnable onCompleteActions) {
         if (mMenuView == null) return;
         float startValue = show ? 0 : 1;
         if (mMenuAnimator != null && mMenuAnimator.isRunning()) {
@@ -147,10 +152,19 @@ class BubbleBarMenuViewController {
         showMenuAnimation.setDuration(MENU_ANIMATION_DURATION);
         showMenuAnimation.setInterpolator(Interpolators.EMPHASIZED);
         showMenuAnimation.addListener(new AnimatorListenerAdapter() {
+            boolean mCancelled = false;
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+                mCancelled = true;
+            }
+
             @Override
             public void onAnimationEnd(Animator animation) {
                 mMenuAnimator = null;
-                endActions.run();
+                if (!mCancelled) {
+                    onCompleteActions.run();
+                }
             }
         });
         mMenuAnimator = showMenuAnimation;
@@ -198,6 +212,8 @@ class BubbleBarMenuViewController {
         mMenuView = (BubbleBarMenuView) LayoutInflater.from(mContext).inflate(
                 R.layout.bubble_bar_menu_view, mRootView, false);
         mMenuView.setOnCloseListener(() -> hideMenu(true  /* animated */));
+        // Set the elevation to draw on top of the caption view.
+        mMenuView.setElevation(CAPTION_ELEVATION + 1);
         if (mBubble != null) {
             mMenuView.updateInfo(mBubble);
             mMenuView.updateActions(createMenuActions(mBubble));
@@ -223,7 +239,7 @@ class BubbleBarMenuViewController {
         if (bubble.isChat()) {
             // Don't bubble conversation action
             menuActions.add(new BubbleBarMenuView.MenuAction(
-                    Icon.createWithResource(mContext, R.drawable.bubble_ic_stop_bubble),
+                    DrawableProvider.forResource(R.drawable.bubble_ic_stop_bubble),
                     resources.getString(R.string.bubbles_dont_bubble_conversation),
                     tintColor,
                     view -> {
@@ -234,8 +250,9 @@ class BubbleBarMenuViewController {
                     }
             ));
             // Open settings action
-            Icon appIcon = bubble.getRawAppBadge() != null ? Icon.createWithBitmap(
-                    bubble.getRawAppBadge()) : null;
+            BitmapInfo rawAppBadge = bubble.getRawAppBadge();
+            DrawableProvider appIcon = rawAppBadge != null
+                    ? DrawableProvider.forInfo(rawAppBadge) : null;
             menuActions.add(new BubbleBarMenuView.MenuAction(
                     appIcon,
                     resources.getString(R.string.bubbles_app_settings, bubble.getAppName()),
@@ -250,7 +267,7 @@ class BubbleBarMenuViewController {
 
         // Dismiss bubble action
         menuActions.add(new BubbleBarMenuView.MenuAction(
-                Icon.createWithResource(resources, R.drawable.ic_remove_no_shadow),
+                DrawableProvider.forResource(R.drawable.ic_remove_no_shadow),
                 resources.getString(R.string.bubble_dismiss_text),
                 tintColor,
                 view -> {
@@ -261,10 +278,9 @@ class BubbleBarMenuViewController {
                 }
         ));
 
-        if (BubbleAnythingFlagHelper.enableBubbleToFullscreen()) {
+        if (BubbleFlagHelper.enableBubbleToFullscreen()) {
             menuActions.add(new BubbleBarMenuView.MenuAction(
-                    Icon.createWithResource(resources,
-                            R.drawable.desktop_mode_ic_handle_menu_fullscreen),
+                    DrawableProvider.forResource(R.drawable.desktop_mode_ic_handle_menu_fullscreen),
                     resources.getString(R.string.bubble_fullscreen_text),
                     tintColor,
                     view -> {

@@ -15,9 +15,12 @@
  */
 package com.android.wm.shell.bubbles.animation;
 
+import android.annotation.NonNull;
 import android.graphics.PointF;
 
 import com.android.wm.shell.bubbles.BubbleExpandedView;
+
+import java.io.PrintWriter;
 
 /**
  * Animation controller for bubble expanded view collapsing
@@ -71,6 +74,9 @@ public interface ExpandedViewAnimationController {
      */
     void animateForImeVisibilityChange(boolean visible);
 
+    /** Cancels the clip animation if it's running. */
+    void cancelClipAnimation();
+
     /**
      * Whether this controller should also animate the expansion for the bubble
      */
@@ -91,4 +97,9 @@ public interface ExpandedViewAnimationController {
      * Reset the view to fully expanded state
      */
     void reset();
+
+    /**
+     * Description of current animation controller state
+     */
+    void dump(@NonNull PrintWriter pw);
 }

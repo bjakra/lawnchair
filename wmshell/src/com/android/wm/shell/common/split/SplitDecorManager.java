@@ -58,7 +58,9 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.SurfaceUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -105,7 +107,13 @@ public class SplitDecorManager extends WindowlessWindowManager {
     /** The current bounds of the main task, mid-resize. */
     private final Rect mInstantaneousBounds = new Rect();
     private final Rect mTempRect = new Rect();
+
+    /** The list of currently running animators. */
+    private final List<Animator> mAnimators = new ArrayList<>();
+
+    @Nullable
     private ValueAnimator mFadeAnimator;
+    @Nullable
     private ValueAnimator mScreenshotAnimator;
 
     private int mIconSize;
@@ -171,18 +179,12 @@ public class SplitDecorManager extends WindowlessWindowManager {
     /**
      * Cancels any currently running animations.
      */
-    public void cancelRunningAnimations() {
-        if (mFadeAnimator != null) {
-            if (mFadeAnimator.isRunning()) {
-                mFadeAnimator.cancel();
-            }
-            mFadeAnimator = null;
+    private void cancelRunningAnimations() {
+        if (mFadeAnimator != null && mFadeAnimator.isRunning()) {
+            mFadeAnimator.cancel();
         }
-        if (mScreenshotAnimator != null) {
-            if (mScreenshotAnimator.isRunning()) {
-                mScreenshotAnimator.cancel();
-            }
-            mScreenshotAnimator = null;
+        if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
+            mScreenshotAnimator.cancel();
         }
     }
 
@@ -339,6 +341,23 @@ public class SplitDecorManager extends WindowlessWindowManager {
     /** Stops showing resizing hint. */
     public void onResized(SurfaceControl.Transaction t,
             @Nullable Consumer<Boolean> animFinishedCallback) {
+        // If there is a running animation, place a placeholder callback to avoid calling the end
+        // callback too early when canceling the existed animation before the new animation starts.
+        final Consumer<Boolean> callbackPlaceHolder =
+                animFinishedCallback != null && mRunningAnimationCount > 0 ? status -> {} : null;
+        if (callbackPlaceHolder != null) {
+            mRunningAnimationCount++;
+            mAnimFinishCallbacks.put(callbackPlaceHolder, false);
+        }
+        animateResized(t, animFinishedCallback);
+        if (callbackPlaceHolder != null) {
+            mRunningAnimationCount--;
+            updateCallbackStatus(false /* callbackStatus */, callbackPlaceHolder);
+        }
+    }
+
+    private void animateResized(SurfaceControl.Transaction t,
+            @Nullable Consumer<Boolean> animFinishedCallback) {
         if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
             mScreenshotAnimator.cancel();
         }
@@ -369,9 +388,12 @@ public class SplitDecorManager extends WindowlessWindowManager {
                     animT.apply();
                     animT.close();
                     mScreenshot = null;
+                    mAnimators.remove(mScreenshotAnimator);
+                    mScreenshotAnimator = null;
                     updateCallbackStatus(true /*callbackStatus*/, animFinishedCallback);
                 }
             });
+            mAnimators.add(mScreenshotAnimator);
             mScreenshotAnimator.start();
         }
 
@@ -389,10 +411,16 @@ public class SplitDecorManager extends WindowlessWindowManager {
         if (mFadeAnimator != null && mFadeAnimator.isRunning()) {
             if (!mShown) {
                 // If fade-out animation is running, just add release callback to it.
+                // Increment mRunningAnimationCount. Without this, the listener in
+                // `startFadeAnimation` calls updateCallbackStatus when the animation ends,
+                // triggering animFinishedCallback before this listener can set the callback
+                // status to true.
+                mRunningAnimationCount++;
                 SurfaceControl.Transaction finishT = new SurfaceControl.Transaction();
                 mFadeAnimator.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
+                        mRunningAnimationCount--;
                         releaseDecor(finishT);
                         finishT.apply();
                         finishT.close();
@@ -416,10 +444,10 @@ public class SplitDecorManager extends WindowlessWindowManager {
     }
 
     /**
-     * Updates the value for the provided {@param callback} and optionally executes the callback
+     * Updates the value for the provided {@code callback} and optionally executes the callback
      * list if no animations are in progress.
      *
-     * @param callbackStatus the parameter that will be passed into the {@param callback}
+     * @param callbackStatus the parameter that will be passed into the {@code callback}
      * @param callback       no-op if null, must be added to {@link #mAnimFinishCallbacks} prior to
      *                       updating via this method
      */
@@ -643,14 +671,17 @@ public class SplitDecorManager extends WindowlessWindowManager {
                 }
                 animT.apply();
                 animT.close();
+                mAnimators.remove(mFadeAnimator);
+                mFadeAnimator = null;
                 updateCallbackStatus(true /*callbackStatus*/, wrappedFinishCallback);
             }
         });
+        mAnimators.add(mFadeAnimator);
         mFadeAnimator.start();
     }
 
     /** Release or hide decor hint. */
-    private void releaseDecor(SurfaceControl.Transaction t) {
+    public void releaseDecor(SurfaceControl.Transaction t) {
         if (mBackgroundLeash != null) {
             t.remove(mBackgroundLeash);
             mBackgroundLeash = null;
@@ -667,6 +698,12 @@ public class SplitDecorManager extends WindowlessWindowManager {
             t.hide(mIconLeash);
             mIcon = null;
         }
+    }
+
+    /** Returns the list of currently running animators. */
+    @NonNull
+    public List<Animator> getAnimators() {
+        return mAnimators;
     }
 
     private static float[] getResizingBackgroundColor(ActivityManager.RunningTaskInfo taskInfo) {

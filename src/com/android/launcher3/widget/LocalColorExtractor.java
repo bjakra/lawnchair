@@ -23,13 +23,13 @@ import android.graphics.Rect;
 import android.util.SparseIntArray;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.launcher3.R;
-import com.android.launcher3.util.ResourceBasedOverride;
+import javax.inject.Inject;
 
 /** Extracts the colors we need from the wallpaper at given locations. */
-public class LocalColorExtractor implements ResourceBasedOverride {
+public class LocalColorExtractor {
 
     /** Listener for color changes on a screen location. */
     public interface Listener {
@@ -43,12 +43,8 @@ public class LocalColorExtractor implements ResourceBasedOverride {
         void onColorsChanged(SparseIntArray extractedColors);
     }
 
-    /**
-     * Creates a new instance of LocalColorExtractor
-     */
-    public static LocalColorExtractor newInstance(Context context) {
-        return Overrides.getObject(LocalColorExtractor.class, context.getApplicationContext(),
-                R.string.local_colors_extraction_class);
+    @Inject
+    public LocalColorExtractor() {
     }
 
     /** Sets the object that will receive the color changes. */
@@ -59,7 +55,10 @@ public class LocalColorExtractor implements ResourceBasedOverride {
     /**
      * Updates the base context to contain the colors override
      */
-    public void applyColorsOverride(Context base, WallpaperColors colors) { }
+    @Nullable
+    public ColorsOverride applyColorsOverride(Context base, WallpaperColors colors) {
+        return null;
+    }
 
     /**
      * Generates color resource overrides from {@link WallpaperColors}.
@@ -72,5 +71,18 @@ public class LocalColorExtractor implements ResourceBasedOverride {
     /**
      * Updates the base context to contain the colors override
      */
-    public void applyColorsOverride(Context base, SparseIntArray override) { }
+    @Nullable
+    public ColorsOverride applyColorsOverride(Context base, SparseIntArray override) {
+        return null;
+    }
+
+    /**
+     * Updates the base context with a color overlay generated using the seeds colors and style, and
+     * returns a {@link ColorsOverride} for using the override
+     */
+    @Nullable
+    public ColorsOverride applyColorOverlay(@NonNull Context base, @NonNull int[] seedColors,
+            int style) {
+        return null;
+    }
 }

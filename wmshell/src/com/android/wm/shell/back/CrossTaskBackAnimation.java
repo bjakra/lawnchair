@@ -18,10 +18,10 @@ package com.android.wm.shell.back;
 
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 import static android.window.BackEvent.EDGE_RIGHT;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_PREDICTIVE_BACK_CROSS_TASK;
-import static com.android.window.flags2.Flags.predictiveBackTimestampApi;
 import static com.android.wm.shell.back.BackAnimationConstants.UPDATE_SYSUI_FLAGS_THRESHOLD;
 import static com.android.wm.shell.back.CrossActivityBackAnimationKt.scaleCentered;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
@@ -57,7 +57,9 @@ import com.android.internal.dynamicanimation.animation.SpringForce;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.protolog.ProtoLog;
+import com.android.systemui.Flags;
 import com.android.wm.shell.R;
+import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.shared.animation.Interpolators;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 
@@ -170,8 +172,15 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
         mStartTaskRect.set(mClosingTarget.windowConfiguration.getBounds());
         mStartTaskRect.offsetTo(0, 0);
 
+        boolean isGestureNav = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_navBarInteractionMode)
+                == NAV_BAR_MODE_GESTURAL;
+        boolean isLargeScreen = SplitScreenUtils.isLargeScreen(mContext.getResources());
+
         // inset bottom in case of pinned taskbar being present
-        mStartTaskRect.inset(0, 0, 0, mClosingTarget.contentInsets.bottom);
+        if (!Flags.fixPredictiveBackClipping() || (isGestureNav || isLargeScreen)) {
+            mStartTaskRect.inset(0, 0, 0, mClosingTarget.contentInsets.bottom);
+        }
 
         // Draw background.
         mBackground.ensureBackground(mClosingTarget.windowConfiguration.getBounds(),
@@ -333,10 +342,8 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
         float progress = backEvent.getProgress();
         mTouchPos.set(backEvent.getTouchX(), backEvent.getTouchY());
         float interpolatedProgress = getInterpolatedProgress(progress);
-        if (predictiveBackTimestampApi()) {
-            mVelocityTracker.addPosition(backEvent.getFrameTimeMillis(),
-                    interpolatedProgress * SPRING_SCALE);
-        }
+        mVelocityTracker.addPosition(backEvent.getFrameTimeMillis(),
+                interpolatedProgress * SPRING_SCALE);
         updateGestureBackProgress(interpolatedProgress, backEvent);
     }
 
@@ -346,23 +353,21 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
             return;
         }
 
-        if (predictiveBackTimestampApi()) {
-            // kick off spring animation with the current velocity from the pre-commit phase, this
-            // affects the scaling of the closing and/or opening task during post-commit
-            float startVelocity = mGestureProgress < 0.1f
-                    ? -DEFAULT_FLING_VELOCITY : -mVelocityTracker.calculateVelocity();
-            SpringAnimation flingAnimation =
-                    new SpringAnimation(mPostCommitFlingScale, SPRING_SCALE)
-                    .setStartVelocity(Math.max(-MAX_FLING_VELOCITY, Math.min(0f, startVelocity)))
-                    .setStartValue(SPRING_SCALE)
-                    .setMinimumVisibleChange(0.1f)
-                    .setSpring(mPostCommitFlingSpring);
-            flingAnimation.start();
-            // do an animation-frame immediately to prevent idle frame
-            flingAnimation.doAnimationFrame(
-                    Choreographer.getInstance().getLastFrameTimeNanos() / TimeUtils.NANOS_PER_MS
-            );
-        }
+        // kick off spring animation with the current velocity from the pre-commit phase, this
+        // affects the scaling of the closing and/or opening task during post-commit
+        float startVelocity = mGestureProgress < 0.1f
+                ? -DEFAULT_FLING_VELOCITY : -mVelocityTracker.calculateVelocity();
+        SpringAnimation flingAnimation =
+                new SpringAnimation(mPostCommitFlingScale, SPRING_SCALE)
+                .setStartVelocity(Math.max(-MAX_FLING_VELOCITY, Math.min(0f, startVelocity)))
+                .setStartValue(SPRING_SCALE)
+                .setMinimumVisibleChange(0.1f)
+                .setSpring(mPostCommitFlingSpring);
+        flingAnimation.start();
+        // do an animation-frame immediately to prevent idle frame
+        flingAnimation.doAnimationFrame(
+                Choreographer.getInstance().getLastFrameTimeNanos() / TimeUtils.NANOS_PER_MS
+        );
 
         // We enter phase 2 of the animation, the starting coordinates for phase 2 are the current
         // coordinate of the gesture driven phase.

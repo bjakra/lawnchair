@@ -26,6 +26,8 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.animation.Animator
 import androidx.core.animation.AnimatorListenerAdapter
 import androidx.core.animation.ValueAnimator
+import com.android.wm.shell.shared.bubbles.DragZone.Bounds.CircleZone
+import com.android.wm.shell.shared.bubbles.DragZone.Bounds.RectZone
 import com.android.wm.shell.shared.bubbles.DragZone.DropTargetRect
 import com.android.wm.shell.shared.bubbles.DraggedObject.Bubble
 import com.android.wm.shell.shared.bubbles.DraggedObject.BubbleBar
@@ -77,13 +79,16 @@ class DropTargetManager(
     private fun setupDropTarget(view: View?) {
         if (view == null) return
         if (view.parent != null) container.removeView(view)
+        view.tag = getDropViewTag()
         container.addView(view, 0)
         view.alpha = 0f
 
-        view.elevation = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            DROP_TARGET_ELEVATION_DP, context.resources.displayMetrics
-        )
+        view.elevation =
+            TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                DROP_TARGET_ELEVATION_DP,
+                context.resources.displayMetrics,
+            )
         // Match parent and the target is drawn within the view
         view.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
     }
@@ -109,6 +114,29 @@ class DropTargetManager(
         return newDragZone
     }
 
+    /**
+     * Called when the drop target views should be hidden. This method will not remove the drop
+     * target views from the container.
+     *
+     * It is mandatory to call [onDragEnded] when the drag operation ends, ensuring that the drop
+     * target views are removed from the container.
+     */
+    fun hideDropTargets() {
+        val dragZones = state?.dragZones
+        if (dragZones.isNullOrEmpty()) return
+        val lowestBottom =
+            dragZones
+                .map { it.bounds }
+                .maxOf { dragZone ->
+                    when (dragZone) {
+                        is RectZone -> dragZone.rect.bottom // rect bottom
+                        is CircleZone -> dragZone.y - dragZone.radius // circle bottom
+                    }
+                }
+        // use coordinate that will not hit any drag zone, so drop targets will be hidden
+        onDragUpdated(0, lowestBottom + 1)
+    }
+
     /** Called when the drag ended. */
     fun onDragEnded() {
         val dropState = state ?: return
@@ -126,9 +154,9 @@ class DropTargetManager(
     }
 
     /**
-     * Runs the provided action once all drop target views are removed from the container.
-     * If there are no drop target views currently present or being animated, the action will be
-     * executed immediately.
+     * Runs the provided action once all drop target views are removed from the container. If there
+     * are no drop target views currently present or being animated, the action will be executed
+     * immediately.
      */
     fun onDropTargetRemoved(action: Runnable) {
         onDropTargetsRemovedAction = action
@@ -206,7 +234,12 @@ class DropTargetManager(
 
     private fun onDropTargetRemoved() {
         val action = onDropTargetsRemovedAction ?: return
-        if ((0 until container.childCount).any { container.getChildAt(it) is DropTargetView }) {
+        if (
+            (0 until container.childCount).any {
+                val childView = container.getChildAt(it)
+                childView is DropTargetView && childView.tag == getDropViewTag()
+            }
+        ) {
             return
         }
         onDropTargetsRemovedAction = null
@@ -214,10 +247,7 @@ class DropTargetManager(
     }
 
     /** Stores the current drag state. */
-    private inner class DragState(
-        private val dragZones: List<DragZone>,
-        val draggedObject: DraggedObject,
-    ) {
+    private inner class DragState(val dragZones: List<DragZone>, val draggedObject: DraggedObject) {
         val initialDragZone =
             draggedObject.initialLocation?.let {
                 if (it.isOnLeft(isLayoutRtl)) {
@@ -232,6 +262,8 @@ class DropTargetManager(
             return dragZones.firstOrNull { it.contains(x, y) }
         }
     }
+
+    private fun getDropViewTag(): Int = this.hashCode()
 
     private val DraggedObject.initialLocation: BubbleBarLocation?
         get() =

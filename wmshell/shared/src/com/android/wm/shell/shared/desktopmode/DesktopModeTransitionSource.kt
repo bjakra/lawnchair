@@ -25,12 +25,20 @@ enum class DesktopModeTransitionSource : Parcelable {
     ADB_COMMAND,
     /** Transitions that originated as a consequence of task dragging. */
     TASK_DRAG,
-    /** Transitions that originated from an app from Overview. */
-    APP_FROM_OVERVIEW,
+    /** Transitions that originated from overview task menu. */
+    OVERVIEW_TASK_MENU,
     /** Transitions that originated from app handle menu button */
     APP_HANDLE_MENU_BUTTON,
     /** Transitions that originated as a result of keyboard shortcuts. */
     KEYBOARD_SHORTCUT,
+    /** Transitions that originated from Recents. */
+    RECENTS,
+    /** Transitions that originated from Taskbar. */
+    TASKBAR,
+    /** Transitions that originate from switching windowing layers. */
+    LAYER_SWITCH,
+    /** Transitions that originate from fullscreen header. */
+    FULLSCREEN_HEADER,
     /** Transitions with source unknown. */
     UNKNOWN;
 

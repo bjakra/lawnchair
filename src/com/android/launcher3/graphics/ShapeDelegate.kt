@@ -27,14 +27,12 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
-import android.graphics.Region
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.ColorDrawable
 import android.util.FloatProperty
 import android.util.Log
 import android.view.View
 import android.view.ViewOutlineProvider
-import androidx.annotation.VisibleForTesting
 import androidx.core.graphics.PathParser
 import androidx.dynamicanimation.animation.DynamicAnimation.MIN_VISIBLE_CHANGE_SCALE
 import androidx.graphics.shapes.CornerRounding
@@ -46,7 +44,9 @@ import androidx.graphics.shapes.toPath
 import androidx.graphics.shapes.transformed
 import com.android.launcher3.Flags
 import com.android.launcher3.anim.SpringAnimationBuilder
-import com.android.launcher3.icons.GraphicsUtils
+import com.android.launcher3.folder.Folder
+import com.android.launcher3.folder.FolderPagedView
+import com.android.launcher3.icons.RoundRectEstimator.estimateRadius
 import com.android.launcher3.views.ClipPathView
 
 /** Abstract representation of the shape of an icon shape */
@@ -96,7 +96,7 @@ interface ShapeDelegate {
         override fun addToPath(path: PathWrapper, offsetX: Float, offsetY: Float, radius: Float) {
             addToPath(path.path, offsetX, offsetY, radius)
             path.setBounds(offsetX, offsetY, offsetX + radius * 2, offsetY + radius * 2)
-            path.setCornerRadius(radius)
+            path.cornerRadius = radius
         }
     }
 
@@ -137,7 +137,7 @@ interface ShapeDelegate {
             val cy = radius + offsetY
             val cr = radius * radiusRatio
             path.setBounds(cx - radius, cy - radius, cx + radius, cy + radius)
-            path.setCornerRadius(cr)
+            path.cornerRadius = cr
         }
 
         override fun <T> createRevealAnimator(
@@ -156,11 +156,9 @@ interface ShapeDelegate {
                 val bottom = (1 - progress) * startRect.bottom + progress * endRect.bottom
                 path.path.addRoundRect(left, top, right, bottom, radius, radius, Path.Direction.CW)
                 path.setBounds(left, top, right, bottom)
-                path.setCornerRadius(radius)
+                path.cornerRadius = radius
             }
-            val shouldUseSpringAnimation =
-                Flags.enableLauncherIconShapes() && Flags.enableExpressiveFolderExpansion()
-            return if (shouldUseSpringAnimation) {
+            return if (useFolderSpringAnimation(target)) {
                 ClipSpringAnimBuilder(target, pathProvider).toAnim(isReversed)
             } else {
                 ClipAnimBuilder(target, pathProvider).toAnim(isReversed)
@@ -256,9 +254,7 @@ interface ShapeDelegate {
                 path.path.set(morph.toPath(progress, path.path))
                 path.estimateBoundsFromPath()
             }
-            val shouldUseSpringAnimation =
-                Flags.enableLauncherIconShapes() && Flags.enableExpressiveFolderExpansion()
-            return if (shouldUseSpringAnimation) {
+            return if (useFolderSpringAnimation(target)) {
                 ClipSpringAnimBuilder(target, pathProvider).toAnim(isReversed)
             } else {
                 ClipAnimBuilder(target, pathProvider).toAnim(isReversed)
@@ -364,43 +360,19 @@ interface ShapeDelegate {
 
     companion object {
         const val TAG = "IconShape"
-        const val DEFAULT_PATH_SIZE = 100f
-        const val AREA_CALC_SIZE = 1000
+        const val DEFAULT_PATH_SIZE_INT = 100
+        const val DEFAULT_PATH_SIZE = DEFAULT_PATH_SIZE_INT.toFloat()
         private const val SPRING_STIFFNESS_SHAPE_POSITION = 380f
         private const val SPRING_DAMPING_SHAPE_POSITION = 0.8f
-        // .1% error margin
-        const val AREA_DIFF_THRESHOLD = AREA_CALC_SIZE * AREA_CALC_SIZE / 1000
-
-        /** Returns a function to calculate area diff from [base] */
-        @VisibleForTesting
-        fun areaDiffCalculator(base: Path): (ShapeDelegate) -> Int {
-            val fullRegion = Region(0, 0, AREA_CALC_SIZE, AREA_CALC_SIZE)
-            val iconRegion = Region().apply { setPath(base, fullRegion) }
-
-            val shapePath = Path()
-            val shapeRegion = Region()
-            return fun(shape: ShapeDelegate): Int {
-                shapePath.reset()
-                shape.addToPath(shapePath, 0f, 0f, AREA_CALC_SIZE / 2f)
-                shapeRegion.setPath(shapePath, fullRegion)
-                shapeRegion.op(iconRegion, Region.Op.XOR)
-                return GraphicsUtils.getArea(shapeRegion)
-            }
-        }
 
         fun pickBestShape(shapeStr: String): ShapeDelegate {
-            // LC-Note: config_icon_mask is a framework resource that a ROM overlay can replace
-            // with an unparsable value (seen in the wild with a line break inside a coordinate).
-            // Fall back to the platform default mask instead of failing launcher startup.
-            val parsedPath =
-                if (shapeStr.isEmpty()) {
-                    null
+            val baseShape =
+                if (shapeStr.isNotEmpty()) {
+                    PathParser.createPathFromPathData(shapeStr)
                 } else {
-                    try {
-                        PathParser.createPathFromPathData(shapeStr)
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error parsing icon mask", e)
-                        null
+                    AdaptiveIconDrawable(null, ColorDrawable(Color.BLACK)).let {
+                        it.setBounds(0, 0, DEFAULT_PATH_SIZE_INT, DEFAULT_PATH_SIZE_INT)
+                        it.iconMask
                     }
                 }
             val baseShape =
@@ -422,32 +394,20 @@ interface ShapeDelegate {
         }
 
         fun pickBestShape(baseShape: Path, shapeStr: String): ShapeDelegate {
-            val calcAreaDiff = areaDiffCalculator(baseShape)
-
-            // Find the shape with minimum area of divergent region.
-            var closestShape: ShapeDelegate = Circle()
-            var minAreaDiff = calcAreaDiff(closestShape)
-
-            // Try some common rounded rect edges
-            for (f in 0..20) {
-                val rectShape = RoundedSquare(f.toFloat() / 20)
-                val rectArea = calcAreaDiff(rectShape)
-                if (rectArea < minAreaDiff) {
-                    minAreaDiff = rectArea
-                    closestShape = rectShape
-                }
-            }
-
+            val roundedRectRadiusRatio = estimateRadius(baseShape, DEFAULT_PATH_SIZE)
             // Use the generic shape only if we have more than .1% error
-            if (shapeStr.isNotEmpty() && minAreaDiff > AREA_DIFF_THRESHOLD) {
+            if (shapeStr.isNotEmpty() && roundedRectRadiusRatio < 0) {
                 try {
-                    val generic = GenericPathShape(shapeStr)
-                    closestShape = generic
+                    return GenericPathShape(shapeStr)
                 } catch (e: Exception) {
                     Log.e(TAG, "Error converting mask to generic shape", e)
                 }
             }
-            return closestShape
+            return when {
+                roundedRectRadiusRatio >= 1f -> Circle()
+                roundedRectRadiusRatio >= 0f -> RoundedSquare(roundedRectRadiusRatio)
+                else -> Circle()
+            }
         }
 
         /**
@@ -468,5 +428,11 @@ interface ShapeDelegate {
                 centerY = (bottom - top) / 2,
                 rounding = CornerRounding(cornerR),
             )
+    }
+
+    fun <T> useFolderSpringAnimation(target: T): Boolean {
+        return (target is Folder || target is FolderPagedView)
+            && Flags.enableLauncherIconShapes()
+            && Flags.enableExpressiveFolderExpansion()
     }
 }

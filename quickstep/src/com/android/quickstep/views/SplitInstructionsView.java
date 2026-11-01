@@ -40,7 +40,7 @@ import com.android.launcher3.Utilities;
 import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.quickstep.util.AnimUtils;
-import com.android.quickstep.util.SplitSelectStateController;
+import com.android.quickstep.split.SplitSelectStateController;
 import com.android.wm.shell.shared.TypefaceUtils;
 import com.android.wm.shell.shared.TypefaceUtils.FontFamily;
 
@@ -166,7 +166,7 @@ public class SplitInstructionsView extends LinearLayout {
 
         AnimUtils.goToNormalStateWithSplitDismissal(stateManager, mContainer,
                 LAUNCHER_SPLIT_SELECTION_EXIT_CANCEL_BUTTON,
-                splitSelectController.getSplitAnimationController());
+                splitSelectController.getSplitAnimationController(), /* onEndCallback= */ null);
     }
 
     void ensureProperRotation() {

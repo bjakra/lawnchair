@@ -18,13 +18,9 @@ package com.android.wm.shell.bubbles
 
 import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Matrix
-import android.graphics.Path
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.InsetDrawable
-import android.util.PathParser
 import android.view.LayoutInflater
 import android.view.View.VISIBLE
 import android.widget.FrameLayout
@@ -32,12 +28,13 @@ import androidx.core.content.ContextCompat
 import com.android.launcher3.icons.BubbleIconFactory
 import com.android.wm.shell.R
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView
+import com.android.wm.shell.bubbles.bar.BubbleBarLayerView
+import com.android.wm.shell.bubbles.model.BubbleIcon
 
 class BubbleOverflow(private val context: Context, private val positioner: BubblePositioner) :
     BubbleViewProvider {
 
-    private lateinit var bitmap: Bitmap
-    private lateinit var dotPath: Path
+    private lateinit var bitmap: BubbleIcon.Custom
 
     private var dotColor = 0
     private var showDot = false
@@ -58,16 +55,16 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
     fun initialize(
         expandedViewManager: BubbleExpandedViewManager,
         stackView: BubbleStackView,
-        positioner: BubblePositioner
+        positioner: BubblePositioner,
     ) {
         createExpandedView()
-                .initialize(
-                        expandedViewManager,
-                    stackView,
-                    positioner,
-                    /* isOverflow= */ true,
-                    /* bubbleTaskView= */ null
-                )
+            .initialize(
+                expandedViewManager,
+                stackView,
+                positioner,
+                /* isOverflow= */ true,
+                /* bubbleTaskView= */ null,
+            )
     }
 
     fun initializeForBubbleBar(
@@ -81,16 +78,21 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
                 /* isOverflow= */ true,
                 /* bubble= */ null,
                 /* bubbleTaskView= */ null,
-                /* mainExecutor= */ null,
-                /* backgroundExecutor= */ null,
-                /* regionSamplingProvider= */ null,
             )
     }
 
     fun cleanUpExpandedState() {
-        expandedView?.cleanUpExpandedState()
+        // Detach overflow from BubbleStackView
+        expandedView?.apply {
+            (parent as? BubbleStackView)?.removeView(this)
+            cleanUpExpandedState()
+        }
         expandedView = null
-        bubbleBarExpandedView?.cleanUpExpandedState()
+        // Detach overflow from BubbleBarLayerView
+        bubbleBarExpandedView?.apply {
+            (parent as? BubbleBarLayerView)?.removeView(this)
+            cleanUpExpandedState()
+        }
         bubbleBarExpandedView = null
     }
 
@@ -111,6 +113,24 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
         expandedView?.updateDimensions()
     }
 
+    /** Handle font size changes. */
+    fun updateFontSize() {
+        expandedView?.updateFontSize()
+        bubbleBarExpandedView?.updateFontSize()
+    }
+
+    /** Handle locale changes. */
+    fun updateLocale() {
+        expandedView?.updateLocale()
+        bubbleBarExpandedView?.updateLocale()
+    }
+
+    /** Handle theme changes. */
+    fun updateTheme() {
+        expandedView?.updateTheme()
+        bubbleBarExpandedView?.updateTheme()
+    }
+
     private fun updateBtnTheme() {
         val res = context.resources
 
@@ -128,32 +148,15 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
                 res.getDimensionPixelSize(R.dimen.bubble_badge_size),
                 ContextCompat.getColor(
                     context,
-                    com.android.launcher3.icons.R.color.important_conversation
+                    com.android.launcher3.icons.R.color.important_conversation,
                 ),
-                res.getDimensionPixelSize(com.android.internal.R.dimen.importance_ring_stroke_width)
+                res.getDimensionPixelSize(com.android.internal.R.dimen.importance_ring_stroke_width),
             )
 
         // Update bitmap
         val fg = InsetDrawable(overflowBtn?.iconDrawable, overflowIconInset)
         val drawable = AdaptiveIconDrawable(ColorDrawable(colorAccent), fg)
-        val bubbleBitmapScale = FloatArray(1)
-        bitmap = iconFactory.getBubbleBitmap(drawable, bubbleBitmapScale)
-
-        // Update dot path
-        dotPath =
-            PathParser.createPathFromPathData(
-                res.getString(com.android.internal.R.string.config_icon_mask)
-            )
-        val scale = bubbleBitmapScale[0]
-        val radius = BadgedImageView.DEFAULT_PATH_SIZE / 2f
-        val matrix = Matrix()
-        matrix.setScale(
-            scale /* x scale */,
-            scale /* y scale */,
-            radius /* pivot x */,
-            radius /* pivot y */
-        )
-        dotPath.transform(matrix)
+        bitmap = BubbleIcon.Custom(iconFactory.getBubbleBitmap(drawable))
 
         // Attach BubbleOverflow to BadgedImageView
         overflowBtn?.setRenderedBubble(this)
@@ -177,7 +180,7 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
             inflater.inflate(
                 R.layout.bubble_expanded_view,
                 null /* root */,
-                false /* attachToRoot */
+                false, /* attachToRoot */
             ) as BubbleExpandedView
         view.applyThemeAttrs()
         expandedView = view
@@ -195,7 +198,7 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
             inflater.inflate(
                 R.layout.bubble_bar_expanded_view,
                 null, /* root */
-                false /* attachToRoot*/
+                false, /* attachToRoot*/
             ) as BubbleBarExpandedView
         view.applyThemeAttrs()
         bubbleBarExpandedView = view
@@ -214,8 +217,6 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
 
     override fun showDot() = showDot
 
-    override fun getDotPath() = dotPath
-
     override fun setTaskViewVisibility(visible: Boolean) {
         // Overflow does not have a TaskView.
     }
@@ -226,7 +227,7 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
                 inflater.inflate(
                     R.layout.bubble_overflow_button,
                     null /* root */,
-                    false /* attachToRoot */
+                    false, /* attachToRoot */
                 ) as BadgedImageView
             overflowBtn?.initialize(positioner)
             overflowBtn?.contentDescription =

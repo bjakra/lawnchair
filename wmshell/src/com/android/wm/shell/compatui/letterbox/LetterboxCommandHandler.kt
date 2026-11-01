@@ -34,30 +34,25 @@ import javax.inject.Inject
  * <p> Use with [adb shell wm shell letterbox &lt;command&gt;].
  */
 @WMSingleton
-class LetterboxCommandHandler @Inject constructor(
+class LetterboxCommandHandler
+@Inject
+constructor(
     private val context: Context,
     shellInit: ShellInit,
     shellCommandHandler: ShellCommandHandler,
-    private val letterboxConfiguration: LetterboxConfiguration
+    private val letterboxConfiguration: LetterboxConfiguration,
 ) : ShellCommandActionHandler {
 
     companion object {
-        @JvmStatic
-        private val TAG = "LetterboxCommandHandler"
+        @JvmStatic private val TAG = "LetterboxCommandHandler"
     }
 
     init {
-        if (Flags.appCompatRefactoring()) {
-            ProtoLog.v(
-                WM_SHELL_APP_COMPAT,
-                "%s: %s",
-                TAG,
-                "Initializing LetterboxCommandHandler"
-            )
-            shellInit.addInitCallback({
-                shellCommandHandler.addCommandCallback("letterbox", this, this)
-            }, this)
-        }
+        ProtoLog.v(WM_SHELL_APP_COMPAT, "$TAG: Initializing LetterboxCommandHandler")
+        shellInit.addInitCallback(
+            { shellCommandHandler.addCommandCallback("letterbox", this, this) },
+            this,
+        )
     }
 
     override fun onShellCommand(args: Array<out String>?, pw: PrintWriter?): Boolean {
@@ -94,8 +89,28 @@ class LetterboxCommandHandler @Inject constructor(
                     $prefix      activity won't be rounded."
                     $prefix cornerRadiusReset"
                     $prefix      Resets the rounded corners radius to the default value."
-                """.trimIndent()
+                """
+                .trimIndent()
         )
+        if (Flags.appCompatEnableBlurWallpaperInShell()) {
+            pw?.println(
+                """
+                    $prefix backgroundType [0:SOLID_COLOR, 1:APP_COLOR_BACKGROUND, 2:APP_COLOR_BACKGROUND_FLOATING, 3:WALLPAPER]"
+                    $prefix      Background type for activities in the letterbox mode."
+                    $prefix backgroundTypeReset"
+                    $prefix      Resets the background type to the default value."
+                    $prefix wallpaperBlurRadius"
+                    $prefix      Blur radius for wallpaper letterbox background."
+                    $prefix wallpaperBlurRadiusReset"
+                    $prefix      Resets the wallpaper blur radius to the default value."
+                    $prefix wallpaperDarkScrimAlpha"
+                    $prefix      Alpha of a black scrim shown over wallpaper letterbox background."
+                    $prefix wallpaperDarkScrimAlphaReset"
+                    $prefix      Resets the wallpaper dark scrim alpha to the default value."
+                """
+                    .trimIndent()
+            )
+        }
     }
 
     private fun onSingleParamCommand(command: String, value: String, pw: PrintWriter): Boolean {
@@ -105,37 +120,78 @@ class LetterboxCommandHandler @Inject constructor(
                     pw,
                     value,
                     ::strToColor,
-                    { color ->
-                        letterboxConfiguration.setLetterboxBackgroundColor(color)
-                    },
-                    { c -> "$c is not a valid color." }
+                    { color -> letterboxConfiguration.setLetterboxBackgroundColor(color) },
+                    { c -> "$c is not a valid color." },
                 )
             }
 
-            "backgroundColorResource" -> return invokeWhenValid(
-                pw,
-                value,
-                ::nameToColorId,
-                { color ->
-                    letterboxConfiguration.setLetterboxBackgroundColorResourceId(color)
-                },
-                { c ->
-                    "$c is not a valid resource. Color in '@android:color/resource_name'" +
+            "backgroundColorResource" ->
+                return invokeWhenValid(
+                    pw,
+                    value,
+                    ::nameToColorId,
+                    { color ->
+                        letterboxConfiguration.setLetterboxBackgroundColorResourceId(color)
+                    },
+                    { c ->
+                        "$c is not a valid resource. Color in '@android:color/resource_name'" +
                             " format should be provided as an argument."
-                }
-            )
+                    },
+                )
 
-            "cornerRadius" -> return invokeWhenValid(
-                pw,
-                value,
-                ::strToInt{ it >= 0 },
-                { radius ->
-                    letterboxConfiguration.setLetterboxActivityCornersRadius(radius)
-                },
-                { r ->
-                    "$r is not a valid radius. It must be an integer >= 0."
+            "cornerRadius" ->
+                return invokeWhenValid(
+                    pw,
+                    value,
+                    ::strToInt { it >= 0 },
+                    { radius -> letterboxConfiguration.setLetterboxActivityCornersRadius(radius) },
+                    { r -> "$r is not a valid radius. It must be an integer >= 0." },
+                )
+
+            "backgroundType" -> {
+                if (!Flags.appCompatEnableBlurWallpaperInShell()) {
+                    return false
                 }
-            )
+                return invokeWhenValid(
+                    pw,
+                    value,
+                    ::strToInt { LetterboxConfiguration.LetterboxBackgroundMode.validForInput(it) },
+                    { type -> letterboxConfiguration.setLetterboxBackgroundType(type) },
+                    { t ->
+                        "$t is not a valid background type. It must be an integer between 0 and 3."
+                    },
+                )
+            }
+
+            "wallpaperBlurRadius" -> {
+                if (!Flags.appCompatEnableBlurWallpaperInShell()) {
+                    return false
+                }
+                return invokeWhenValid(
+                    pw,
+                    value,
+                    ::strToInt { it >= 0 },
+                    { radius ->
+                        letterboxConfiguration.setLetterboxBackgroundWallpaperBlurRadiusPx(radius)
+                    },
+                    { r -> "$r is not a valid radius. It must be an integer >= 0." },
+                )
+            }
+
+            "wallpaperDarkScrimAlpha" -> {
+                if (!Flags.appCompatEnableBlurWallpaperInShell()) {
+                    return false
+                }
+                return invokeWhenValid(
+                    pw,
+                    value,
+                    ::strToFloat { it >= 0f && it < 1f },
+                    { alpha ->
+                        letterboxConfiguration.setLetterboxBackgroundWallpaperDarkScrimAlpha(alpha)
+                    },
+                    { a -> "$a is not a valid alpha. It must be a float between 0 and 1." },
+                )
+            }
 
             else -> {
                 pw.println("Invalid command: $value")
@@ -148,10 +204,10 @@ class LetterboxCommandHandler @Inject constructor(
         when (command) {
             "backgroundColor" -> {
                 pw.println(
-                    "    Background color: " + Integer.toHexString(
-                        letterboxConfiguration.getLetterboxBackgroundColor()
-                            .toArgb()
-                    )
+                    "    Background color: " +
+                        Integer.toHexString(
+                            letterboxConfiguration.getLetterboxBackgroundColor().toArgb()
+                        )
                 )
                 return true
             }
@@ -174,6 +230,63 @@ class LetterboxCommandHandler @Inject constructor(
                 return true
             }
 
+            "backgroundType" -> {
+                if (!Flags.appCompatEnableBlurWallpaperInShell()) {
+                    return false
+                }
+                pw.println(
+                    "    Background type: " +
+                        "${letterboxConfiguration.getLetterboxBackgroundType()}"
+                )
+                return true
+            }
+
+            "backgroundTypeReset" -> {
+                if (!Flags.appCompatEnableBlurWallpaperInShell()) {
+                    return false
+                }
+                letterboxConfiguration.resetLetterboxBackgroundType()
+                return true
+            }
+
+            "wallpaperBlurRadius" -> {
+                if (!Flags.appCompatEnableBlurWallpaperInShell()) {
+                    return false
+                }
+                pw.println(
+                    "    Wallpaper blur radius: " +
+                        "${letterboxConfiguration.getLetterboxBackgroundWallpaperBlurRadiusPx()} px."
+                )
+                return true
+            }
+
+            "wallpaperBlurRadiusReset" -> {
+                if (!Flags.appCompatEnableBlurWallpaperInShell()) {
+                    return false
+                }
+                letterboxConfiguration.resetLetterboxBackgroundWallpaperBlurRadiusPx()
+                return true
+            }
+
+            "wallpaperDarkScrimAlpha" -> {
+                if (!Flags.appCompatEnableBlurWallpaperInShell()) {
+                    return false
+                }
+                pw.println(
+                    "    Wallpaper dark scrim alpha: " +
+                        "${letterboxConfiguration.getLetterboxBackgroundWallpaperDarkScrimAlpha()}"
+                )
+                return true
+            }
+
+            "wallpaperDarkScrimAlphaReset" -> {
+                if (!Flags.appCompatEnableBlurWallpaperInShell()) {
+                    return false
+                }
+                letterboxConfiguration.resetLetterboxBackgroundWallpaperDarkScrimAlpha()
+                return true
+            }
+
             else -> {
                 pw.println("Invalid command: $command")
                 return false
@@ -186,7 +299,7 @@ class LetterboxCommandHandler @Inject constructor(
         input: String,
         converter: (String) -> T?,
         consumer: (T) -> Unit,
-        errorMessage: (String) -> String = { value -> " Wrong input value: $value." }
+        errorMessage: (String) -> String = { value -> " Wrong input value: $value." },
     ): Boolean {
         converter(input)?.let {
             consumer(it)
@@ -218,8 +331,20 @@ class LetterboxCommandHandler @Inject constructor(
         try {
             val value = str.toInt()
             if (predicate(value)) value else null
-        } catch (e: IllegalArgumentException) {
+        } catch (e: NumberFormatException) {
             null
         }
     }
+
+    // Converts a [String] to [Float] when possible and the predicate evaluates to [true].
+    // It returns [null] otherwise.
+    private fun strToFloat(predicate: (Float) -> Boolean = { _ -> true }): (String) -> Float? =
+        { str ->
+            try {
+                val value = str.toFloat()
+                if (predicate(value)) value else null
+            } catch (e: NumberFormatException) {
+                null
+            }
+        }
 }

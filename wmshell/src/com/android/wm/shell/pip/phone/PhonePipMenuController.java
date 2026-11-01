@@ -24,13 +24,11 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.util.Size;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewRootImpl;
-import android.view.WindowManagerGlobal;
 
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.DisplayController;
@@ -166,7 +164,7 @@ public class PhonePipMenuController implements PipMenuController {
      */
     @Override
     public void attach(SurfaceControl leash) {
-        mLeash = leash;
+        mLeash = new SurfaceControl(leash, "PhonePipMenuController");
         attachPipMenuView();
     }
 
@@ -177,7 +175,10 @@ public class PhonePipMenuController implements PipMenuController {
     public void detach() {
         hideMenu();
         detachPipMenuView();
-        mLeash = null;
+        if (mLeash != null) {
+            mLeash.release();
+            mLeash = null;
+        }
     }
 
     void attachPipMenuView() {
@@ -244,7 +245,6 @@ public class PhonePipMenuController implements PipMenuController {
         mSystemWindows.updateViewLayout(mPipMenuView,
                 getPipMenuLayoutParams(mContext, MENU_WINDOW_TITLE, destinationBounds.width(),
                         destinationBounds.height()));
-        updateMenuLayout(destinationBounds);
     }
 
     /**
@@ -281,41 +281,40 @@ public class PhonePipMenuController implements PipMenuController {
     }
 
     /**
-     * Similar to {@link #showMenu(int, Rect, boolean, boolean, boolean)} but only show the menu
+     * Similar to {@link #showMenu(int, Rect, boolean, boolean)} but only show the menu
      * upon PiP window transition is finished.
      */
     public void showMenuWithPossibleDelay(int menuState, Rect stackBounds, boolean allowMenuTimeout,
-            boolean willResizeMenu, boolean showResizeHandle) {
+            boolean willResizeMenu) {
         if (willResizeMenu) {
             // hide all visible controls including close button and etc. first, this is to ensure
             // menu is totally invisible during the transition to eliminate unpleasant artifacts
             fadeOutMenu();
         }
         showMenuInternal(menuState, stackBounds, allowMenuTimeout, willResizeMenu,
-                willResizeMenu /* withDelay=willResizeMenu here */, showResizeHandle);
+                willResizeMenu /* withDelay=willResizeMenu here */);
     }
 
     /**
      * Shows the menu activity immediately.
      */
     public void showMenu(int menuState, Rect stackBounds, boolean allowMenuTimeout,
-            boolean willResizeMenu, boolean showResizeHandle) {
+            boolean willResizeMenu) {
         showMenuInternal(menuState, stackBounds, allowMenuTimeout, willResizeMenu,
-                false /* withDelay */, showResizeHandle);
+                false /* withDelay */);
     }
 
     private void showMenuInternal(int menuState, Rect stackBounds, boolean allowMenuTimeout,
-            boolean willResizeMenu, boolean withDelay, boolean showResizeHandle) {
+            boolean willResizeMenu, boolean withDelay) {
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: showMenu() state=%s"
-                            + " isMenuVisible=%s"
-                            + " allowMenuTimeout=%s"
-                            + " willResizeMenu=%s"
-                            + " withDelay=%s"
-                            + " showResizeHandle=%s"
+                    "%s: showMenu() state=%d"
+                            + " isMenuVisible=%b"
+                            + " allowMenuTimeout=%b"
+                            + " willResizeMenu=%b"
+                            + " withDelay=%b"
                             + " callers=\n%s", TAG, menuState, isMenuVisible(), allowMenuTimeout,
-                    willResizeMenu, withDelay, showResizeHandle, Debug.getCallers(5, "    "));
+                    willResizeMenu, withDelay, Debug.getCallers(5, "    "));
         }
 
         if (!checkPipMenuState()) {
@@ -327,8 +326,7 @@ public class PhonePipMenuController implements PipMenuController {
                 PipMenuController.ALPHA_NO_CHANGE);
         updateMenuBounds(stackBounds);
 
-        mPipMenuView.showMenu(menuState, stackBounds, allowMenuTimeout, willResizeMenu, withDelay,
-                showResizeHandle);
+        mPipMenuView.showMenu(menuState, stackBounds, allowMenuTimeout, willResizeMenu, withDelay);
     }
 
     /**
@@ -428,10 +426,10 @@ public class PhonePipMenuController implements PipMenuController {
         final boolean isMenuVisible = isMenuVisible();
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: hideMenu() state=%s"
-                            + " isMenuVisible=%s"
-                            + " animationType=%s"
-                            + " resize=%s"
+                    "%s: hideMenu() state=%d"
+                            + " isMenuVisible=%b"
+                            + " animationType=%d"
+                            + " resize=%b"
                             + " callers=\n%s", TAG, mMenuState, isMenuVisible,
                     animationType, resize,
                     Debug.getCallers(5, "    "));
@@ -507,8 +505,8 @@ public class PhonePipMenuController implements PipMenuController {
     void onMenuStateChangeStart(int menuState, boolean resize, Runnable callback) {
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: onMenuStateChangeStart() mMenuState=%s"
-                            + " menuState=%s resize=%s"
+                    "%s: onMenuStateChangeStart() mMenuState=%d"
+                            + " menuState=%d resize=%b"
                             + " callers=\n%s", TAG, mMenuState, menuState, resize,
                     Debug.getCallers(5, "    "));
         }
@@ -528,12 +526,9 @@ public class PhonePipMenuController implements PipMenuController {
             // Do not grant focus if IME is visible, which can cause the focus being granted
             // back and forth in between the IME and PiP menu, and causes flicker.
             final boolean grantFocus = !mIsImeVisible && (menuState != MENU_STATE_NONE);
-            try {
-                WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(null /* window */,
-                        mSystemWindows.getFocusGrantToken(mPipMenuView), grantFocus);
-            } catch (RemoteException e) {
+            if (!mSystemWindows.requestInputFocus(mPipMenuView, grantFocus)) {
                 ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                        "%s: Unable to update focus as menu appears/disappears, %s", TAG, e);
+                        "%s: Unable to update focus as menu appears/disappears", TAG);
             }
         }
     }
@@ -570,23 +565,6 @@ public class PhonePipMenuController implements PipMenuController {
             mPipMenuView.dispatchTouchEvent(ev);
         } else {
             mPipMenuView.dispatchGenericMotionEvent(ev);
-        }
-    }
-
-    /**
-     * Tell the PIP Menu to recalculate its layout given its current position on the display.
-     */
-    public void updateMenuLayout(Rect bounds) {
-        final boolean isMenuVisible = isMenuVisible();
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: updateMenuLayout() state=%s"
-                            + " isMenuVisible=%s"
-                            + " callers=\n%s", TAG, mMenuState, isMenuVisible,
-                    Debug.getCallers(5, "    "));
-        }
-        if (isMenuVisible) {
-            mPipMenuView.updateMenuLayout(bounds);
         }
     }
 

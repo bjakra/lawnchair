@@ -32,6 +32,7 @@ import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UnminimizeReason
+import com.android.wm.shell.desktopmode.data.DesktopRepository
 import com.android.wm.shell.desktopmode.multidesks.DesksOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.sysui.UserChangeListener
@@ -52,13 +53,13 @@ class DesktopTasksLimiter(
     private val shellTaskOrganizer: ShellTaskOrganizer,
     private val desksOrganizer: DesksOrganizer,
     private val desktopMixedTransitionHandler: DesktopMixedTransitionHandler,
+    private val snapEventHandler: SnapEventHandler,
     private val maxTasksLimit: Int?,
 ) {
     private val minimizeTransitionObserver = MinimizeTransitionObserver()
     @VisibleForTesting val leftoverMinimizedTasksRemover = LeftoverMinimizedTasksRemover()
 
     private var userId: Int
-    lateinit var snapEventHandler: SnapEventHandler
 
     init {
         maxTasksLimit?.let {
@@ -157,39 +158,18 @@ class DesktopTasksLimiter(
             info: TransitionInfo,
         ) {
             val launchDetails = pendingTaskLimitTransitionTokens.remove(transition) ?: return
-            logV("handleTaskLimitTransitionReady, transition=$transition, info=$info")
-            markClosingTasks(taskRepository, info, launchDetails)
+            logV("handleTaskLimitTransitionReady, transition=%s, info=%s", transition, info)
             transitions.runOnIdle {
                 val expandedTaskIds =
                     taskRepository.getExpandedTasksIdsInDeskOrdered(launchDetails.deskId).filter {
                         !taskRepository.isClosingTask(it)
                     }
-                logV("runOnIdle, expandedTasks=$expandedTaskIds, after transition=$transition")
-                triggerMinimizeTransition(launchDetails.deskId, expandedTaskIds)
-            }
-        }
-
-        private fun markClosingTasks(
-            taskRepository: DesktopRepository,
-            info: TransitionInfo,
-            launchDetails: LaunchDetails,
-        ) {
-            // markClosingTasks() is a workaround while
-            // ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS is ramping up, so don't run this
-            // logic when that flag has been enabled.
-            if (DesktopExperienceFlags.ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS.isTrue) {
-                return
-            }
-            info.changes.forEach { change ->
-                val taskInfo = change.taskInfo ?: return@forEach
-                if (change.mode != TRANSIT_CLOSE || !taskInfo.isFreeform) {
-                    return@forEach
-                }
-                taskRepository.addClosingTask(
-                    taskInfo.displayId,
-                    launchDetails.deskId,
-                    taskInfo.taskId,
+                logV(
+                    "runOnIdle, expandedTasks=%s, after transition=%s",
+                    expandedTaskIds,
+                    transition,
                 )
+                triggerMinimizeTransition(launchDetails.deskId, expandedTaskIds)
             }
         }
 
@@ -219,7 +199,7 @@ class DesktopTasksLimiter(
                     return task
                 } else {
                     logW(
-                        "Tried to minimize non-running task#%s, Try next task instead.",
+                        "Tried to minimize non-running task#%d, Try next task instead.",
                         taskIdToMinimize,
                     )
                 }
@@ -272,7 +252,18 @@ class DesktopTasksLimiter(
             val taskChange =
                 info.changes.find { change -> change.taskInfo?.taskId == taskDetails.taskId }
             val taskRepository = desktopUserRepositories.current
-            if (taskChange == null) return !taskRepository.isVisibleTask(taskDetails.taskId)
+            if (taskChange == null) {
+                if (!taskRepository.isVisibleTask(taskDetails.taskId)) {
+                    return true
+                }
+                // if the task is expanded on the desk but not wm visible, we can still mark it as
+                // minimized.
+                if (taskRepository.isActiveTask(taskDetails.taskId)) {
+                    val taskInfo = shellTaskOrganizer.getRunningTaskInfo(taskDetails.taskId)
+                    return taskInfo?.isVisible == false
+                }
+                return false
+            }
             return taskChange.mode == TRANSIT_TO_BACK
         }
 
@@ -294,9 +285,11 @@ class DesktopTasksLimiter(
         }
 
         override fun onTransitionFinished(transition: IBinder, aborted: Boolean) {
+            activeTransitionTokensAndTasks.remove(transition)
             pendingTransitionTokensAndTasks.remove(transition)
             activeUnminimizeTransitionTokensAndTasks.remove(transition)
             pendingUnminimizeTransitionTokensAndTasks.remove(transition)
+            pendingTaskLimitTransitionTokens.remove(transition)
         }
     }
 
@@ -376,12 +369,7 @@ class DesktopTasksLimiter(
         deskId: Int,
         task: ActivityManager.RunningTaskInfo,
         wct: WindowContainerTransaction,
-    ) =
-        if (DesktopExperienceFlags.ENABLE_MULTIPLE_DESKTOPS_BACKEND.isTrue) {
-            desksOrganizer.minimizeTask(wct, deskId, task)
-        } else {
-            wct.reorder(task.token, /* onTop= */ false)
-        }
+    ) = desksOrganizer.minimizeTask(wct, deskId, task)
 
     /**
      * Add a pending transition to trigger a new minimize transition in case the pending transition
@@ -454,7 +442,7 @@ class DesktopTasksLimiter(
         if (visibleOrderedTasks.size + newTasksOpening <= taskLimit) {
             logV(
                 "No need to minimize; tasks below limit, " +
-                    " visible tasks: %s, new task: %s, task limit: %s",
+                    " visible tasks: %s, new task: %b, task limit: %d",
                 visibleOrderedTasks,
                 launchingNewIntent,
                 taskLimit,
@@ -477,10 +465,14 @@ class DesktopTasksLimiter(
 
     @VisibleForTesting fun getTransitionObserver(): TransitionObserver = minimizeTransitionObserver
 
+    // TODO(b/478792808): Remove suppression
+    @SuppressWarnings("ProtoLogNonConstantFormat")
     private fun logV(msg: String, vararg arguments: Any?) {
         ProtoLog.v(WM_SHELL_DESKTOP_MODE, "%s: $msg", TAG, *arguments)
     }
 
+    // TODO(b/478792808): Remove suppression
+    @SuppressWarnings("ProtoLogNonConstantFormat")
     private fun logW(msg: String, vararg arguments: Any?) {
         ProtoLog.w(WM_SHELL_DESKTOP_MODE, "%s: $msg", TAG, *arguments)
     }

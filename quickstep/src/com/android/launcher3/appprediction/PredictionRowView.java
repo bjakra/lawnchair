@@ -89,7 +89,8 @@ public class PredictionRowView<T extends Context & ActivityContext>
 
         mFocusHelper = new SimpleFocusIndicatorHelper(this);
         mActivityContext = ActivityContext.lookupContext(context);
-        mNumPredictedAppsPerRow = mActivityContext.getDeviceProfile().numShownAllAppsColumns;
+        mNumPredictedAppsPerRow =
+                mActivityContext.getDeviceProfile().getAllAppsProfile().getNumShownAllAppsColumns();
         mTopRowExtraHeight = getResources().getDimensionPixelSize(
                 R.dimen.all_apps_search_top_row_extra_height);
         mVerticalPadding = getResources().getDimensionPixelSize(
@@ -124,12 +125,10 @@ public class PredictionRowView<T extends Context & ActivityContext>
     private void updateVisibility() {
         boolean enabled = mPredictionsEnabled && PreferenceCacheExtensionsKt.firstCached(prefs2.getShowSuggestedAppsInDrawer());
         setVisibility(enabled ? VISIBLE : GONE);
-        if (mActivityContext.getAppsView() != null) {
-            if (enabled) {
-                mActivityContext.getAppsView().getAppsStore().registerIconContainer(this);
-            } else {
-                mActivityContext.getAppsView().getAppsStore().unregisterIconContainer(this);
-            }
+        if (enabled) {
+            mActivityContext.getActivityComponent().getAppsStore().registerIconContainer(this);
+        } else {
+            mActivityContext.getActivityComponent().getAppsStore().unregisterIconContainer(this);
         }
     }
 
@@ -206,7 +205,7 @@ public class PredictionRowView<T extends Context & ActivityContext>
 
     @Override
     public void onDeviceProfileChanged(DeviceProfile dp) {
-        mNumPredictedAppsPerRow = dp.numShownAllAppsColumns;
+        mNumPredictedAppsPerRow = dp.getAllAppsProfile().getNumShownAllAppsColumns();
         removeAllViews();
         applyPredictionApps();
     }

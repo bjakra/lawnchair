@@ -17,7 +17,6 @@
 package com.android.wm.shell.fullscreen;
 
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCREEN;
-import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -32,6 +31,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopWallpaperActivity;
 import com.android.wm.shell.desktopmode.desktopwallpaperactivity.DesktopWallpaperActivityTokenProvider;
+import com.android.wm.shell.packageupdate.PackageUpdateController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -60,13 +60,13 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     private final Optional<WindowDecorViewModel> mWindowDecorViewModelOptional;
     private final Optional<DesktopWallpaperActivityTokenProvider>
             mDesktopWallpaperActivityTokenProviderOptional;
-
+    private final Optional<PackageUpdateController> mPackageUpdateControllerOptional;
     /**
      * This constructor is used by downstream products.
      */
     public FullscreenTaskListener(SyncTransactionQueue syncQueue) {
         this(null /* shellInit */, null /* shellTaskOrganizer */, syncQueue, Optional.empty(),
-                Optional.empty(), Optional.empty());
+                Optional.empty(), Optional.empty(), Optional.empty());
     }
 
     public FullscreenTaskListener(ShellInit shellInit,
@@ -75,13 +75,15 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
             Optional<RecentTasksController> recentTasksOptional,
             Optional<WindowDecorViewModel> windowDecorViewModelOptional,
             Optional<DesktopWallpaperActivityTokenProvider>
-                    desktopWallpaperActivityTokenProviderOptional) {
+                    desktopWallpaperActivityTokenProviderOptional,
+            Optional<PackageUpdateController> packageUpdateControllerOptional) {
         mShellTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
         mRecentTasksOptional = recentTasksOptional;
         mWindowDecorViewModelOptional = windowDecorViewModelOptional;
         mDesktopWallpaperActivityTokenProviderOptional =
                 desktopWallpaperActivityTokenProviderOptional;
+        mPackageUpdateControllerOptional = packageUpdateControllerOptional;
         // Note: Some derivative FullscreenTaskListener implementations do not use ShellInit
         if (shellInit != null) {
             shellInit.addInitCallback(this::onInit, this);
@@ -104,6 +106,9 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
         state.mLeash = leash;
         state.mTaskInfo = taskInfo;
         mTasks.put(taskInfo.taskId, state);
+        // TODO(b/467922656): Generalise this for all tasks (e.g. depend on TDA) instead of
+        // individual tasks.
+        mPackageUpdateControllerOptional.ifPresent(c -> c.onTaskAppeared(taskInfo));
     }
 
     @Override
@@ -130,6 +135,7 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
                         provider.removeToken(taskInfo.getToken());
                     }
                 });
+        mPackageUpdateControllerOptional.ifPresent(c -> c.onTaskVanished(taskInfo));
     }
 
     private void updateRecentsForVisibleFullscreenTask(RunningTaskInfo taskInfo) {
@@ -143,20 +149,29 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
 
     @Override
     public void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
-        b.setParent(findTaskSurface(taskId));
+        final SurfaceControl taskSurface = findTaskSurface(taskId);
+        if (taskSurface != null) {
+            b.setParent(taskSurface);
+        }
     }
 
     @Override
     public void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
             SurfaceControl.Transaction t) {
-        t.reparent(sc, findTaskSurface(taskId));
+        final SurfaceControl taskSurface = findTaskSurface(taskId);
+        if (taskSurface != null) {
+            t.reparent(sc, taskSurface);
+        }
     }
 
     private SurfaceControl findTaskSurface(int taskId) {
-        if (!mTasks.contains(taskId)) {
-            throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
+        final State state = mTasks.get(taskId);
+        if (state != null) {
+            return state.mLeash;
         }
-        return mTasks.get(taskId).mLeash;
+        ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Surface not found: #%d",
+                taskId);
+        return null;
     }
 
     @Override
@@ -168,6 +183,6 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
 
     @Override
     public String toString() {
-        return TAG + ":" + taskListenerTypeToString(TASK_LISTENER_TYPE_FULLSCREEN);
+        return TAG;
     }
 }

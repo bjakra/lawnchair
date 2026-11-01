@@ -15,8 +15,6 @@
  */
 package com.android.launcher3.states
 
-import android.content.Context
-import com.android.launcher3.Flags.enableScalingRevealHomeAnimation
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherState
 import com.android.launcher3.R
@@ -33,9 +31,10 @@ class EditModeState(id: Int) : LauncherState(id, StatsLogManager.LAUNCHER_STATE_
         private val STATE_FLAGS =
             (FLAG_MULTI_PAGE or
                 FLAG_WORKSPACE_INACCESSIBLE or
-                FLAG_DISABLE_RESTORE or
+                FLAG_DISABLE_RESTORE_EXCEPT_UI_MODE_CHANGE or
                 FLAG_WORKSPACE_ICONS_CAN_BE_DRAGGED or
-                FLAG_WORKSPACE_HAS_BACKGROUNDS)
+                FLAG_WORKSPACE_HAS_BACKGROUNDS or
+                FLAG_WORKSPACE_ICONS_BEING_DRAGGED)
 
         private fun getEditModePageStripHeightPx(launcher: Launcher): Int =
             launcher.resources.getDimensionPixelSize(R.dimen.edit_mode_page_strip_height)
@@ -99,12 +98,8 @@ class EditModeState(id: Int) : LauncherState(id, StatsLogManager.LAUNCHER_STATE_
 
     override fun getTransitionDuration(context: ActivityContext, isToState: Boolean) = 150
 
-    override fun <T> getDepthUnchecked(context: T): Float where T : Context?, T : ActivityContext? {
-        if (enableScalingRevealHomeAnimation()) {
-            return DEPTH_15_PERCENT
-        } else {
-            return 0.5f
-        }
+    override fun getDepthUnchecked(context: ActivityContext): Float {
+        return DEPTH_15_PERCENT
     }
 
     override fun getWorkspaceScaleAndTranslation(launcher: Launcher): ScaleAndTranslation =

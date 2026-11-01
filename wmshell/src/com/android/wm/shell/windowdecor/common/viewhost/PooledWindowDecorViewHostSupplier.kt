@@ -19,8 +19,11 @@ import android.content.Context
 import android.os.Trace
 import android.util.Pools
 import android.view.Display
+import android.view.Display.DEFAULT_DISPLAY
 import android.view.SurfaceControl
+import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.shared.annotations.ShellMainThread
+import com.android.wm.shell.shared.desktopmode.DesktopState
 import com.android.wm.shell.sysui.ShellInit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -41,11 +44,13 @@ class PooledWindowDecorViewHostSupplier(
     private val context: Context,
     @ShellMainThread private val mainScope: CoroutineScope,
     shellInit: ShellInit,
-    maxPoolSize: Int,
+    private val desktopState: DesktopState,
+    private val displayController: DisplayController,
+    private val maxPoolSize: Int,
     private val preWarmSize: Int,
 ) : WindowDecorViewHostSupplier<WindowDecorViewHost> {
-
     private val pool: Pools.Pool<WindowDecorViewHost> = Pools.SynchronizedPool(maxPoolSize)
+    private val displayPools: HashMap<Int, Pools.Pool<WindowDecorViewHost>> = HashMap()
     private var nextDecorViewHostId = 0
 
     init {
@@ -54,18 +59,44 @@ class PooledWindowDecorViewHostSupplier(
     }
 
     private fun onShellInit() {
-        if (preWarmSize <= 0) {
-            return
-        }
-        preWarmViewHosts(preWarmSize)
+        displayController.addDisplayWindowListener(
+            object : DisplayController.OnDisplaysChangedListener {
+                override fun onDisplayAdded(displayId: Int) {
+                    if (displayPools.containsKey(displayId)) {
+                        return
+                    }
+                    displayPools[displayId] = Pools.SynchronizedPool(maxPoolSize)
+
+                    if (
+                        preWarmSize > 0 && desktopState.isDesktopModeSupportedOnDisplay(displayId)
+                    ) {
+                        preWarmViewHosts(preWarmSize, displayId)
+                    }
+                }
+
+                override fun onDisplayRemoved(displayId: Int) {
+                    val displayPool = displayPools.remove(displayId)
+                    // Release all the viewHosts in the pool
+                    var pooledViewHost = displayPool?.acquire()
+                    val transaction = SurfaceControl.Transaction()
+                    while (pooledViewHost != null) {
+                        pooledViewHost.release(transaction)
+                        pooledViewHost = displayPool?.acquire()
+                    }
+                    transaction.apply()
+                }
+            }
+        )
     }
 
-    private fun preWarmViewHosts(preWarmSize: Int) {
+    private fun preWarmViewHosts(preWarmSize: Int, displayId: Int = DEFAULT_DISPLAY) {
         mainScope.launch {
             // Applying isn't needed, as the surface was never actually shown.
             val t = SurfaceControl.Transaction()
+            val displayContext = displayController.getDisplayContext(displayId) ?: return@launch
             repeat(preWarmSize) {
-                val warmedViewHost = newInstance(context, context.display).apply { warmUp() }
+                val warmedViewHost =
+                    newInstance(displayContext, displayContext.display).apply { warmUp() }
                 // Put the warmed view host in the pool by releasing it.
                 release(warmedViewHost, t)
             }
@@ -73,7 +104,7 @@ class PooledWindowDecorViewHostSupplier(
     }
 
     override fun acquire(context: Context, display: Display): WindowDecorViewHost {
-        val pooledViewHost = pool.acquire()
+        val pooledViewHost = displayPools[display.displayId]?.acquire()
         if (pooledViewHost != null) {
             return pooledViewHost
         }
@@ -84,8 +115,9 @@ class PooledWindowDecorViewHostSupplier(
     }
 
     override fun release(viewHost: WindowDecorViewHost, t: SurfaceControl.Transaction) {
-        val pooled = pool.release(viewHost)
-        if (!pooled) {
+        viewHost.reset()
+        val displayPool = displayPools[viewHost.displayId]
+        if (displayPool == null || !displayPool.release(viewHost)) {
             viewHost.release(t)
         }
     }

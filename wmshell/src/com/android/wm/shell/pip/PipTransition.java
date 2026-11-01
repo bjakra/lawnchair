@@ -521,8 +521,18 @@ public class PipTransition extends PipTransitionController {
             @NonNull Point leashOffset, @PipAnimationController.TransitionDirection int direction,
             @NonNull SurfaceControl.Transaction tx) {
         final boolean enteringPip = isInPipDirection(direction);
+        final SurfaceControl leash = mPipOrganizer.getSurfaceControl();
+        final boolean hasValidLeash = leash != null && leash.isValid();
         if (enteringPip) {
             mPipTransitionState.setTransitionState(ENTERED_PIP);
+            // TRUSTED_OVERLAY is granted iff Shell successfully receives the transition.
+            // It's revoked once the task exits pinned mode in
+            // RootWindowContainer#notifyActivityPipModeChanged
+            if (hasValidLeash) {
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "Set TRUSTED_OVERLAY for Task#%d", taskInfo.taskId);
+                tx.setTrustedOverlay(leash, true);
+            }
         }
         // If we have an exit transition, but aren't playing a transition locally, it
         // means we're expecting the exit transition will be "merged" into another transition
@@ -530,8 +540,6 @@ public class PipTransition extends PipTransitionController {
         // the exit transition is merged.
         if ((mExitTransition == null || mMoveToBackTransition == null || isAnimatingLocally())
                 && mFinishCallback != null) {
-            final SurfaceControl leash = mPipOrganizer.getSurfaceControl();
-            final boolean hasValidLeash = leash != null && leash.isValid();
             WindowContainerTransaction wct = null;
             if (isOutPipDirection(direction)) {
                 // Only need to reset surface properties. The server-side operations were already
@@ -721,7 +729,9 @@ public class PipTransition extends PipTransitionController {
             mPipOrganizer.clearContentOverlay();
         }
         if (mPipOrganizer.getOutPipWindowingMode() == WINDOWING_MODE_UNDEFINED) {
-            mHomeTransitionObserver.notifyHomeVisibilityChanged(false /* isVisible */);
+            mHomeTransitionObserver.notifyHomeVisibilityChanged(
+                    false /* isVisible */, false /* keyguardGoingAway */, false /* waking */,
+                    /* behindDesktop */ false);
         }
         if (pipChange == null) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
@@ -1114,8 +1124,7 @@ public class PipTransition extends PipTransitionController {
                     destinationBounds, sourceHintRect);
         }
         if (!mPipOrganizer.shouldAttachMenuEarly()) {
-            mTransitions.getMainExecutor().executeDelayed(
-                    () -> mPipMenuController.attach(leash), 0);
+            mPipMenuController.attach(leash);
         }
 
         if (taskInfo.pictureInPictureParams != null
@@ -1376,6 +1385,11 @@ public class PipTransition extends PipTransitionController {
     public boolean isTaskActiveInPip(int taskId) {
         final TaskInfo inPipTask = mPipOrganizer.getTaskInfo();
         return inPipTask != null && mPipOrganizer.isInPip() && taskId == inPipTask.taskId;
+    }
+
+    @Override
+    public boolean isInPip() {
+        return mPipOrganizer.isInPip();
     }
 
     private void updatePipForUnhandledTransition(@NonNull TransitionInfo.Change pipChange,

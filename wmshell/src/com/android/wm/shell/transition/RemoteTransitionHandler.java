@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.transition;
 
-import static com.android.systemui.shared.Flags.returnAnimationFrameworkLongLived;
+import static com.android.wm.shell.Flags.addOneOffHandlerLeashes;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,6 +40,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.BinderThread;
 
 import com.android.internal.protolog.ProtoLog;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.TransitionUtil;
@@ -56,30 +57,34 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     private static final String TAG = "RemoteTransitionHandler";
 
     private final ShellExecutor mMainExecutor;
+    private final TransitionLeashManager mTransitionLeashManager;
 
     /** Includes remotes explicitly requested by, eg, ActivityOptions */
     private final ArrayMap<IBinder, RemoteTransition> mRequestedRemotes = new ArrayMap<>();
 
     /** Ordered by specificity. Last filters will be checked first */
-    private final ArrayList<Pair<TransitionFilter, RemoteTransition>> mFilters =
+    final ArrayList<Pair<TransitionFilter, RemoteTransition>> mFilters =
             new ArrayList<>();
     private final ArrayList<Pair<TransitionFilter, RemoteTransition>> mTakeoverFilters =
             new ArrayList<>();
 
     private final ArrayMap<IBinder, RemoteDeathHandler> mDeathHandlers = new ArrayMap<>();
 
-    RemoteTransitionHandler(@NonNull ShellExecutor mainExecutor) {
+    RemoteTransitionHandler(
+            @NonNull ShellExecutor mainExecutor,
+            @NonNull TransitionLeashManager transitionLeashManager) {
         mMainExecutor = mainExecutor;
+        mTransitionLeashManager = transitionLeashManager;
     }
 
-    void addFiltered(TransitionFilter filter, RemoteTransition remote) {
+    void addFiltered(RemoteTransition remote) {
         handleDeath(remote.asBinder(), null /* finishCallback */);
-        mFilters.add(new Pair<>(filter, remote));
+        mFilters.add(new Pair<>(remote.getFilter(), remote));
     }
 
-    void addFilteredForTakeover(TransitionFilter filter, RemoteTransition remote) {
+    void addFilteredForTakeover(RemoteTransition remote) {
         handleDeath(remote.asBinder(), null /* finishCallback */);
-        mTakeoverFilters.add(new Pair<>(filter, remote));
+        mTakeoverFilters.add(new Pair<>(remote.getFilter(), remote));
     }
 
     void removeFiltered(RemoteTransition remote) {
@@ -119,13 +124,33 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        if (!Transitions.SHELL_TRANSITIONS_ROTATION && TransitionUtil.hasDisplayChange(info)) {
+        // Ignore the remote transition if the display changes size or rotation, since Launcher
+        // doesn't have the necessary permission to deal with such changes.
+        final boolean ignoreTransition = !Transitions.SHELL_TRANSITIONS_ROTATION
+                && (Flags.enableCrossDisplaysAppLaunchTransition()
+                        ? TransitionUtil.hasStationaryOnlyDisplayChange(info) :
+                        TransitionUtil.hasDisplayChange(info));
+        if (ignoreTransition) {
             // Note that if the remote doesn't have permission ACCESS_SURFACE_FLINGER, some
             // operations of the start transaction may be ignored.
             mRequestedRemotes.remove(transition);
             return false;
         }
         RemoteTransition pendingRemote = mRequestedRemotes.get(transition);
+        if (pendingRemote != null) {
+            final TransitionFilter filter = pendingRemote.getFilter();
+            if (filter != null && !filter.matches(info)) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition doesn't match its "
+                        + "explicit remote for %s", info);
+                try {
+                    pendingRemote.getRemoteTransition().onTransitionConsumed(transition, false);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error delegating onTransitionConsumed()", e);
+                }
+                // The explicit remote isn't interested in this transition, so release it.
+                return false;
+            }
+        }
         if (pendingRemote == null) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition doesn't have "
                     + "explicit remote, search filters for match for %s", info);
@@ -147,18 +172,35 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
 
         if (pendingRemote == null) return false;
 
+        final Transitions.TransitionFinishCallback wrappedCallback;
+        if (addOneOffHandlerLeashes()) {
+            // Provide handler-specific leashes to make sure that animations remain contained to the
+            // scope of ownership of the handler. This is only necessary because we are handing the
+            // animation off to a remote, over which we have no control.
+            mTransitionLeashManager.setUpLeashes(transition, info, startTransaction);
+            wrappedCallback = wct -> {
+                finishCallback.onTransitionFinished(wct);
+                mTransitionLeashManager.cleanUp(transition);
+            };
+        } else {
+            wrappedCallback = finishCallback;
+        }
+
         final RemoteTransition remote = pendingRemote;
         IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
             @Override
             public void onTransitionFinished(WindowContainerTransaction wct,
                     SurfaceControl.Transaction sct) {
-                unhandleDeath(remote.asBinder(), finishCallback);
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                        "Received remote transition finished callback for (#%d)",
+                        info.getDebugId());
+                unhandleDeath(remote.asBinder(), wrappedCallback);
                 if (sct != null) {
                     finishTransaction.merge(sct);
                 }
                 mMainExecutor.execute(() -> {
                     mRequestedRemotes.remove(transition);
-                    finishCallback.onTransitionFinished(wct);
+                    wrappedCallback.onTransitionFinished(wct);
                 });
             }
         };
@@ -169,20 +211,20 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
         final TransitionInfo remoteInfo =
                 remoteStartT == startTransaction ? info : info.localRemoteCopy();
         try {
-            handleDeath(remote.asBinder(), finishCallback);
+            handleDeath(remote.asBinder(), wrappedCallback);
             remote.getRemoteTransition().startAnimation(transition, remoteInfo, remoteStartT, cb);
             // assume that remote will apply the start transaction.
             startTransaction.clear();
-            Transitions.setRunningRemoteTransitionDelegate(remote.getAppThread());
+            Transitions.setRunningRemoteTransitionDelegate(transition);
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error running remote transition.", e);
             if (remoteStartT != startTransaction) {
                 remoteStartT.close();
             }
             startTransaction.apply();
-            unhandleDeath(remote.asBinder(), finishCallback);
+            unhandleDeath(remote.asBinder(), wrappedCallback);
             mRequestedRemotes.remove(transition);
-            mMainExecutor.execute(() -> finishCallback.onTransitionFinished(null /* wct */));
+            mMainExecutor.execute(() -> wrappedCallback.onTransitionFinished(null /* wct */));
         }
         return true;
     }
@@ -218,16 +260,17 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
         final RemoteTransition remoteTransition = mRequestedRemotes.get(mergeTarget);
         if (remoteTransition == null) return;
 
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "   Merge into remote: %s",
-                remoteTransition);
-
         final IRemoteTransition remote = remoteTransition.getRemoteTransition();
         if (remote == null) return;
 
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                "   Requesting merge (#%d) into remote: %s", info.getDebugId(), remoteTransition);
         IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
             @Override
             public void onTransitionFinished(WindowContainerTransaction wct,
                     SurfaceControl.Transaction sct) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Merged (#%d) into remote",
+                        info.getDebugId());
                 // We have merged, since we sent the transaction over binder, the one in this
                 // process won't be cleared if the remote applied it. We don't actually know if the
                 // remote applied the transaction, but applying twice will break surfaceflinger
@@ -259,17 +302,13 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     @Override
     public Transitions.TransitionHandler getHandlerForTakeover(
             @NonNull IBinder transition, @NonNull TransitionInfo info) {
-        if (!returnAnimationFrameworkLongLived()) {
-            return null;
-        }
-
         for (Pair<TransitionFilter, RemoteTransition> registered : mTakeoverFilters) {
             if (registered.first.matches(info)) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                         "Found matching remote to takeover (#%d)", info.getDebugId());
 
-                OneShotRemoteHandler oneShot =
-                        new OneShotRemoteHandler(mMainExecutor, registered.second);
+                OneShotRemoteHandler oneShot = new OneShotRemoteHandler(
+                        mMainExecutor, mTransitionLeashManager, registered.second);
                 oneShot.setTransition(transition);
                 return oneShot;
             }

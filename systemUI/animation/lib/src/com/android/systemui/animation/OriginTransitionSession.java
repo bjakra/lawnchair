@@ -17,6 +17,7 @@
 package com.android.systemui.animation;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.ActivityOptions.LaunchCookie;
@@ -31,12 +32,17 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.window.IRemoteTransition;
 import android.window.RemoteTransition;
+import android.window.TransitionFilter;
 
 import com.android.systemui.animation.OriginRemoteTransition.TransitionPlayer;
 import com.android.systemui.animation.shared.IOriginTransitions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -63,7 +69,7 @@ public class OriginTransitionSession {
     @Nullable private final IOriginTransitions mOriginTransitions;
     private final Predicate<RemoteTransition> mIntentStarter;
     @Nullable private final IRemoteTransition mEntryTransition;
-    @Nullable private final IRemoteTransition mExitTransition;
+    @NonNull private final Map<IRemoteTransition, TransitionFilter> mExitTransitionMap;
     private final AtomicInteger mState = new AtomicInteger(NOT_STARTED);
     @Nullable private RemoteTransition mOriginTransition;
 
@@ -72,12 +78,12 @@ public class OriginTransitionSession {
             @Nullable IOriginTransitions originTransitions,
             Predicate<RemoteTransition> intentStarter,
             @Nullable IRemoteTransition entryTransition,
-            @Nullable IRemoteTransition exitTransition) {
+            @NonNull Map<IRemoteTransition, TransitionFilter> exitTransitionMap) {
         mName = name;
         mOriginTransitions = originTransitions;
         mIntentStarter = intentStarter;
         mEntryTransition = entryTransition;
-        mExitTransition = exitTransition;
+        mExitTransitionMap = exitTransitionMap;
         if (hasExitTransition() && !hasEntryTransition()) {
             throw new IllegalArgumentException(
                     "Entry transition must be supplied if you want to play an exit transition!");
@@ -100,11 +106,23 @@ public class OriginTransitionSession {
         if (hasEntryTransition() && hasExitTransition()) {
             logD("start: starting with entry and exit transition.");
             try {
-                remoteTransition =
-                        mOriginTransition =
-                                mOriginTransitions.makeOriginTransition(
+                if (!mExitTransitionMap.isEmpty()) {
+                    int index = 0;
+                    final List<RemoteTransition> transitions = new ArrayList<>();
+                    for (Map.Entry<IRemoteTransition, TransitionFilter> entry
+                            : mExitTransitionMap.entrySet()) {
+                        transitions.add(new RemoteTransition(
+                                entry.getKey(), null, mName + "-exit:" + index, entry.getValue()));
+                        logD("mapping exit transition[" + index + "]: "
+                                + entry.getKey() + " and filter: " + entry.getValue());
+                        index++;
+                    }
+                    remoteTransition =
+                            mOriginTransition =
+                                    mOriginTransitions.makeOriginTransitions(
                                         new RemoteTransition(mEntryTransition, mName + "-entry"),
-                                        new RemoteTransition(mExitTransition, mName + "-exit"));
+                                        transitions);
+                }
             } catch (Exception e) {
                 logE("Unable to create origin transition!", e);
             }
@@ -165,8 +183,10 @@ public class OriginTransitionSession {
         if (mEntryTransition instanceof OriginRemoteTransition) {
             ((OriginRemoteTransition) mEntryTransition).cancel();
         }
-        if (mExitTransition instanceof OriginRemoteTransition) {
-            ((OriginRemoteTransition) mExitTransition).cancel();
+        for (IRemoteTransition transition : mExitTransitionMap.keySet()) {
+            if (transition instanceof OriginRemoteTransition) {
+                ((OriginRemoteTransition) transition).cancel();
+            }
         }
     }
 
@@ -175,7 +195,7 @@ public class OriginTransitionSession {
     }
 
     private boolean hasExitTransition() {
-        return mOriginTransitions != null && mExitTransition != null;
+        return mOriginTransitions != null && !mExitTransitionMap.isEmpty();
     }
 
     private void setupTransactionQueues() {
@@ -189,8 +209,10 @@ public class OriginTransitionSession {
         if (mEntryTransition != null && mEntryTransition instanceof OriginRemoteTransition) {
             ((OriginRemoteTransition) mEntryTransition).setShellTransactionToken(shellApplyToken);
         }
-        if (mExitTransition != null && mExitTransition instanceof OriginRemoteTransition) {
-            ((OriginRemoteTransition) mExitTransition).setShellTransactionToken(shellApplyToken);
+        for (IRemoteTransition transition : mExitTransitionMap.keySet()) {
+            if (transition instanceof OriginRemoteTransition) {
+                ((OriginRemoteTransition) transition).setShellTransactionToken(shellApplyToken);
+            }
         }
     }
 
@@ -230,10 +252,13 @@ public class OriginTransitionSession {
         private final Context mContext;
         @Nullable private final IOriginTransitions mOriginTransitions;
         @Nullable private Supplier<IRemoteTransition> mEntryTransitionSupplier;
-        @Nullable private Supplier<IRemoteTransition> mExitTransitionSupplier;
+        private final Map<IRemoteTransition, TransitionFilter> mReturnTransitionMap =
+                new HashMap<>();
         private Handler mHandler = new Handler(Looper.getMainLooper());
         private String mName;
         @Nullable private Predicate<RemoteTransition> mIntentStarter;
+
+        @Nullable private IOriginTransitionCallback mOriginTransitionCallback;
 
         /** Create a builder that only supports entry transition. */
         public Builder(Context context) {
@@ -277,6 +302,12 @@ public class OriginTransitionSession {
                     });
         }
 
+        /** Specify a callback that will receive event updates around the transition. */
+        public Builder withCallback(@Nullable  IOriginTransitionCallback callback) {
+            mOriginTransitionCallback = callback;
+            return this;
+        }
+
         private static ActivityOptions createDefaultActivityOptions(
                 @Nullable RemoteTransition transition) {
             ActivityOptions options =
@@ -311,7 +342,8 @@ public class OriginTransitionSession {
 
         /** Add an origin entry transition to the builder. */
         public Builder withEntryTransition(
-                UIComponent entryOrigin, TransitionPlayer entryPlayer) {
+                UIComponent entryOrigin,
+                TransitionPlayer entryPlayer) {
             mEntryTransitionSupplier =
                     () ->
                             new OriginRemoteTransition(
@@ -319,27 +351,64 @@ public class OriginTransitionSession {
                                     /* isEntry= */ true,
                                     entryOrigin,
                                     entryPlayer,
-                                    mHandler);
+                                    mHandler,
+                                    mOriginTransitionCallback);
             return this;
         }
 
         /** Add an exit transition to the builder. */
         public Builder withExitTransition(IRemoteTransition transition) {
-            mExitTransitionSupplier = () -> transition;
+            mReturnTransitionMap.clear();
+            mReturnTransitionMap.put(transition, null);
             return this;
         }
 
         /** Add an origin exit transition to the builder. */
         public Builder withExitTransition(
                 UIComponent exitTarget, TransitionPlayer exitPlayer) {
-            mExitTransitionSupplier =
-                    () ->
-                            new OriginRemoteTransition(
-                                    mContext,
-                                    /* isEntry= */ false,
-                                    exitTarget,
-                                    exitPlayer,
-                                    mHandler);
+            mReturnTransitionMap.clear();
+            mReturnTransitionMap.put(new OriginRemoteTransition(
+                                        mContext,
+                                        /* isEntry= */ false,
+                                        exitTarget,
+                                        exitPlayer,
+                                        mHandler,
+                                        mOriginTransitionCallback), null);
+            return this;
+        }
+
+        /** Add an exit transition/filter to the builder. */
+        public Builder addExitTransitionWithFilter(
+                IRemoteTransition transition,
+                TransitionFilter filter) {
+            if (mReturnTransitionMap.size() == 1
+                    && mReturnTransitionMap.entrySet().contains(null)) {
+                Log.w(TAG, "Exit transition already set using `withExitTransition()` "
+                        + "- ignoring list addition");
+                return this;
+            }
+            mReturnTransitionMap.put(transition, filter);
+            return this;
+        }
+
+        /** Add an exit transition/filter to the builder. */
+        public Builder addExitTransitionWithFilter(
+                UIComponent exitTarget,
+                TransitionPlayer exitPlayer,
+                TransitionFilter filter) {
+            if (mReturnTransitionMap.size() == 1
+                    && mReturnTransitionMap.entrySet().contains(null)) {
+                Log.w(TAG, "Exit transition already set using `withExitTransition()` "
+                        + "- ignoring list addition");
+                return this;
+            }
+            mReturnTransitionMap.put(new OriginRemoteTransition(
+                    mContext,
+                    /* isEntry= */ false,
+                    exitTarget,
+                    exitPlayer,
+                    mHandler,
+                    mOriginTransitionCallback), filter);
             return this;
         }
 
@@ -354,12 +423,17 @@ public class OriginTransitionSession {
             if (mIntentStarter == null) {
                 throw new IllegalArgumentException("No intent, pending intent, or intent starter!");
             }
+
+            final Map<IRemoteTransition, TransitionFilter> returnTransitionMap =
+                    new HashMap<>(mReturnTransitionMap);
+            mReturnTransitionMap.clear();
+
             return new OriginTransitionSession(
                     mName,
                     mOriginTransitions,
                     mIntentStarter,
                     mEntryTransitionSupplier == null ? null : mEntryTransitionSupplier.get(),
-                    mExitTransitionSupplier == null ? null : mExitTransitionSupplier.get());
+                    returnTransitionMap);
         }
     }
 }

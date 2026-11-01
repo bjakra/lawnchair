@@ -44,6 +44,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
 import android.window.TaskSnapshot;
+import android.window.TaskSnapshotManager;
 
 import app.lawnchair.compat.LawnchairQuickstepCompat;
 import com.android.internal.app.IVoiceInteractionManagerService;
@@ -132,12 +133,13 @@ public class ActivityManagerWrapper {
     }
 
     /**
-     * @return the task snapshot for the given {@param taskId}.
+     * @return the task snapshot for the given {@code taskId}.
      */
     public @NonNull ThumbnailData getTaskThumbnail(int taskId, boolean isLowResolution) {
         TaskSnapshot snapshot = null;
         try {
-            snapshot = getService().getTaskSnapshot(taskId, isLowResolution);
+            snapshot = TaskSnapshotManager.getInstance().getTaskSnapshot(
+                    taskId, TaskSnapshotManager.convertRetrieveFlag(isLowResolution));
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to retrieve task snapshot", e);
         }
@@ -157,7 +159,31 @@ public class ActivityManagerWrapper {
     public ThumbnailData takeTaskThumbnail(int taskId) {
         TaskSnapshot snapshot = null;
         try {
-            snapshot = getService().takeTaskSnapshot(taskId, /* updateCache= */ true);
+            snapshot = TaskSnapshotManager.getInstance().takeTaskSnapshot(taskId,
+                    true /* updateCache */);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to take task snapshot", e);
+        }
+        if (snapshot != null) {
+            return ThumbnailData.fromSnapshot(snapshot);
+        } else {
+            return new ThumbnailData();
+        }
+    }
+
+    /**
+     * Requests for a new snapshot to be taken for the given task, stores it in the cache, and
+     * returns a {@link ThumbnailData} with specific resolution as result.
+     */
+    @NonNull
+    public ThumbnailData takeTaskThumbnail(int taskId, boolean lowResolution) {
+        if (!com.android.window.flags.Flags.onlyCacheLowResTaskSnapshot()) {
+            return takeTaskThumbnail(taskId);
+        }
+        TaskSnapshot snapshot = null;
+        try {
+            snapshot = TaskSnapshotManager.getInstance().takeTaskSnapshot(taskId,
+                    true /* updateCache */, lowResolution);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to take task snapshot", e);
         }

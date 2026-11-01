@@ -51,6 +51,7 @@ constructor(
     @ApplicationContext ctx: Context,
     themeManager: ThemeManager,
     private val modelProvider: Provider<LauncherModel>,
+    private val iconChangeTracker: IconChangeTracker,
     private val iconCacheProvider: Provider<IconCache>,
     pluginManagerWrapper: PluginManagerWrapper,
     lifecycle: DaggerSingletonTracker,
@@ -63,8 +64,11 @@ constructor(
 
     private var processor: IconProcessorPlugin? = null
 
-    override fun getApplicationInfoHash(appInfo: ApplicationInfo): String =
-        (appInfo.sourceDir?.hashCode() ?: 0).toString() + " " + appInfo.longVersionCode
+    override fun getApplicationInfoHash(appInfo: ApplicationInfo) =
+        mSystemState.withAdditionalValues(
+            (appInfo.sourceDir?.hashCode() ?: 0).toString(),
+            appInfo.longVersionCode.toString(),
+        )
 
     override fun loadPackageIcon(
         info: PackageItemInfo,
@@ -107,24 +111,24 @@ constructor(
     }
 
     override fun onPluginLoaded(
-        plugin: IconProcessorPlugin?,
-        pluginContext: Context?,
-        manager: PluginLifecycleManager<IconProcessorPlugin>?,
+        plugin: IconProcessorPlugin,
+        pluginContext: Context,
+        manager: PluginLifecycleManager<IconProcessorPlugin>,
     ) {
-        plugin?.setIconChangeNotifier { pkg, userHandle ->
-            modelProvider.get().onAppIconChanged(pkg, userHandle)
+        plugin.setIconChangeNotifier { pkg, userHandle ->
+            iconChangeTracker.notifyIconChanged(pkg, userHandle)
         }
         processor = plugin
         Log.d(TAG, "Plugin connected $plugin")
         MODEL_EXECUTOR.execute {
             iconCacheProvider.get().clearMemoryCache()
-            modelProvider.get().reloadIfActive()
+            modelProvider.get().reloadIfActive("LauncherIconPlugin-load")
         }
     }
 
     override fun onPluginUnloaded(
-        plugin: IconProcessorPlugin?,
-        manager: PluginLifecycleManager<IconProcessorPlugin>?,
+        plugin: IconProcessorPlugin,
+        manager: PluginLifecycleManager<IconProcessorPlugin>,
     ) {
         processor = null
         Log.d(TAG, "Plugin disconnected")

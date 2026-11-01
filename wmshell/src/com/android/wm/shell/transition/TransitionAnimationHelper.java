@@ -26,6 +26,7 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAGS_IS_NON_APP_WINDOW;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
+import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_CLOSE;
@@ -163,6 +164,12 @@ public class TransitionAnimationHelper {
         }
 
         Animation a = null;
+        if (animAttr == R.styleable.WindowAnimation_wallpaperCloseExitAnimation) {
+            // A closing wallpaper doesn't need an animation.
+            if (change.hasFlags(FLAG_IS_WALLPAPER)) {
+                animAttr = 0;
+            }
+        }
         if (animAttr != 0) {
             if (overrideType == ANIM_FROM_STYLE && !isTask) {
                 final TransitionInfo.AnimationOptions.CustomActivityTransition customTransition =
@@ -229,7 +236,7 @@ public class TransitionAnimationHelper {
             boolean hasOpenTransit = false;
             for (TransitionInfo.Change change : info.getChanges()) {
                 if ((change.getTaskInfo() != null || change.hasFlags(FLAG_IS_DISPLAY))
-                        && !TransitionUtil.isOrderOnly(change)) {
+                        && !TransitionUtil.isStationary(change)) {
                     // This isn't an activity-level transition.
                     return type;
                 }

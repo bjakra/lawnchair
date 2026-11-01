@@ -24,7 +24,6 @@ import android.content.res.Resources
 import android.graphics.Point
 import android.os.SystemProperties
 import androidx.compose.ui.graphics.toArgb
-import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.desktopmode.CaptionState
 import com.android.wm.shell.desktopmode.WindowDecorCaptionRepository
@@ -117,17 +116,17 @@ class AppToWebEducationController(
     }
 
     private inline fun runIfEducationFeatureEnabled(block: () -> Unit) {
-        if (
-            desktopState.canEnterDesktopMode &&
-                Flags.enableDesktopWindowingAppToWebEducationIntegration()
-        ) {
+        if (desktopState.canEnterDesktopMode) {
             block()
         }
     }
 
-    private fun showEducation(captionState: CaptionState, colorScheme: EducationColorScheme) {
+    private suspend fun showEducation(
+        captionState: CaptionState,
+        colorScheme: EducationColorScheme,
+    ) {
         val educationGlobalCoordinates: Point
-        val taskId: Int
+        val taskInfo: RunningTaskInfo
         when (captionState) {
             is CaptionState.AppHandle -> {
                 val appHandleBounds = captionState.globalAppHandleBounds
@@ -135,7 +134,7 @@ class AppToWebEducationController(
                     loadDimensionPixelSize(R.dimen.desktop_windowing_education_promo_width)
                 educationGlobalCoordinates =
                     Point(appHandleBounds.centerX() - educationWidth / 2, appHandleBounds.bottom)
-                taskId = captionState.runningTaskInfo.taskId
+                taskInfo = captionState.runningTaskInfo
             }
 
             is CaptionState.AppHeader -> {
@@ -143,7 +142,7 @@ class AppToWebEducationController(
                     captionState.runningTaskInfo.configuration.windowConfiguration.bounds
                 educationGlobalCoordinates =
                     Point(taskBounds.left, captionState.globalAppChipBounds.bottom)
-                taskId = captionState.runningTaskInfo.taskId
+                taskInfo = captionState.runningTaskInfo
             }
 
             else -> return
@@ -156,13 +155,14 @@ class AppToWebEducationController(
                 educationColorScheme = colorScheme,
                 viewGlobalCoordinates = educationGlobalCoordinates,
                 educationText = getString(R.string.desktop_windowing_app_to_web_education_text),
+                educationImage = R.raw.app_to_web_education_image,
                 widthId = R.dimen.desktop_windowing_education_promo_width,
                 heightId = R.dimen.desktop_windowing_education_promo_height,
             )
 
         windowingEducationViewController.showEducation(
             viewConfig = educationConfig,
-            taskId = taskId,
+            taskInfo = taskInfo,
         )
     }
 

@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -37,6 +38,7 @@ import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowRelayoutResult;
@@ -47,6 +49,7 @@ import android.window.TaskSnapshot;
 
 import com.android.internal.protolog.ProtoLog;
 import com.android.internal.view.BaseIWindow;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
@@ -70,6 +73,10 @@ public class TaskSnapshotWindow {
     private final int mOrientationOnCreation;
 
     private final boolean mHasImeSurface;
+    private final WindowManager.LayoutParams mLayoutParams;
+    private SurfaceControl mRootSurface;
+
+    private int mSeqId = -1;
 
     static TaskSnapshotWindow create(StartingWindowInfo info, IBinder appToken,
             TaskSnapshot snapshot, ShellExecutor splashScreenExecutor,
@@ -86,9 +93,10 @@ public class TaskSnapshotWindow {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
                 "create taskSnapshot surface for task: %d", taskId);
 
+        final int format = snapshot.getHardwareBufferFormat();
         final WindowManager.LayoutParams layoutParams = SnapshotDrawerUtils.createLayoutParameters(
                 info, TITLE_FORMAT + taskId, TYPE_APPLICATION_STARTING,
-                snapshot.getHardwareBuffer().getFormat(), appToken);
+                format, appToken);
         if (layoutParams == null) {
             Slog.e(TAG, "TaskSnapshotWindow no layoutParams");
             return null;
@@ -98,7 +106,6 @@ public class TaskSnapshotWindow {
         final int displayId = runningTaskInfo.displayId;
 
         final IWindowSession session = WindowManagerGlobal.getWindowSession();
-        final SurfaceControl surfaceControl = new SurfaceControl();
         final ClientWindowFrames tmpFrames = new ClientWindowFrames();
 
         final InsetsSourceControl.Array tmpControls = new InsetsSourceControl.Array();
@@ -109,7 +116,7 @@ public class TaskSnapshotWindow {
 
         final TaskSnapshotWindow snapshotSurface = new TaskSnapshotWindow(
                 snapshot, taskDescription, orientation,
-                clearWindowHandler, splashScreenExecutor);
+                clearWindowHandler, splashScreenExecutor, layoutParams);
         final Window window = snapshotSurface.mWindow;
 
         final InsetsState tmpInsetsState = new InsetsState();
@@ -129,6 +136,34 @@ public class TaskSnapshotWindow {
         } catch (RemoteException e) {
             snapshotSurface.clearWindowSynced();
         }
+
+        if (WindowManager.useClientSurface()) {
+            final SurfaceControl surfaceControl = new SurfaceControl.Builder()
+                    .setName(layoutParams.getTitle() + " - task-snapshot-surface")
+                    .setBLASTLayer().setNotAddToRoot()
+                    .setHidden(false)
+                    .setFormat(format)
+                    .setCallsite("TaskSnapshotWindow#create").build();
+            final Runnable reportDrawn = () -> {
+                try {
+                    Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#relayoutAsync2");
+                    snapshotSurface.mSession.relayoutAsync2(snapshotSurface.mWindow, layoutParams,
+                            -1, -1, View.VISIBLE, 0, 0, 0, surfaceControl);
+                    snapshotSurface.mHasDrawn = true;
+                    snapshotSurface.reportDrawn();
+                } catch (Throwable e) {
+                    snapshotSurface.clearWindowSynced();
+                } finally {
+                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                }
+            };
+            SnapshotDrawerUtils.drawSnapshotOnSurface(layoutParams, surfaceControl, snapshot,
+                    info.taskBounds, reportDrawn);
+            snapshotSurface.mRootSurface = surfaceControl;
+            return snapshotSurface.mHasDrawn ? snapshotSurface : null;
+        }
+
+        final SurfaceControl surfaceControl = new SurfaceControl();
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#relayout");
             final WindowRelayoutResult outRelayoutResult = new WindowRelayoutResult(tmpFrames,
@@ -148,8 +183,10 @@ public class TaskSnapshotWindow {
         }
 
         SnapshotDrawerUtils.drawSnapshotOnSurface(layoutParams, surfaceControl, snapshot,
-                info.taskBounds, true /* releaseAfterDraw */);
+                info.taskBounds,
+                !Flags.onlyCacheLowResTaskSnapshot() /* releaseAfterDraw */);
         snapshotSurface.mHasDrawn = true;
+        snapshotSurface.mRootSurface = surfaceControl;
         snapshotSurface.reportDrawn();
 
         return snapshotSurface;
@@ -157,7 +194,7 @@ public class TaskSnapshotWindow {
 
     public TaskSnapshotWindow(TaskSnapshot snapshot, TaskDescription taskDescription,
             int currentOrientation, Runnable clearWindowHandler,
-            ShellExecutor splashScreenExecutor) {
+            ShellExecutor splashScreenExecutor, WindowManager.LayoutParams layoutParams) {
         mSplashScreenExecutor = splashScreenExecutor;
         mSession = WindowManagerGlobal.getWindowSession();
         mWindow = new Window(this);
@@ -167,6 +204,16 @@ public class TaskSnapshotWindow {
         mOrientationOnCreation = currentOrientation;
         mClearWindowHandler = clearWindowHandler;
         mHasImeSurface = snapshot.hasImeSurface();
+        mLayoutParams = layoutParams;
+    }
+
+    void redrawSnapshot(@NonNull TaskSnapshot snapshot, @NonNull Rect taskBounds) {
+        if (mRootSurface == null || !mRootSurface.isValid()) {
+            return;
+        }
+        SnapshotDrawerUtils.drawSnapshotOnSurface(mLayoutParams, mRootSurface, snapshot,
+                taskBounds, false /* releaseAfterDraw */);
+        mRootSurface.release();
     }
 
     int getBackgroundColor() {
@@ -178,6 +225,9 @@ public class TaskSnapshotWindow {
     }
 
     void removeImmediately() {
+        if (mRootSurface != null && mRootSurface.isValid()) {
+            mRootSurface.release();
+        }
         try {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
                     "Removing taskSnapshot surface, mHasDrawn=%b", mHasDrawn);
@@ -196,7 +246,8 @@ public class TaskSnapshotWindow {
 
     private void reportDrawn() {
         try {
-            mSession.finishDrawing(mWindow, null /* postDrawTransaction */, Integer.MAX_VALUE);
+            mSession.finishDrawing(mWindow, null /* postDrawTransaction */,
+                    ViewRootImpl.NoPreloadHolder.sAlwaysSeqId ? mSeqId : Integer.MAX_VALUE);
         } catch (RemoteException e) {
             clearWindowSynced();
         }
@@ -226,8 +277,17 @@ public class TaskSnapshotWindow {
                     // ASAP as we are going to wait on the new window in any case to unfreeze
                     // the screen, and the starting window is not needed anymore.
                     snapshot.clearWindowSynced();
-                } else if (reportDraw) {
+                } else if (!ViewRootImpl.NoPreloadHolder.sAlwaysSeqId && reportDraw) {
                     if (snapshot.mHasDrawn) {
+                        snapshot.reportDrawn();
+                    }
+                }
+                if (ViewRootImpl.NoPreloadHolder.sAlwaysSeqId
+                        && layout.syncSeqId > snapshot.mSeqId) {
+                    snapshot.mSeqId = layout.syncSeqId;
+                    if (snapshot.mHasDrawn
+                            // Consider "cleared" as drawn (since it has "drawn emptiness")
+                            || clearSnapshot) {
                         snapshot.reportDrawn();
                     }
                 }
