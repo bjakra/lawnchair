@@ -15,12 +15,12 @@
  */
 package com.android.launcher3.hybridhotseat;
 
+import app.lawnchair.ui.preferences.navigation.Predictions;
+import app.lawnchair.ui.preferences.PreferenceActivity;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
 import static com.android.launcher3.LauncherAnimUtils.getScaleProperty;
 import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.anim.AnimatorListeners.forSuccessCallback;
-import static com.android.launcher3.hybridhotseat.HotseatEduController.getLawnchairSettingsIntent;
-import static com.android.launcher3.hybridhotseat.HotseatEduController.getSettingsIntent;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_HOTSEAT_PREDICTION_PINNED;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_HOTSEAT_RANKED;
 import static com.android.launcher3.util.OnboardingPrefs.HOTSEAT_LONGPRESS_TIP_SEEN;
@@ -242,6 +242,11 @@ public class HotseatPredictionController implements
 
     public void dump(String prefix, PrintWriter writer) {
         mHotseatOrganizer.dump(prefix, writer);
+    }
+
+    public static Intent getLawnchairSettingsIntent(Context context) {
+        return PreferenceActivity.createIntent(context, Predictions.INSTANCE)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     }
 
     static Intent getSettingsIntent() {

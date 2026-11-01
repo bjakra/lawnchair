@@ -15,6 +15,8 @@
  */
 package com.android.launcher3.model
 
+import android.util.SparseIntArray
+import com.android.launcher3.util.IntArray as LauncherIntArray
 import com.android.launcher3.model.data.CollectionInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
@@ -25,6 +27,15 @@ import java.util.function.Predicate
 
 /** Interface for handling model updates. */
 interface IModelWriter {
+    /** Lawnchair: persists the workspace page order synchronously. */
+    fun persistWorkspaceScreenOrderSync(screenOrder: LauncherIntArray?)
+
+    /**
+     * Lawnchair: remaps the screen ids of all desktop items. [onComplete] runs on the main thread
+     * after the item callbacks are dispatched.
+     */
+    fun moveWorkspaceScreensInDatabase(screenIdMap: SparseIntArray?, onComplete: Runnable?)
+
 
     /**
      * A log of changes made to the model.

@@ -16,7 +16,6 @@
 package com.android.launcher3.taskbar;
 
 import static com.android.launcher3.Flags.enableTaskbarUiThread;
-import static com.android.launcher3.Flags.syncAppLaunchWithTaskbarStash;
 import static com.android.launcher3.QuickstepTransitionManager.TASKBAR_TO_APP_DURATION;
 import static com.android.launcher3.QuickstepTransitionManager.TRANSIENT_TASKBAR_TRANSITION_DURATION;
 import static com.android.launcher3.QuickstepTransitionManager.getTaskbarToHomeDuration;

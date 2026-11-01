@@ -19,7 +19,6 @@ package com.android.launcher3.folder;
 import static android.text.TextUtils.isEmpty;
 
 import static com.android.launcher3.Flags.blurOnMoreSurfaces;
-import static com.android.launcher3.Flags.enableLauncherVisualRefresh;
 import static com.android.launcher3.Flags.enableWorkspaceSelection;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
 import static com.android.launcher3.LauncherAnimUtils.SPRING_LOADED_EXIT_DELAY;

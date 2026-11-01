@@ -45,6 +45,11 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
+import android.graphics.Point;
+import com.android.launcher3.dragndrop.FolderAdaptiveIcon;
+import com.android.launcher3.icons.cache.CachedObjectCachingLogic;
+import com.android.launcher3.views.ActivityContext;
+import com.android.launcher3.widget.PendingAddShortcutInfo;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.RectF;
@@ -203,7 +208,8 @@ public final class Utilities {
         if (info instanceof PendingAddShortcutInfo) {
             ShortcutConfigActivityInfo activityInfo = ((PendingAddShortcutInfo) info).getActivityInfo(context);
             outObj[0] = activityInfo;
-            return activityInfo.getFullResIcon(appState.getIconCache());
+            return activityInfo.getFullResIcon(appState.getIconCache().getIconLoadRequest(
+                    activityInfo, CachedObjectCachingLogic.INSTANCE));
         }
         if (info.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION) {
             LauncherActivityInfo activityInfo = context.getSystemService(LauncherApps.class)
@@ -228,8 +234,9 @@ public final class Utilities {
                 return null;
             } else {
                 outObj[0] = si.get(0);
-                BitmapInfo bi = CacheableShortcutCachingLogic.INSTANCE.loadIcon(
-                    context, appState.getIconCache(), new CacheableShortcutInfo(si.get(0), context));
+                BitmapInfo bi = appState.getIconCache().getIconLoadRequest(
+                    new CacheableShortcutInfo(si.get(0), context),
+                    CacheableShortcutCachingLogic.INSTANCE).evaluate();
                 return bi.newIcon(context);
             }
         } else if (info.itemType == LauncherSettings.Favorites.ITEM_TYPE_FOLDER) {

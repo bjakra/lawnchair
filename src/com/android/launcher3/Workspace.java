@@ -313,6 +313,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     private boolean mDisallowPagedViewInterceptForIconSwipe = false;
 
     private boolean mIsDownOverHorizontalScrollContent;
+    private float mXDown;
+    private float mYDown;
+    private View mFirstPagePinnedItem;
+    private boolean mIsEventOverFirstPagePinnedItem;
 
     final static float START_DAMPING_TOUCH_SLOP_ANGLE = (float) Math.PI / 6;
     final static float MAX_SWIPE_ANGLE = (float) Math.PI / 3;
@@ -799,6 +803,11 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         // Disable all layout transitions before removing all pages to ensure that we don't get the
         // transition animations competing with us changing the scroll when we add pages
         disableLayoutTransitions();
+
+        // Recycle the first page pinned item
+        if (mFirstPagePinnedItem != null && mFirstPagePinnedItem.getParent() != null) {
+            ((ViewGroup) mFirstPagePinnedItem.getParent()).removeView(mFirstPagePinnedItem);
+        }
 
         // Remove the pages and clear the screen models
         removeAllViews();
@@ -1466,6 +1475,22 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         float x = ev.getX();
         float y = ev.getY();
 
+        mXDown = x;
+        mYDown = y;
+        if (mFirstPagePinnedItem != null) {
+            final float[] tempFXY = new float[] {x, y};
+            Utilities.mapCoordInSelfToDescendant(mFirstPagePinnedItem, this, tempFXY);
+            mIsEventOverFirstPagePinnedItem = mFirstPagePinnedItem.getLeft() <= tempFXY[0]
+                    && mFirstPagePinnedItem.getRight() >= tempFXY[0]
+                    && mFirstPagePinnedItem.getTop() <= tempFXY[1]
+                    && mFirstPagePinnedItem.getBottom() >= tempFXY[1];
+        } else {
+            mIsEventOverFirstPagePinnedItem = false;
+        }
+        if (!mIsEventOverFirstPagePinnedItem) {
+            mIsEventOverFirstPagePinnedItem = isEventOverQsb(mXDown, mYDown);
+        }
+
         mIsDownOverHorizontalScrollContent = false;
         int childCount = getChildCount();
         if (childCount <= 0) return;
@@ -1480,9 +1505,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 targetPage = page;
                 break;
             }
-        }
-        if (!mIsEventOverFirstPagePinnedItem) {
-            mIsEventOverFirstPagePinnedItem = isEventOverQsb(mXDown, mYDown);
         }
         if (targetPage == null) return;
 
@@ -1524,7 +1546,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
     @Override
     protected void determineScrollingStart(MotionEvent ev) {
-        if (!isFinishedSwitchingState() || mIsDownOverHorizontalScrollContent) return;
+        if (!isFinishedSwitchingState() || mIsDownOverHorizontalScrollContent
+                || mIsEventOverFirstPagePinnedItem) {
+            return;
+        }
 
         float deltaX = ev.getX() - getDownMotionX();
         float absDeltaX = Math.abs(deltaX);
@@ -3202,7 +3227,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         if (mFirstPagePinnedItem == null) {
             return false;
         }
-        getViewBoundsRelativeToWorkspace(hotseat.getShortcutsAndWidgets(), mTempRect);
+        getViewBoundsRelativeToWorkspace(mFirstPagePinnedItem, mTempRect);
         return mTempRect.contains(dragObject.x, dragObject.y);
     }
 

@@ -30,7 +30,6 @@ import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.launcher3.util.ScrollableLayoutManager.PREDICTIVE_BACK_MIN_SCALE;
 import static com.android.launcher3.views.RecyclerViewFastScroller.FastScrollerLocation.ALL_APPS_SCROLLER;
-import static com.android.window.flags2.Flags.predictiveBackThreeButtonNav;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -382,6 +381,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
             mSearchUiDelegate.onInitializeSearchBar();
         }
         mActivityContext.addOnDeviceProfileChangeListener(this);
+        updateBottomSheetBackgroundColor();
         if (Utilities.ATLEAST_S) {
             java.util.function.Consumer<Boolean> listener = enabled -> {
                 if (updateBottomSheetBackgroundColor(enabled)) {
@@ -950,9 +950,25 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
     }
 
     int getBackgroundColor() {
-        return isBackgroundBlurEnabled()
+        return mCachedBottomSheetBgColor;
+    }
+
+    // LC-Note: Applies the user's drawer colour on top of the default for the blur state.
+    private boolean updateBottomSheetBackgroundColor() {
+        return updateBottomSheetBackgroundColor(isBackgroundBlurEnabled());
+    }
+
+    // LC-Note: For listener to avoid querying stale value.
+    private boolean updateBottomSheetBackgroundColor(boolean blurEnabled) {
+        int defaultColor = blurEnabled
                 ? mBottomSheetBackgroundColorOverBlur
                 : mBottomSheetBackgroundColorBlurFallback;
+        int newColor = LawnchairUtilsKt.getAllAppsBackgroundColor(mActivityContext, defaultColor);
+        if (mCachedBottomSheetBgColor != newColor) {
+            mCachedBottomSheetBgColor = newColor;
+            return true;
+        }
+        return false;
     }
 
     boolean isBackgroundBlurEnabled() {

@@ -652,6 +652,7 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
 
     public void drawDot(Canvas canvas) {
         if (!mForceHideDot && ((mDotInfo != null && mDotInfo.hasDot()) || mDotScale > 0)) {
+            mDotParams.setDotColor(mBackground.getDotColor());
             Rect iconBounds = mDotParams.iconBounds;
             // FolderIcon draws the icon to be top-aligned (with padding) & horizontally-centered
             int iconSize = mActivity.getDeviceProfile().getWorkspaceProfile().getIconSizePx();

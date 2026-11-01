@@ -1729,13 +1729,13 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                 case "TextClock", "android.widget.TextClock" -> {
                     TextClock tc = new TextClock(context, attrs);
                     tc.setClockEventDelegate(
-                            AsyncClockEventDelegate.INSTANCE.get(this).asClockEventDelegate());
+                            AsyncClockEventDelegate.INSTANCE.get(this));
                     return tc;
                 }
                 case "AnalogClock", "android.widget.AnalogClock" -> {
                     AnalogClock ac = new AnalogClock(context, attrs);
                     ac.setClockEventDelegate(
-                            AsyncClockEventDelegate.INSTANCE.get(this).asClockEventDelegate());
+                            AsyncClockEventDelegate.INSTANCE.get(this));
                     return ac;
                 }
             }

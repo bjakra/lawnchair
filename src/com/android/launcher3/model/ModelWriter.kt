@@ -15,6 +15,9 @@
  */
 package com.android.launcher3.model
 
+import com.android.launcher3.util.IntArray as LauncherIntArray
+import com.android.launcher3.LauncherPrefs
+import android.util.SparseIntArray
 import android.content.ContentValues
 import android.content.Context
 import android.util.Log
@@ -478,6 +481,75 @@ open class ModelWriter(
         reason: String?,
     ) {
         execute { it.deleteWidgetInfo(info, holder, reason) }
+    }
+
+    override fun persistWorkspaceScreenOrderSync(screenOrder: LauncherIntArray?) {
+        if (screenOrder == null || screenOrder.isEmpty) return
+        LauncherPrefs.get(context)
+            .putSync(LauncherPrefs.WORKSPACE_SCREEN_ORDER.to(screenOrder.toConcatString()))
+    }
+
+    override fun moveWorkspaceScreensInDatabase(screenIdMap: SparseIntArray?, onComplete: Runnable?) {
+        if (screenIdMap == null || screenIdMap.size() == 0) {
+            onComplete?.let(Executors.MAIN_EXECUTOR::execute)
+            return
+        }
+        newModelTask(
+                Runnable {
+                    try {
+                        model.modelDbController.newTransaction().use { t ->
+                            val desktop = "${Favorites.CONTAINER}=${Favorites.CONTAINER_DESKTOP}"
+                            // First pass to temporary ids to avoid collisions in cycles.
+                            for (i in 0 until screenIdMap.size()) {
+                                val values = ContentValues()
+                                values.put(Favorites.SCREEN, Int.MIN_VALUE + i)
+                                model.modelDbController.update(
+                                    values,
+                                    "$desktop AND ${Favorites.SCREEN}=${screenIdMap.keyAt(i)}",
+                                    null,
+                                )
+                            }
+                            // Second pass to final ids.
+                            for (i in 0 until screenIdMap.size()) {
+                                val values = ContentValues()
+                                values.put(Favorites.SCREEN, screenIdMap.valueAt(i))
+                                model.modelDbController.update(
+                                    values,
+                                    "$desktop AND ${Favorites.SCREEN}=${Int.MIN_VALUE + i}",
+                                    null,
+                                )
+                            }
+                            t.commit()
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to remap workspace screens", e)
+                        onComplete?.let(Executors.MAIN_EXECUTOR::execute)
+                        return@Runnable
+                    }
+
+                    val updatedItems = ArrayList<ItemInfo>()
+                    synchronized(bgDataModel) {
+                        for (item in bgDataModel.itemsIdMap) {
+                            if (item.container != Favorites.CONTAINER_DESKTOP) continue
+                            val newScreenId = screenIdMap.get(item.screenId, item.screenId)
+                            if (newScreenId != item.screenId) {
+                                item.screenId = newScreenId
+                                updatedItems.add(item)
+                            }
+                        }
+                        if (updatedItems.isNotEmpty()) {
+                            bgDataModel.updateItems(updatedItems, modificationSource)
+                        }
+                    }
+                    if (updatedItems.isNotEmpty()) {
+                        val changeLog = ChangeLog()
+                        changeLog.itemsModified.addAll(updatedItems)
+                        launcherStateNotifier.notifyModelChanged(changeLog, owner)
+                    }
+                    onComplete?.let(Executors.MAIN_EXECUTOR::execute)
+                }
+            )
+            .executeOnModelThread()
     }
 
     private abstract inner class ModelTask : Runnable {

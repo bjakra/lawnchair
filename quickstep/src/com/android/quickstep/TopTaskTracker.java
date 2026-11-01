@@ -27,7 +27,6 @@ import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.launcher3.BuildConfig.DEBUG;
 import static com.android.launcher3.statehandlers.DesktopVisibilityController.INACTIVE_DESK_ID;
-import static com.android.quickstep.fallback.window.RecentsWindowFlags.enableOverviewOnConnectedDisplays;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_TYPE_A;
 import static com.android.wm.shell.Flags.enableFlexibleSplit;

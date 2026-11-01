@@ -142,8 +142,6 @@ public class TaskbarManagerImpl {
     private static final Uri NAV_BAR_KIDS_MODE = Settings.Secure.getUriFor(
             Settings.Secure.NAV_BAR_KIDS_MODE);
 
-    private static final LooperExecutor TASKBAR_UI_THREAD =
-            new LooperExecutor("TASKBAR_UI_THREAD", THREAD_PRIORITY_FOREGROUND);
 
     private final Context mBaseContext;
     private final int mPrimaryDisplayId;

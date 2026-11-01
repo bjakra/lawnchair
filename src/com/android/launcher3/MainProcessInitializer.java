@@ -36,7 +36,6 @@ import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.graphics.BitmapCreationCheck;
 import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.util.LockedUserState;
-import com.android.launcher3.util.ResourceBasedOverride;
 import javax.inject.Inject;
 
 import org.chickenhook.restrictionbypass.Unseal;

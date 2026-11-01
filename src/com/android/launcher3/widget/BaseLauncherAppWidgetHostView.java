@@ -16,6 +16,8 @@
 
 package com.android.launcher3.widget;
 
+import app.lawnchair.AccentColorExtractor;
+
 import android.content.Context;
 import android.graphics.Outline;
 import android.graphics.Rect;
@@ -73,7 +75,7 @@ public abstract class BaseLauncherAppWidgetHostView extends NavigableAppWidgetHo
 
         mInflater = LayoutInflater.from(context);
         mEnforcedCornerRadius = RoundedCornerEnforcement.computeEnforcedRadius(getContext());
-        mColorExtractor = LocalColorExtractor.newInstance(getContext());
+        mColorExtractor = new AccentColorExtractor(getContext());
     }
 
     @Override

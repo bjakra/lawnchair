@@ -22,7 +22,6 @@ import androidx.annotation.MainThread;
 
 import com.android.launcher3.Utilities;
 import java.util.Random;
-import kotlin.random.Random;
 import java.util.function.Supplier;
 
 /**

@@ -79,8 +79,6 @@ import static com.android.launcher3.folder.FolderGridOrganizer.createFolderGridO
 import static com.android.launcher3.icons.BitmapRenderer.createHardwareBitmap;
 import static com.android.launcher3.keyboard.KeyboardStateManager.KeyboardState.HIDE;
 import static com.android.launcher3.keyboard.KeyboardStateManager.KeyboardState.SHOW;
-import static com.android.launcher3.logging.KeyboardStateManager.KeyboardState.HIDE;
-import static com.android.launcher3.logging.KeyboardStateManager.KeyboardState.SHOW;
 import static com.android.launcher3.logging.StatsLogManager.EventEnum;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_BACKGROUND;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_HOME;
@@ -2698,7 +2696,7 @@ public class Launcher extends StatefulActivity<LauncherState>
      */
     public SparseArray<ItemInfo> getPinnedItems() {
         SparseArray<ItemInfo> items = new SparseArray<>();
-        mapOverCellLayouts(new CellLayout[]{getHotseat()}, (info, view) -> {
+        getHotseat().mapOverItems((info, view) -> {
             // Always return false to make sure all items in the hotseat are checked.
             if (info == null) return false;
             if (info.isPredictedItem()) return false;

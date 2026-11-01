@@ -27,7 +27,6 @@ import android.view.ViewRootImpl;
 
 import androidx.annotation.NonNull;
 import com.android.launcher3.Utilities;
-import com.android.quickstep.RemoteAnimationTargets.ReleaseCheck;
 import com.android.quickstep.SurfaceReleaseCheck;
 
 import app.lawnchair.compat.LawnchairQuickstepCompat;

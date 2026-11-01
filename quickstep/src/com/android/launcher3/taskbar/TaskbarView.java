@@ -181,10 +181,6 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         return mIgnoreTaskbarIconCount;
     }
 
-    public int getIgnoreTaskbarIconCount() {
-        return mIgnoreTaskbarIconCount;
-    }
-
     // TODO: clean it up in follow up cl with removal of taskbar icon alignment.
     // Only used for edge of 3 button navigation mode, where we need to hide icons which go
     // beyond the bounds.

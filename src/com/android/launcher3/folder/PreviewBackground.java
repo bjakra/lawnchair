@@ -66,6 +66,13 @@ import app.lawnchair.util.LawnchairUtilsKt;
  * information, handles drawing, and animation (accept state <--> rest state).
  */
 public class PreviewBackground extends DelegatedCellDrawing {
+    private int mDotColor;
+
+    /** Lawnchair: the colour chosen for folder notification dots. */
+    public int getDotColor() {
+        return mDotColor;
+    }
+
 
     private static final boolean DRAW_SHADOW = false;
     private static final boolean DRAW_STROKE = false;

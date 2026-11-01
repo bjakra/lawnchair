@@ -542,3 +542,7 @@ licensee {
     bundleAndroidAsset = true
     androidAssetReportPath = 'licenses.json'
 }
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ['-Xmaxerrs', '5000']
+}

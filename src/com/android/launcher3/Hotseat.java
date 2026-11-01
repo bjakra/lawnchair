@@ -35,6 +35,7 @@ import android.graphics.drawable.InsetDrawable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
@@ -298,7 +299,7 @@ public class Hotseat extends FrameLayout implements Insettable {
     public int getCellYFromOrder(int rank) {
         if (mHasVerticalHotseat) {
             CellLayout page = getCurrentPageLayout();
-            int countY = page != null ? page.getCountY() : mActivity.getDeviceProfile().numShownHotseatIcons;
+            int countY = page != null ? page.getCountY() : mActivity.getDeviceProfile().getHotseatProfile().getNumShownIcons();
             return countY - (rank + 1);
         }
         DeviceProfile dp = mActivity.getDeviceProfile();

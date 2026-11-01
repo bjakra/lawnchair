@@ -33,6 +33,17 @@ import java.util.function.Predicate
  * allowing tests to verify the exact sequence of mutations a client attempts to execute.
  */
 class FakeModelWriter : IModelWriter {
+    override fun persistWorkspaceScreenOrderSync(
+        screenOrder: com.android.launcher3.util.IntArray?
+    ) {}
+
+    override fun moveWorkspaceScreensInDatabase(
+        screenIdMap: android.util.SparseIntArray?,
+        onComplete: Runnable?,
+    ) {
+        onComplete?.run()
+    }
+
 
     /** A fake notifier that records UI state changes. */
     val notifier = FakeLauncherUiStateNotifier()

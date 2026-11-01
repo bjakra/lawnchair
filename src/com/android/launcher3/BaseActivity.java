@@ -113,6 +113,7 @@ public abstract class BaseActivity extends Activity implements ActivityContext {
     private final SavedStateRegistryController mSavedStateRegistryController =
             SavedStateRegistryController.create(this);
     private final LifecycleRegistry mLifecycleRegistry = new LifecycleRegistry(this);
+    private final LifecycleHelper mLifecycleHelper;
     private final WeakCleanupSet mCleanupSet = new WeakCleanupSet(this, getUiExecutor());
 
     protected volatile DeviceProfile mDeviceProfile;
@@ -206,8 +207,9 @@ public abstract class BaseActivity extends Activity implements ActivityContext {
 
     public BaseActivity() {
         mSavedStateRegistryController.performAttach();
-        registerActivityLifecycleCallbacks(
-                new LifecycleHelper(this, mSavedStateRegistryController, mLifecycleRegistry));
+        mLifecycleHelper =
+                new LifecycleHelper(this, mSavedStateRegistryController, mLifecycleRegistry);
+        registerActivityLifecycleCallbacks(mLifecycleHelper);
         TestInformationHandler.trackUiSurface(this);
     }
 

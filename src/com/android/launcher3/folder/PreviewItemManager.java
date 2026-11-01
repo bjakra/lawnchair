@@ -33,7 +33,6 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.util.FloatProperty;
 import android.util.Log;
 import android.view.View;
 
@@ -70,20 +69,6 @@ public class PreviewItemManager {
 
     private static final String TAG = "PreviewItemManager";
 
-    private static final FloatProperty<PreviewItemManager> CURRENT_PAGE_ITEMS_TRANS_X =
-            new FloatProperty<PreviewItemManager>("currentPageItemsTransX") {
-                @Override
-                public void setValue(PreviewItemManager manager, float v) {
-                    manager.mCurrentPageItemsTransX = v;
-                    manager.onParamsChanged();
-                }
-
-                @Override
-                public Float get(PreviewItemManager manager) {
-                    return manager.mCurrentPageItemsTransX;
-                }
-            };
-
     private final Context mContext;
     private final FolderIcon mIcon;
     @VisibleForTesting
@@ -110,7 +95,6 @@ public class PreviewItemManager {
         mIcon = icon;
         mIconSize = ActivityContext.lookupContext(
                 mContext).getDeviceProfile().getFolderProfile().getChildIconSizePx();
-        mClipThreshold = dpToPx(1f);
     }
 
     /**
@@ -204,19 +188,8 @@ public class PreviewItemManager {
         // The items are drawn in coordinates relative to the preview offset
         PreviewBackground bg = mIcon.getFolderBackground();
         Path clipPath = bg.getClipPath().getPath();
-        float firstPageItemsTransX = 0;
-        if (mShouldSlideInFirstPage) {
-            PointF firstPageOffset = new PointF(bg.basePreviewOffsetX + mCurrentPageItemsTransX,
-                    bg.basePreviewOffsetY);
-            boolean shouldClip = mCurrentPageItemsTransX > mClipThreshold;
-            drawParams(canvas, mCurrentPageParams, firstPageOffset, shouldClip, clipPath);
-            firstPageItemsTransX = -ITEM_SLIDE_IN_OUT_DISTANCE_PX + mCurrentPageItemsTransX;
-        }
-
-        PointF firstPageOffset = new PointF(bg.basePreviewOffsetX + firstPageItemsTransX,
-                bg.basePreviewOffsetY);
-        boolean shouldClipFirstPage = firstPageItemsTransX < -mClipThreshold;
-        drawParams(canvas, mFirstPageParams, firstPageOffset, shouldClipFirstPage, clipPath);
+        PointF firstPageOffset = new PointF(bg.basePreviewOffsetX, bg.basePreviewOffsetY);
+        drawParams(canvas, mFirstPageParams, firstPageOffset, false, clipPath);
         canvas.restoreToCount(saveCount);
     }
 

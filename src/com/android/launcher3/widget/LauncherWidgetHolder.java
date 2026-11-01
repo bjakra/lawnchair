@@ -20,7 +20,6 @@ import static android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID;
 
 import static com.android.launcher3.BuildConfigs.WIDGETS_ENABLED;
 import static com.android.launcher3.BuildConfigs.WIDGETS_ENABLED;
-import static com.android.launcher3.Flags.enableWorkspaceInflation;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.widget.LauncherAppWidgetProviderInfo.fromProviderInfo;
 import static com.android.launcher3.widget.ListenableAppWidgetHost.getWidgetHolderExecutor;
@@ -37,6 +36,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.util.SparseArray;
 import android.widget.Toast;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -51,7 +51,6 @@ import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.util.ActivityOptionsWrapper;
-import com.android.launcher3.util.ResourceBasedOverride;
 import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.widget.ListenableAppWidgetHost.ProviderChangedListener;
@@ -74,6 +73,7 @@ import app.lawnchair.LawnchairAppWidgetHostView;
  * background.
  */
 public class LauncherWidgetHolder {
+    private static final String TAG = "LauncherWidgetHolder";
 
     public static final int APPWIDGET_HOST_ID = 1024;
 

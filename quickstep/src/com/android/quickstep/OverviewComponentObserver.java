@@ -235,7 +235,7 @@ public final class OverviewComponentObserver {
 
         if (!mIsHomeDisabled && (defaultHome == null || mIsDefaultHome)) {
             // User default home is same as our home app. Use Overview integrated in Launcher.
-            if (enableLauncherOverviewInWindow) {
+            if (enableLauncherOverviewInWindow.isTrue()) {
                 RecentsWindowManager recentsWindowManager = mRecentsWindowManagerRepository.get(
                         DEFAULT_DISPLAY);
                 mDefaultDisplayContainerInterface =
