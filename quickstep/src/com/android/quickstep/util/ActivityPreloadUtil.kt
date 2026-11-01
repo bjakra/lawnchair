@@ -20,7 +20,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Trace
 import android.view.Display.DEFAULT_DISPLAY
-import com.android.launcher3.Utilities
 import com.android.launcher3.provider.RestoreDbTask
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.LockedUserState
@@ -42,8 +41,6 @@ object ActivityPreloadUtil {
     }
 
     private fun preloadOverview(ctx: Context, fromInit: Boolean, forSUWAllSet: Boolean) {
-        if (!Utilities.ATLEAST_BAKLAVA) return // LC-Note: QuickSwitch compatibility!
-
         Trace.beginSection("preloadOverview(fromInit=$fromInit, forSUWAllSet=$forSUWAllSet)")
 
         try {
@@ -71,7 +68,7 @@ object ActivityPreloadUtil {
             )
                 return
 
-            //ActiveGestureProtoLogProxy.logPreloadRecentsAnimation()
+            ActiveGestureProtoLogProxy.logPreloadRecentsAnimation()
             val overviewIntent = Intent(overviewCompObserver.overviewIntentIgnoreSysUiState)
             Executors.UI_HELPER_EXECUTOR.execute {
                 ActivityManagerWrapper.getInstance().preloadRecentsActivity(overviewIntent)

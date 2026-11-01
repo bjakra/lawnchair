@@ -375,22 +375,7 @@ interface ShapeDelegate {
                         it.iconMask
                     }
                 }
-            val baseShape =
-                parsedPath?.apply {
-                    transform(
-                        Matrix().apply {
-                            setScale(
-                                AREA_CALC_SIZE / DEFAULT_PATH_SIZE,
-                                AREA_CALC_SIZE / DEFAULT_PATH_SIZE,
-                            )
-                        }
-                    )
-                } ?: AdaptiveIconDrawable(null, ColorDrawable(Color.BLACK)).let {
-                    it.setBounds(0, 0, AREA_CALC_SIZE, AREA_CALC_SIZE)
-                    it.iconMask
-                }
-            // Ignore a mask that failed to parse, so it is not parsed a second time below.
-            return pickBestShape(baseShape, if (parsedPath != null) shapeStr else "")
+            return pickBestShape(baseShape, shapeStr)
         }
 
         fun pickBestShape(baseShape: Path, shapeStr: String): ShapeDelegate {

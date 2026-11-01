@@ -28,7 +28,6 @@ import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.MainProcessInitializer;
 import com.android.launcher3.RemoveAnimationSettingsTracker;
-import com.android.launcher3.appfunctions.workspace.WorkspaceAppFunctions;
 import com.android.launcher3.automation.AutomationRepository;
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger;
 import com.android.launcher3.display.DisplayController;
@@ -200,9 +199,6 @@ public interface LauncherBaseAppComponent {
 
     /** Repository for workspace data */
     HomeScreenRepository getHomeScreenRepository();
-
-    /** Returns the WorkspaceAppFunctions instance */
-    WorkspaceAppFunctions getWorkspaceAppFunctions();
 
     /** Provider for default values */
     DefaultsValueProvider getDefaultsValueProvider();

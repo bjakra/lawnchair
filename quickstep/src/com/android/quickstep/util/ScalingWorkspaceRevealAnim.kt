@@ -16,6 +16,8 @@
 
 package com.android.quickstep.util
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.graphics.Matrix
@@ -85,33 +87,9 @@ class ScalingWorkspaceRevealAnim(
             )
 
         val BLUR_INTERPOLATOR = Interpolators.clampToProgress(EMPHASIZED, 0f, 0.666f)
-
-        /**
-         * Ensures workspace and hotseat are visible after swipe-to-home when a reveal animation
-         * was cancelled or interrupted before restoring alpha.
-         */
-        @JvmStatic
-        fun ensureHomeContentVisible(launcher: QuickstepLauncher) {
-            if (!launcher.isInState(LauncherState.NORMAL)) {
-                return
-            }
-            val workspace = launcher.workspace
-            val hotseat = launcher.hotseat
-            if (
-                workspace.alpha < MAX_ALPHA ||
-                    hotseat.alpha < MAX_ALPHA ||
-                    !workspace.isVisible ||
-                    !hotseat.isVisible
-            ) {
-                workspace.alpha = MAX_ALPHA
-                hotseat.alpha = MAX_ALPHA
-                launcher.stateManager.reapplyState()
-            }
-        }
     }
 
     private val animation = PendingAnimation(SCALE_DURATION_MS)
-    private val depthController = launcher.depthController
     private var blurLayer: SurfaceControl? = null
     private var surfaceTransactionApplier: SurfaceTransactionApplier =
         SurfaceTransactionApplier(launcher.dragLayer)
@@ -265,11 +243,19 @@ class ScalingWorkspaceRevealAnim(
         // Needed to avoid text artefacts during the scale animation.
         workspace.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         hotseat.setLayerType(View.LAYER_TYPE_HARDWARE, null)
-
         animation.addListener(
-            AnimatorListeners.forEndCallback { _: Boolean -> restoreWorkspaceVisibility() }
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationCancel(animation: Animator) {
+                    super.onAnimationCancel(animation)
+                    Log.d(TAG, "onAnimationCancel")
+                }
+
+                override fun onAnimationPause(animation: Animator) {
+                    super.onAnimationPause(animation)
+                    Log.d(TAG, "onAnimationPause")
+                }
+            }
         )
-    }
 
         animation.addListener(
             AnimatorListeners.forEndCallback(
@@ -302,16 +288,7 @@ class ScalingWorkspaceRevealAnim(
                     depthController?.pauseBlursOnWindows(false)
                 }
             )
-        }
-
-        workspace.setLayerType(View.LAYER_TYPE_NONE, null)
-        hotseat.setLayerType(View.LAYER_TYPE_NONE, null)
-
-        // Reset the cached animations.
-        Animations.setOngoingAnimation(workspace, animation = null)
-        Animations.setOngoingAnimation(hotseat, animation = null)
-        removeBlurLayer()
-        depthController?.pauseBlursOnWindows(false)
+        )
     }
 
     fun getAnimators(): AnimatorSet {

@@ -31,7 +31,6 @@ object LauncherComponentProvider {
     @JvmStatic
     fun get(c: Context): LauncherAppComponent {
         val app = c.applicationContext
-
         if (app is LauncherApplication) return app.appComponent
 
         val inflater = LayoutInflater.from(app)

@@ -38,7 +38,6 @@ import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.util.PluginManagerWrapper
 import com.android.launcher3.util.SandboxContext
 import com.android.launcher3.widgetpicker.NoOpWidgetPickerModule
-import com.android.launcher3.workspacefunctions.NoOpWorkspaceFunctionsModule
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -101,7 +100,6 @@ abstract class QsbWidgetModule {
             WidgetModule::class,
             NoOpLoggerModule::class,
             BootSafeModules::class,
-            NoOpWorkspaceFunctionsModule::class,
             NoOpOrganizerModule::class,
             NoOpGeneratorModule::class,
         ]

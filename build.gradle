@@ -387,6 +387,7 @@ dependencies {
     implementation projects.viewcapturelib
     implementation projects.displaylib
     implementation projects.mechanics
+    implementation projects.tracinglib
 
     // Recents lib dependency
     withQuickstepCompileOnly projects.hiddenApi

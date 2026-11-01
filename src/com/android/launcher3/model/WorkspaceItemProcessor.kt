@@ -41,7 +41,6 @@ import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger.RestoreError
 import com.android.launcher3.folder.Folder
 import com.android.launcher3.folder.FolderGridOrganizer.createFolderGridOrganizer
-import com.android.launcher3.Utilities
 import com.android.launcher3.homescreenfiles.HomeScreenFile
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
 import com.android.launcher3.icons.CacheableShortcutInfo
@@ -121,7 +120,6 @@ class WorkspaceItemProcessor(
             when (c.itemType) {
                 Favorites.ITEM_TYPE_APPLICATION,
                 Favorites.ITEM_TYPE_DEEP_SHORTCUT -> processAppOrDeepShortcut()
-                Favorites.ITEM_TYPE_SHORTCUT -> processLegacyShortcut()
                 Favorites.ITEM_TYPE_FOLDER,
                 Favorites.ITEM_TYPE_APP_GROUP -> processFolderOrAppPair()
                 Favorites.ITEM_TYPE_APPWIDGET,
@@ -132,64 +130,6 @@ class WorkspaceItemProcessor(
         } catch (e: Exception) {
             Log.e(TAG, "Desktop items loading interrupted", e)
         }
-    }
-
-    /** LC-Note: We still use this to support legacy shortcut for non-root. */
-    private fun processLegacyShortcut() {
-        val intent =
-            c.parseIntent()
-                ?: run {
-                    c.markDeleted(
-                        "Null intent from db for legacy shortcut id=${c.id}",
-                        RestoreError.APP_NO_DB_INTENT,
-                    )
-                    return
-                }
-        var disabledState =
-            if (userManagerState.isUserQuiet(c.serialNumber))
-                WorkspaceItemInfo.FLAG_DISABLED_QUIET_USER
-            else 0
-        val appInfoWrapper = ApplicationInfoWrapper(context, intent)
-        if (appInfoWrapper.isSuspended()) {
-            disabledState = disabledState or ItemInfoWithIcon.FLAG_DISABLED_SUSPENDED
-        }
-
-        val info = c.loadSimpleWorkspaceItem()
-
-        // LC-Note: Show badge for legacy shortcut when possible
-        val launchPackage = intent.component?.packageName ?: intent.`package`
-        if (!launchPackage.isNullOrEmpty()) {
-            info.bitmap = info.bitmap.withBadgeInfo(
-                iconCache.getShortcutInfoBadge(launchPackage, c.user)
-            )
-        }
-
-        info.options = c.options
-        if (
-            intent.action != null &&
-                intent.categories != null &&
-                intent.action == Intent.ACTION_MAIN &&
-                intent.categories.contains(Intent.CATEGORY_LAUNCHER)
-        ) {
-            intent.addFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
-            )
-        }
-
-        c.markRestored()
-        val useLowResIcon = !c.isOnWorkspaceOrHotseat
-        iconRequestInfos.add(c.createIconRequestInfo(info, useLowResIcon))
-        c.applyCommonProperties(info)
-        info.intent = intent
-        info.rank = c.rank
-        info.spanX = 1
-        info.spanY = 1
-        info.runtimeStatusFlags = info.runtimeStatusFlags or disabledState
-        if (isSafeMode && !appInfoWrapper.isSystem()) {
-            info.runtimeStatusFlags =
-                info.runtimeStatusFlags or ItemInfoWithIcon.FLAG_DISABLED_SAFEMODE
-        }
-        c.checkAndAddItem(info, loadedItems, memoryLogger)
     }
 
     /**
@@ -483,32 +423,28 @@ class WorkspaceItemProcessor(
                     automationRepo,
                 )
             }
-            try {
-                if (
-                    Utilities.ATLEAST_V && (c.restoreFlag != 0 ||
-                            Flags.enableSupportForArchiving() &&
-                            activityInfo != null &&
-                            activityInfo.applicationInfo.isArchived) && !TextUtils.isEmpty(targetPkg)
-                ) {
-                    tempPackageKey.update(targetPkg, c.user)
-                    val si = installingPkgs[tempPackageKey]
-                    if (si == null) {
-                        info.runtimeStatusFlags =
-                            info.runtimeStatusFlags and
-                                    ItemInfoWithIcon.FLAG_INSTALL_SESSION_ACTIVE.inv()
-                    } else if (
-                        activityInfo == null ||
+            if (
+                (c.restoreFlag != 0 ||
+                    Flags.enableSupportForArchiving() &&
+                        activityInfo != null &&
+                        activityInfo.applicationInfo.isArchived) && !TextUtils.isEmpty(targetPkg)
+            ) {
+                tempPackageKey.update(targetPkg, c.user)
+                val si = installingPkgs[tempPackageKey]
+                if (si == null) {
+                    info.runtimeStatusFlags =
+                        info.runtimeStatusFlags and
+                            ItemInfoWithIcon.FLAG_INSTALL_SESSION_ACTIVE.inv()
+                } else if (
+                    activityInfo == null ||
                         (Flags.enableSupportForArchiving() &&
-                                activityInfo.applicationInfo.isArchived)
-                    ) {
-                        // For archived apps, include progress info in case there is
-                        // a pending install session post restart of device.
-                        val installProgress = (si.getProgress() * 100).toInt()
-                        info.setProgressLevel(installProgress, PackageInstallInfo.STATUS_INSTALLING)
-                    }
+                            activityInfo.applicationInfo.isArchived)
+                ) {
+                    // For archived apps, include progress info in case there is
+                    // a pending install session post restart of device.
+                    val installProgress = (si.getProgress() * 100).toInt()
+                    info.setProgressLevel(installProgress, PackageInstallInfo.STATUS_INSTALLING)
                 }
-            } catch (t: Throwable) {
-                Log.e(TAG, "Error loading icon", t)
             }
             c.checkAndAddItem(info, loadedItems, memoryLogger)
         } else {

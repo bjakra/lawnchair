@@ -20,7 +20,6 @@ import android.animation.AnimatorListenerAdapter
 import android.annotation.ElapsedRealtimeLong
 import android.content.Intent
 import android.graphics.PointF
-import android.os.SystemClock
 import android.os.Trace
 import android.util.Log
 import android.view.Display.DEFAULT_DISPLAY
@@ -32,11 +31,10 @@ import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import com.android.app.displaylib.DisplayRepository
 import com.android.app.displaylib.PerDisplayRepository
+import com.android.app.tracing.traceSection
 import com.android.internal.jank.Cuj
 import com.android.internal.util.LatencyTracker
 import com.android.launcher3.DeviceProfile
-import com.android.launcher3.PagedView
-import com.android.launcher3.Utilities
 import com.android.launcher3.anim.AnimatorListeners
 import com.android.launcher3.logger.LauncherAtom
 import com.android.launcher3.logging.StatsLogManager
@@ -134,7 +132,7 @@ constructor(
         isLastOfBatch: Boolean = true,
     ): CommandInfo? {
         if (commandQueue.size >= MAX_QUEUE_SIZE) {
-            if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logCommandQueueFull(type, commandQueue)
+            OverviewCommandHelperProtoLogProxy.logCommandQueueFull(type, commandQueue)
             return null
         }
 
@@ -147,13 +145,13 @@ constructor(
                 statusChangedCallback = this::onCommandStatusChanged,
             )
         commandQueue.add(command)
-        if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logCommandAdded(command)
+        OverviewCommandHelperProtoLogProxy.logCommandAdded(command)
 
         if (commandQueue.size == 1) {
-            if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logCommandExecuted(command, commandQueue.size)
+            OverviewCommandHelperProtoLogProxy.logCommandExecuted(command, commandQueue.size)
             coroutineScope.launch(dispatcherProvider.main) { processNextCommand() }
         } else {
-            if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logCommandNotExecuted(command, commandQueue.size)
+            OverviewCommandHelperProtoLogProxy.logCommandNotExecuted(command, commandQueue.size)
         }
 
         return command
@@ -189,7 +187,7 @@ constructor(
 
     /** Clear pending or completed commands from the queue */
     fun clearPendingCommands() {
-        if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logClearPendingCommands(commandQueue)
+        OverviewCommandHelperProtoLogProxy.logClearPendingCommands(commandQueue)
         commandQueue.removeAll { it.status != CommandStatus.PROCESSING }
     }
 
@@ -199,22 +197,25 @@ constructor(
      * completion (returns false).
      */
     @UiThread
-    private fun processNextCommand() {
+    private fun processNextCommand(): Unit =
+        traceSection("OverviewCommandHelper.processNextCommand") {
             val command: CommandInfo? = commandQueue.firstOrNull()
             if (command == null) {
-                if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logNoPendingCommands()
-                return
+                OverviewCommandHelperProtoLogProxy.logNoPendingCommands()
+                return@traceSection
             }
 
             command.status = CommandStatus.PROCESSING
-            if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logExecutingCommand(command)
+            OverviewCommandHelperProtoLogProxy.logExecutingCommand(command)
 
             coroutineScope.launch(dispatcherProvider.main) {
+                traceSection("OverviewCommandHelper.executeCommandWithTimeout") {
                     withTimeout(QUEUE_WAIT_DURATION_IN_MS) {
                         executeCommandSuspended(command)
                         ensureActive()
                         onCommandFinished(command)
                     }
+                }
             }
         }
 
@@ -225,7 +226,7 @@ constructor(
     @VisibleForTesting
     fun executeCommand(command: CommandInfo, onCallbackResult: () -> Unit): Boolean {
         val recentsView = getVisibleRecentsView(command.displayId)
-        if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logExecutingCommand(command, recentsView)
+        OverviewCommandHelperProtoLogProxy.logExecutingCommand(command, recentsView)
         return if (recentsView != null) {
             executeWhenRecentsIsVisible(command, recentsView, onCallbackResult)
         } else {
@@ -240,14 +241,14 @@ constructor(
     private suspend fun executeCommandSuspended(command: CommandInfo) =
         suspendCancellableCoroutine { continuation ->
             fun processResult(isCompleted: Boolean) {
-                if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logExecutedCommandWithResult(
+                OverviewCommandHelperProtoLogProxy.logExecutedCommandWithResult(
                     command,
                     isCompleted,
                 )
                 if (isCompleted) {
                     continuation.resume(Unit)
                 } else {
-                    if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logWaitingForCommandCallback(command)
+                    OverviewCommandHelperProtoLogProxy.logWaitingForCommandCallback(command)
                 }
             }
 
@@ -400,7 +401,7 @@ constructor(
     ): Boolean {
         return if (callbackList != null) {
             callbackList.add {
-                if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logLaunchingTaskCallback(command)
+                OverviewCommandHelperProtoLogProxy.logLaunchingTaskCallback(command)
                 onCallbackResult()
             }
             OverviewCommandHelperProtoLogProxy.logLaunchingTaskWaitingForCallback(command)
@@ -434,7 +435,7 @@ constructor(
         val taskAnimationManager = taskAnimationManagerRepository[command.displayId]
         if (taskAnimationManager == null) {
             Log.e(TAG, "No TaskAnimationManager found for display ${command.displayId}")
-            if (Utilities.ATLEAST_S) ActiveGestureProtoLogProxy.logOnTaskAnimationManagerNotAvailable(command.displayId)
+            ActiveGestureProtoLogProxy.logOnTaskAnimationManagerNotAvailable(command.displayId)
             return false
         }
         // Make sure the recents view is available if the recents window hasn't been created yet
@@ -514,21 +515,21 @@ constructor(
         val animatorListener: Animator.AnimatorListener =
             object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator) {
-                    if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logSwitchingToOverviewStateStart(command)
+                    OverviewCommandHelperProtoLogProxy.logSwitchingToOverviewStateStart(command)
                     super.onAnimationStart(animation)
                     updateRecentsViewFocus(command)
                     logShowOverviewFrom(command)
                 }
 
                 override fun onAnimationEnd(animation: Animator) {
-                    if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logSwitchingToOverviewStateEnd(command)
+                    OverviewCommandHelperProtoLogProxy.logSwitchingToOverviewStateEnd(command)
                     super.onAnimationEnd(animation)
                     onRecentsViewFocusUpdated(command)
                     onCallbackResult()
                 }
             }
         if (containerInterface.switchToRecentsIfVisible(animatorListener)) {
-            if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logSwitchingToOverviewStateWaiting(command)
+            OverviewCommandHelperProtoLogProxy.logSwitchingToOverviewStateWaiting(command)
             // If successfully switched, wait until animation finishes
             return false
         }
@@ -578,7 +579,7 @@ constructor(
                         // and treat the running activity as the task behind the overlay.
                         val otherVisibleTask = runningTask?.visibleNonExcludedTask
                         if (otherVisibleTask != null) {
-                            if (Utilities.ATLEAST_S) ActiveGestureProtoLogProxy.logUpdateGestureStateRunningTask(
+                            ActiveGestureProtoLogProxy.logUpdateGestureStateRunningTask(
                                 otherVisibleTask.packageName ?: "MISSING",
                                 runningTask.packageName ?: "MISSING",
                             )
@@ -594,7 +595,7 @@ constructor(
         if (interactionHandler == null) {
             // Can happen e.g. when a display is disconnected, so try to handle gracefully.
             Log.d(TAG, "AbsSwipeUpHandler not available for displayId=${command.displayId})")
-            if (Utilities.ATLEAST_S) ActiveGestureProtoLogProxy.logOnAbsSwipeUpHandlerNotAvailable(command.displayId)
+            ActiveGestureProtoLogProxy.logOnAbsSwipeUpHandlerNotAvailable(command.displayId)
             return true
         }
         interactionHandler.setGestureAnimationEndCallback {
@@ -624,7 +625,7 @@ constructor(
                         logShowOverviewFrom(command)
                     }
                     containerInterface.runOnInitBackgroundStateUI {
-                        if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logOnInitBackgroundStateUI(command)
+                        OverviewCommandHelperProtoLogProxy.logOnInitBackgroundStateUI(command)
                         interactionHandler.onGestureEnded(
                             0f,
                             PointF(),
@@ -637,7 +638,7 @@ constructor(
                 override fun onRecentsAnimationCanceled(
                     thumbnailDatas: HashMap<Int, ThumbnailData>
                 ) {
-                    if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logRecentsAnimCanceled(command)
+                    OverviewCommandHelperProtoLogProxy.logRecentsAnimCanceled(command)
                     interactionHandler.onGestureCancelled()
                     command.removeListener(this)
 
@@ -682,8 +683,9 @@ constructor(
         handler: AbsSwipeUpHandler<*, *, *>,
         onCommandResult: () -> Unit,
     ) {
-        if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logSwitchingViaRecentsAnimComplete(command)
+        OverviewCommandHelperProtoLogProxy.logSwitchingViaRecentsAnimComplete(command)
         command.removeListener(handler)
+        Trace.endAsyncSection(TRANSITION_NAME, 0)
         onRecentsViewFocusUpdated(command)
         onCommandResult()
     }
@@ -692,21 +694,21 @@ constructor(
     private fun onCommandFinished(command: CommandInfo) {
         command.status = CommandStatus.COMPLETED
         if (commandQueue.firstOrNull() !== command) {
-            if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logCommandFinishedButNotScheduled(
+            OverviewCommandHelperProtoLogProxy.logCommandFinishedButNotScheduled(
                 commandQueue.firstOrNull(),
                 command,
             )
             return
         }
 
-        if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logCommandFinishedSuccessfully(command)
+        OverviewCommandHelperProtoLogProxy.logCommandFinishedSuccessfully(command)
         commandQueue.remove(command)
         processNextCommand()
     }
 
     private fun cancelCommand(command: CommandInfo, throwable: Throwable?) {
         command.status = CommandStatus.CANCELED
-        if (Utilities.ATLEAST_S) OverviewCommandHelperProtoLogProxy.logCommandCanceled(command, throwable)
+        OverviewCommandHelperProtoLogProxy.logCommandCanceled(command, throwable)
         commandQueue.remove(command)
         processNextCommand()
     }

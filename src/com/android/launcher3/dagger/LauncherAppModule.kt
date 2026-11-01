@@ -54,7 +54,6 @@ class BootSafeModules
             LauncherWidgetPickerModule::class,
             WidgetModule::class,
             StatsLoggerModule::class,
-            WorkspaceFunctionsLauncherModule::class,
             OrganizerLauncherModule::class,
         ]
 )

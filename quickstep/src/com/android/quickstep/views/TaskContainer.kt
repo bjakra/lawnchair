@@ -23,8 +23,6 @@ import android.view.View.OnClickListener
 import androidx.core.view.isVisible
 import com.android.app.tracing.traceSection
 import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
-import com.android.launcher3.Flags.enableRefactorTaskContentView
-import com.android.launcher3.Flags.enableRefactorTaskThumbnail
 import com.android.launcher3.model.data.TaskViewItemInfo
 import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.launcher3.util.TransformingTouchDelegate
@@ -78,11 +76,13 @@ class TaskContainer(
     val itemInfo: TaskViewItemInfo
         get() = TaskViewItemInfo(taskView, this)
 
-    fun bind() = {
+    fun bind() =
+        traceSection("TaskContainer.bind") {
             digitalWellBeingToast?.bind(task, taskView, snapshotView, stagePosition)
         }
 
-    fun destroy() = {
+    fun destroy() =
+        traceSection("TaskContainer.destroy") {
             digitalWellBeingToast?.destroy()
             taskContentView.scaleX = 1f
             taskContentView.scaleY = 1f
@@ -100,7 +100,8 @@ class TaskContainer(
         }
     }
 
-    fun refreshOverlay(thumbnailPosition: ThumbnailPosition) = {
+    fun refreshOverlay(thumbnailPosition: ThumbnailPosition) =
+        traceSection("TaskContainer.refreshOverlay") {
             this.thumbnailPosition = thumbnailPosition
             if (overlayEnabledStatus) {
                 overlay.initOverlay(

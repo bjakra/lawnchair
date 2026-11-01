@@ -96,15 +96,6 @@
             </intent-filter>
         </service>
 
-        <service
-            android:name="com.android.launcher3.taskbar.CueBarInsightRendererService"
-            android:exported="true"
-            android:permission="android.permission.BIND_CONTEXT_COMPONENT_SERVICE">
-            <intent-filter>
-                <action android:name="android.service.personalcontext.renderer.InsightRendererService" />
-            </intent-filter>
-        </service>
-
         <activity android:name="com.android.quickstep.RecentsActivity"
              android:excludeFromRecents="true"
              android:launchMode="singleTask"

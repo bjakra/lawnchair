@@ -68,7 +68,6 @@ data class AllAppsProfile(
             inv: InvariantDeviceProfile,
             metric: DisplayMetrics,
             typeIndex: Int,
-            cellHeightMultiplier: Float = 1f,
             scale: Float,
         ) =
             Point(
@@ -80,7 +79,6 @@ data class AllAppsProfile(
             inv: InvariantDeviceProfile,
             metric: DisplayMetrics,
             typeIndex: Int,
-            cellHeightMultiplier: Float = 1f,
             res: Resources,
             context: Context,
             allAppsTopPadding: Int,
@@ -91,7 +89,7 @@ data class AllAppsProfile(
             val allAppsBorderSpacePx =
                 calculateAllAppsBorderSpacePx(inv, metric, typeIndex, workspaceProfile.scale)
             var allAppsCellHeightPx =
-                (pxFromDp(inv.allAppsCellSize[typeIndex].y, metric, cellHeightMultiplier) + allAppsBorderSpacePx.y)
+                (pxFromDp(inv.allAppsCellSize[typeIndex].y, metric) + allAppsBorderSpacePx.y)
             var allAppsIconSizePx = pxFromDp(inv.allAppsIconSize[typeIndex], metric)
             val allAppsIconTextSizePx =
                 pxFromSp(inv.allAppsIconTextSize[typeIndex], metric).toFloat()
@@ -213,7 +211,6 @@ data class AllAppsProfile(
             inv: InvariantDeviceProfile,
             metric: DisplayMetrics,
             typeIndex: Int,
-            cellHeightMultiplier: Float = 1f,
             scale: Float,
             deviceProperties: DeviceProperties,
             displayOptionSpec: DisplayOptionSpec,
@@ -240,10 +237,13 @@ data class AllAppsProfile(
 
             return AllAppsProfile(
                 borderSpacePx = allAppsBorderSpacePx,
+                // AllApps cells don't have real space between cells,
+                // so we add the border space to the cell height
                 cellHeightPx =
-                    (pxFromDp(inv.allAppsCellSize.get(typeIndex).y, metric, cellHeightMultiplier) +
+                    (pxFromDp(inv.allAppsCellSize.get(typeIndex).y, metric) +
                         allAppsBorderSpacePx.y),
                 iconSizePx = allAppsIconSizePx,
+                // We need the double conversion to keep the original behaviour
                 iconTextSizePx =
                     (pxFromSp(inv.allAppsIconTextSize[typeIndex], metric).toFloat() * scale)
                         .toInt()
@@ -405,7 +405,6 @@ data class AllAppsProfile(
             metric: DisplayMetrics,
             isScalableGrid: Boolean,
             typeIndex: Int,
-            cellHeightMultiplier: Float = 1f,
             workspaceProfile: WorkspaceProfile,
             deviceProperties: DeviceProperties,
             context: Context,
@@ -418,7 +417,6 @@ data class AllAppsProfile(
                         inv = inv,
                         metric = metric,
                         typeIndex = typeIndex,
-                        cellHeightMultiplier = cellHeightMultiplier,
                         res = res,
                         context = context,
                         allAppsTopPadding = allAppsTopPadding,
@@ -434,7 +432,6 @@ data class AllAppsProfile(
                         inv = inv,
                         metric = metric,
                         typeIndex = typeIndex,
-                        cellHeightMultiplier = cellHeightMultiplier,
                         scale = workspaceProfile.scale,
                         deviceProperties = deviceProperties,
                         context = context,

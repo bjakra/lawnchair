@@ -26,7 +26,6 @@ import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.popup.SystemShortcut
 import com.android.quickstep.views.RecentsViewContainer
 import com.android.quickstep.views.TaskContainer
-import com.android.window.flags2.Flags.universalResizableByDefault
 import javax.inject.Inject
 
 /**

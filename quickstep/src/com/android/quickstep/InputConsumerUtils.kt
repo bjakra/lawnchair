@@ -21,9 +21,7 @@ import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.ViewConfiguration
 import androidx.annotation.VisibleForTesting
-import com.android.launcher3.Utilities
 import com.android.launcher3.Utilities.shouldEnableMouseInteractionChanges
-import com.android.launcher3.anim.AnimatedFloat
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.statemanager.StatefulContainer
@@ -535,7 +533,7 @@ object InputConsumerUtils {
             // running activity as the task behind the overlay.
             val otherVisibleTask = runningTask?.visibleNonExcludedTask
             if (otherVisibleTask != null) {
-                if (Utilities.ATLEAST_S) ActiveGestureProtoLogProxy.logUpdateGestureStateRunningTask(
+                ActiveGestureProtoLogProxy.logUpdateGestureStateRunningTask(
                     otherVisibleTask.packageName ?: "MISSING",
                     runningTask.packageName ?: "MISSING",
                 )
@@ -851,7 +849,7 @@ object InputConsumerUtils {
         consumer: InputConsumer,
         reasonString: CompoundString,
     ) {
-        if (Utilities.ATLEAST_S) ActiveGestureProtoLogProxy.logSetInputConsumer(consumer.name, reasonString.toString())
+        ActiveGestureProtoLogProxy.logSetInputConsumer(consumer.name, reasonString.toString())
         if ((consumer.type and InputConsumer.TYPE_OTHER_ACTIVITY) != 0) {
             ActiveGestureLog.INSTANCE.trackEvent(
                 ActiveGestureErrorDetector.GestureEvent.FLAG_USING_OTHER_ACTIVITY_INPUT_CONSUMER

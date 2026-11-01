@@ -18,8 +18,6 @@ package com.android.launcher3;
 import android.app.Application;
 import android.util.Log;
 import androidx.annotation.NonNull;
-import androidx.appfunctions.service.AppFunctionConfiguration;
-import com.android.launcher3.appfunctions.workspace.WorkspaceAppFunctions;
 import com.android.launcher3.dagger.DaggerLauncherAppComponent;
 import com.android.launcher3.dagger.LauncherAppComponent;
 import com.android.launcher3.dagger.LauncherBaseAppComponent;
@@ -31,7 +29,7 @@ import kotlin.jvm.functions.Function1;
 /**
  * Main application class for Launcher
  */
-public class LauncherApplication extends Application implements AppFunctionConfiguration.Provider {
+public class LauncherApplication extends Application {
 
     private volatile LauncherBaseAppComponent mAppComponent;
     @Override
@@ -71,15 +69,4 @@ public class LauncherApplication extends Application implements AppFunctionConfi
                 .build();
     }
 
-    @NonNull
-    @Override
-    public AppFunctionConfiguration getAppFunctionConfiguration() {
-        Log.d("LauncherApp", "getAppFunctionConfiguration");
-        AppFunctionConfiguration.Builder builder = new AppFunctionConfiguration.Builder();
-        if (Flags.condoPlanner()) {
-            builder.addEnclosingClassFactory(WorkspaceAppFunctions.class,
-                    () -> getAppComponent().getWorkspaceAppFunctions());
-        }
-        return builder.build();
-    }
 }

@@ -29,7 +29,6 @@ import android.graphics.Canvas
 import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
-import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
 import android.util.FloatProperty
@@ -42,8 +41,6 @@ import android.view.ViewStub
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
 import android.widget.Toast
-import androidx.annotation.IntDef
-import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.core.animation.doOnCancel
 import androidx.core.view.isGone
@@ -715,7 +712,6 @@ constructor(
         getTaskIcons().forEach { (icon, _) -> icon.layoutDirection = deviceLayoutDirection }
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
         updatePivots()
@@ -873,7 +869,8 @@ constructor(
         }
     }
 
-    override fun onAttachedToWindow() {
+    override fun onAttachedToWindow() =
+        traceSection("TaskView.onAttachedToWindow") {
             super.onAttachedToWindow()
             // TaskView binds the ViewModel during onBind, and unbinds it in onRecycle. So it
             // should start listening here.
@@ -884,7 +881,8 @@ constructor(
                 }
         }
 
-    private fun updateTaskViewState(state: TaskTileUiState) {
+    private fun updateTaskViewState(state: TaskTileUiState) =
+        traceSection("TaskView.updateTaskViewState") {
             sysUiStatusNavFlags = state.sysUiStatusNavFlags
 
             // Updating containers
@@ -1016,7 +1014,8 @@ constructor(
             return thumbnailPosition
         }
 
-    override fun onDetachedFromWindow() {
+    override fun onDetachedFromWindow() =
+        traceSection("TaskView.onDetachedFromWindow") {
             super.onDetachedFromWindow()
             cancelJobs()
         }
@@ -1051,6 +1050,7 @@ constructor(
                 coroutineJobsToCancel.forEach { it.cancel("TaskView detaching from window") }
             }
         }
+    }
 
     /** Updates this task view to the given {@param task}. */
     open fun bind(
@@ -1160,7 +1160,8 @@ constructor(
     /** Check if given `taskId` is tracked in this view */
     fun containsTaskId(taskId: Int) = getTaskContainerById(taskId) != null
 
-    open fun setOrientationState(orientationState: RecentsOrientedState) {
+    open fun setOrientationState(orientationState: RecentsOrientedState) =
+        traceSection("TaskView.setOrientationState") {
             this.orientedState = orientationState
             getTaskIcons().forEach { (icon, _) -> icon.setIconOrientation(orientationState) }
             setThumbnailOrientation(orientationState)
@@ -1540,7 +1541,7 @@ constructor(
             )
             if (
                 !ActivityManagerWrapper.getInstance()
-                    .startActivityFromRecents(firstTaskContainer.task.key, if (Utilities.ATLEAST_Q) opts else null)
+                    .startActivityFromRecents(firstTaskContainer.task.key, opts)
             ) {
                 Log.d(TAG, "launchWithoutAnimation - task launch failed")
                 // If the call to start activity failed, then post the result immediately,

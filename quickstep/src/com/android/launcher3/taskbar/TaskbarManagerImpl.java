@@ -98,7 +98,6 @@ import com.android.quickstep.DisplayModel;
 import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.RecentsActivity;
 import com.android.quickstep.SystemUiProxy;
-import com.android.quickstep.cuebar.data.repository.AmbientCueRepository;
 import com.android.quickstep.dagger.SysUIConnectionSingleton;
 import com.android.quickstep.util.ContextualSearchInvoker;
 import com.android.quickstep.util.SystemUiFlagUtils;
@@ -244,7 +243,6 @@ public class TaskbarManagerImpl {
     private boolean mDeviceUnlocked;
 
     private final AllAppsActionManager mAllAppsActionManager;
-    private AmbientCueRepository mAmbientCueRepository;
 
     private @Nullable SafeCloseable mActivityOnDestroySafeCloseable;
 
@@ -826,10 +824,6 @@ public class TaskbarManagerImpl {
         }
     }
 
-    @VisibleForTesting
-    protected void injectTestInsights() {
-        mAmbientCueRepository.injectTestInsightForCueBar();
-    }
 
     /** Called when the SysUI flags for a given display change. */
     public void onSystemUiFlagsChanged(@SystemUiStateFlags long systemUiStateFlags, int displayId) {
@@ -1094,8 +1088,6 @@ public class TaskbarManagerImpl {
                             dp, resource.getNavButtonController(), mUnfoldProgressProvider,
                             !resource.isExternalDisplay(), getPrimaryDisplayId(),
                             mSystemUiProxy, mActivityManagerWrapper, mDesktopState);
-            mAmbientCueRepository = taskbarActivityContext.getControllers().cueBarController
-                    .getAmbientCueRepository();
             return taskbarActivityContext;
         } finally {
             Trace.endSection();

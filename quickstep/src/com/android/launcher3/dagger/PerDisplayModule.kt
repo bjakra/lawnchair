@@ -34,14 +34,11 @@ import com.android.app.displaylib.PerDisplayInstanceProviderWithTeardown
 import com.android.app.displaylib.PerDisplayInstanceRepositoryImpl
 import com.android.app.displaylib.PerDisplayRepository
 import com.android.app.displaylib.createDisplayLibComponent
-import com.android.launcher3.Utilities
 import com.android.launcher3.concurrent.annotations.Background
 import com.android.launcher3.concurrent.annotations.BackgroundContext
 import com.android.launcher3.concurrent.annotations.UiContext
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.util.LooperExecutor
-import com.android.launcher3.util.coroutines.DispatcherProvider
-import com.android.quickstep.FallbackWindowInterface
 import com.android.quickstep.RecentsAnimationDeviceState
 import com.android.quickstep.RotationTouchHelper
 import com.android.quickstep.TaskAnimationManager

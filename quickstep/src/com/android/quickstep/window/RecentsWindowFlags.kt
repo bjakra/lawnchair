@@ -16,18 +16,10 @@
 
 package com.android.quickstep.window
 
-//import android.window.DesktopExperienceFlags.DesktopExperienceFlag
+import android.window.DesktopExperienceFlags.DesktopExperienceFlag
 import com.android.launcher3.Flags
 import com.android.launcher3.util.OverviewReleaseFlags
 
-// Lawnchair-TODO-Flags:     @JvmField
-//    val enableLauncherOverviewInWindow: DesktopExperienceFlag =
-//        DesktopExperienceFlag(
-//            Flags::enableLauncherOverviewInWindow,
-//            false,
-//            Flags.FLAG_ENABLE_LAUNCHER_OVERVIEW_IN_WINDOW,
-//        )
-// Impl: var.isTrue()
 object RecentsWindowFlags {
     @JvmField
     val enableLauncherOverviewInWindow: DesktopExperienceFlag =
