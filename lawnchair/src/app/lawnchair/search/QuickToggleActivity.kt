@@ -26,6 +26,11 @@ import app.lawnchair.search.algorithms.engine.provider.QuickToggle
 class QuickToggleActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Dark theme recreates this activity, which must not toggle a second time
+        if (savedInstanceState != null) {
+            finish()
+            return
+        }
         val toggle = intent.getStringExtra(EXTRA_TOGGLE)
             ?.let { name -> QuickToggle.entries.find { it.name == name } }
         if (toggle != null) {

@@ -4,6 +4,7 @@ import android.content.Context
 import app.lawnchair.preferences2.PreferenceManager2
 import app.lawnchair.preferences2.firstCached
 import app.lawnchair.search.adapter.SPACE
+import app.lawnchair.search.adapter.SPACE_MINI
 import app.lawnchair.search.adapter.SearchTargetCompat
 import app.lawnchair.search.adapter.SearchTargetFactory
 import com.android.launcher3.R
@@ -94,7 +95,7 @@ data object QuickToggleSectionBuilder : SectionBuilder {
         val targets = mutableListOf<SearchTargetCompat>()
         targets.add(factory.createHeaderTarget(context.getString(R.string.search_section_quick_toggles)))
         targets.addAll(toggles.map { factory.createQuickToggleTarget(it.toggle, it.isActive) })
-        targets.add(factory.createHeaderTarget(SPACE))
+        targets.add(factory.createHeaderTarget(SPACE_MINI))
         return targets
     }
 }
@@ -112,7 +113,7 @@ data object CalendarSectionBuilder : SectionBuilder {
         val targets = mutableListOf<SearchTargetCompat>()
         targets.add(factory.createHeaderTarget(context.getString(R.string.search_section_calendar)))
         targets.addAll(events.map { factory.createCalendarTarget(it) })
-        targets.add(factory.createHeaderTarget(SPACE))
+        targets.add(factory.createHeaderTarget(SPACE_MINI))
         return targets
     }
 }

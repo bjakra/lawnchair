@@ -122,6 +122,10 @@ class SearchResultIconRow(context: Context, attrs: AttributeSet?) :
             setOnClickListener {
                 target.searchAction?.intent?.let { intent -> handleSearchTargetClick(context, intent) }
             }
+            // Graphite: the icon handles its own touches, so it needs the same action as the row
+            icon.setOnClickListener {
+                target.searchAction?.intent?.let { intent -> handleSearchTargetClick(context, intent) }
+            }
         }
         if (isCalculator) {
             setOnClickListener {

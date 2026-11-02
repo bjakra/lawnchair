@@ -115,7 +115,7 @@ sealed class LawnchairSearchAlgorithm(
                     peopleTileIndices,
                     suggestionIndices,
                     fileIndices,
-                    settingIndices,
+                    adjacentRun(settingIndices, index),
                     recentIndices,
                     calculator,
                 )
@@ -155,6 +155,20 @@ sealed class LawnchairSearchAlgorithm(
             }
 
         return appAndShortcutIndices
+    }
+
+    /**
+     * Graphite: the rows next to [index]. Several sections now use the settings row layout, and
+     * grouping all of them would round each section on one side only.
+     */
+    private fun adjacentRun(indices: List<Int>, index: Int): List<Int> {
+        if (index !in indices) return indices
+        val present = indices.toSet()
+        var first = index
+        while (first - 1 in present) first--
+        var last = index
+        while (last + 1 in present) last++
+        return (first..last).toList()
     }
 
     private fun getBackground(
