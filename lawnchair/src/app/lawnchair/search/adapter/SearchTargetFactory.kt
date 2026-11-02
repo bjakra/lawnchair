@@ -3,9 +3,9 @@ package app.lawnchair.search.adapter
 import android.content.ContentUris
 import android.provider.CalendarContract
 import android.text.format.DateUtils
-import app.lawnchair.search.QuickToggleActivity
+import app.lawnchair.allapps.views.SearchResultQuickToggles
+import app.lawnchair.search.LawnchairSearchAdapterProvider
 import app.lawnchair.search.algorithms.engine.SearchResult
-import app.lawnchair.search.algorithms.engine.provider.QuickToggle
 import app.lawnchair.search.algorithms.engine.provider.SettingsPageIndex
 import android.content.Context
 import android.content.Intent
@@ -303,22 +303,24 @@ class SearchTargetFactory(
         return createSearchTarget(id, action, LayoutType.ICON_SLICE, SearchTargetCompat.RESULT_TYPE_SETTING_TILE, SETTINGS)
     }
 
-    /** Graphite: a quick setting. The title shows its current state when it has one. */
-    fun createQuickToggleTarget(toggle: QuickToggle, isActive: Boolean?): SearchTargetCompat {
-        val id = "quick_toggle_${toggle.name}"
-        val label = context.getString(toggle.labelRes)
-        val title = when (isActive) {
-            null -> label
-            true -> context.getString(R.string.search_toggle_state_on, label)
-            false -> context.getString(R.string.search_toggle_state_off, label)
-        }
-        val intent = Intent(context, QuickToggleActivity::class.java)
-            .putExtra(QuickToggleActivity.EXTRA_TOGGLE, toggle.name)
-        val action = SearchActionCompat.Builder(id, title)
-            .setIcon(Icon.createWithAdaptiveBitmap(createSmallSearchResultBitmap(context, toggle.iconRes)))
-            .setIntent(intent)
-            .build()
-        return createSearchTarget(id, action, LayoutType.ICON_SLICE, SearchTargetCompat.RESULT_TYPE_SETTING_TILE, SETTINGS)
+    /** Graphite: a row of up to two quick setting tiles. */
+    fun createQuickToggleRowTarget(row: List<SearchResult.QuickToggleResult>): SearchTargetCompat {
+        val id = "quick_toggles_" + row.joinToString("_") { it.toggle.name }
+        val extras = bundleOf(
+            SearchResultQuickToggles.EXTRA_TOGGLES to row.map { it.toggle.name }.toTypedArray(),
+            SearchResultQuickToggles.EXTRA_STATES to row.map {
+                when (it.isActive) {
+                    null -> SearchResultQuickToggles.STATE_UNKNOWN
+                    true -> SearchResultQuickToggles.STATE_ON
+                    false -> SearchResultQuickToggles.STATE_OFF
+                }
+            }.toIntArray(),
+        )
+        val action = SearchActionCompat.Builder(id, id).setIntent(Intent()).build()
+        return createSearchTarget(
+            id, action, LawnchairSearchAdapterProvider.QUICK_TOGGLES_LAYOUT,
+            SearchTargetCompat.RESULT_TYPE_SETTING_TILE, SETTINGS, extras,
+        )
     }
 
     /** Graphite: an upcoming calendar event. */

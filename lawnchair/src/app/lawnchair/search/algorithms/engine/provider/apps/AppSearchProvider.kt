@@ -33,6 +33,15 @@ object AppSearchProvider {
         return appResults.map { SearchResult.App(data = it) }
     }
 
+    /** Graphite: the apps shown before anything is typed. Hidden apps are never included. */
+    fun topApps(context: Context, allApps: AllAppsList, count: Int): List<SearchResult> {
+        val prefs = PreferenceManager2.getInstance(context)
+        val visible = allApps.data.asSequence()
+            .filterHiddenApps("", prefs.hiddenApps.firstCached(), prefs.hiddenAppsInSearch.firstCached())
+            .toList()
+        return AppUsageRanking.rank(context, visible, "").take(count).map { SearchResult.App(data = it) }
+    }
+
     private fun normalSearch(context: Context, apps: List<AppInfo>, query: String, maxResultsCount: Int, hiddenApps: Set<String>, hiddenAppsInSearch: String): List<AppInfo> {
         // Do an intersection of the words in the query and each title, and filter out all the
         // apps that don't match all of the words in the query.

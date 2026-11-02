@@ -960,7 +960,7 @@
     <string name="all_apps_search_result_suggestions">From the web</string>
     <string name="all_apps_search_result_contacts_from_device">Contacts from device</string>
     <string name="all_apps_search_result_files">Files from device</string>
-    <string name="all_apps_search_result_settings_entry_from_device">Settings from device</string>
+    <string name="all_apps_search_result_settings_entry_from_device">Settings</string>
 
     <string name="all_apps_search_market_message">Search for more apps</string>
     <string name="all_apps_search_on_web_message">Search on <xliff:g example="Startpage" id="web_search_provider">%1$s</xliff:g>
@@ -1095,13 +1095,10 @@
 
     <string name="please_wait">Please wait…</string>
     <!-- Graphite: search additions -->
-    <string name="search_section_quick_toggles">Quick settings</string>
     <string name="search_section_calendar">Calendar</string>
     <string name="search_pref_result_quick_toggles_title">Quick settings</string>
     <string name="search_pref_result_calendar_title">Calendar events</string>
     <string name="search_calendar_event">%1$s · %2$s</string>
-    <string name="search_toggle_state_on">%1$s · On</string>
-    <string name="search_toggle_state_off">%1$s · Off</string>
     <string name="search_toggle_wifi">Internet</string>
     <string name="search_toggle_bluetooth">Bluetooth</string>
     <string name="search_toggle_airplane">Airplane mode</string>

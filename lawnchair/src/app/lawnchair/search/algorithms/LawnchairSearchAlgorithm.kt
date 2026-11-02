@@ -185,6 +185,8 @@ sealed class LawnchairSearchAlgorithm(
         recentIndices: List<Int>,
         calculator: List<Int>,
     ): SearchItemBackground = when {
+        layoutType == LawnchairSearchAdapterProvider.QUICK_TOGGLES_LAYOUT -> transparentBackground
+
         layoutType == TEXT_HEADER || layoutType == ICON_SINGLE_VERTICAL_TEXT || layoutType == EMPTY_DIVIDER -> iconBackground
 
         layoutType == SMALL_ICON_HORIZONTAL_TEXT -> getGroupedBackground(index, smallIconIndices)

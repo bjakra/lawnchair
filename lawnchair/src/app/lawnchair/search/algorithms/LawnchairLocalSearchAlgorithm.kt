@@ -107,6 +107,10 @@ class LawnchairLocalSearchAlgorithm(context: Context) : LawnchairSearchAlgorithm
         }
     }
 
+    /**
+     * Graphite: before anything is typed, show the most used apps instead of the whole app list, as
+     * on the Pixel launcher, followed by recent searches when those are enabled.
+     */
     override fun doZeroStateSearch(callback: SearchCallback<BaseAllAppsAdapter.AdapterItem>) {
         modelRetryJob?.cancel()
         currentJob?.cancel()
@@ -114,28 +118,18 @@ class LawnchairLocalSearchAlgorithm(context: Context) : LawnchairSearchAlgorithm
         val prefs = PreferenceManager.getInstance(context)
         val historyEnabled = prefs.searchResulRecentSuggestion.get()
 
-        if (!historyEnabled) {
-            callback.clearSearchResult()
-        } else {
+        modelRetryJob = appState.model.runWhenModelLoaded(coroutineScope) { apps ->
             currentJob = coroutineScope.launch {
-                val prefs2 = PreferenceManager2.getInstance(context)
-                val maxHistory = prefs2.maxRecentResultCount.firstCached()
-
-                val historyResults = historySearchProvider.getRecentKeywords(context, maxHistory)
-
-                val resultsToTranslate = if (historyResults.isNotEmpty()) {
-                    historyResults + listOf(SearchResult.Action.SearchSettings)
+                val topApps = appSearchProvider.topApps(context, apps, ZERO_STATE_APP_COUNT)
+                val historyResults = if (historyEnabled) {
+                    val maxHistory = PreferenceManager2.getInstance(context).maxRecentResultCount.firstCached()
+                    historySearchProvider.getRecentKeywords(context, maxHistory)
                 } else {
-                    listOf(
-                        SearchResult.Action.EmptyState(
-                            titleRes = R.string.search_empty_state_title,
-                            subtitleRes = R.string.search_empty_state_no_history_subtitle,
-                        ),
-                        SearchResult.Action.SearchSettings,
-                    )
+                    emptyList()
                 }
-
-                val searchTargets = translateToSearchTargets(resultsToTranslate)
+                val searchTargets = translateToSearchTargets(
+                    topApps + historyResults + listOf(SearchResult.Action.SearchSettings),
+                )
                 val adapterItems = transformSearchResults(searchTargets)
                 withContext(Dispatchers.Main) {
                     callback.onSearchResult("", ArrayList(adapterItems))
@@ -210,3 +204,5 @@ class LawnchairLocalSearchAlgorithm(context: Context) : LawnchairSearchAlgorithm
         }
     }
 }
+
+private const val ZERO_STATE_APP_COUNT = 4

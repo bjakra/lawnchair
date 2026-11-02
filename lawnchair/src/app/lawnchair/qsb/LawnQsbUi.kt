@@ -1,5 +1,6 @@
 package app.lawnchair.qsb
 
+import androidx.compose.ui.platform.LocalContext
 import android.content.Context
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
@@ -83,6 +84,8 @@ data class QsbIconState(
     val contentDescription: String,
     val method: ThemingMethod = ThemingMethod.THEME_BY_LAYER_ID,
     val visible: Boolean = true,
+    /** Graphite: draw it in a neutral colour, ignoring the provider's colours. */
+    val neutral: Boolean = false,
 )
 
 /**
@@ -455,7 +458,11 @@ fun QsbIcon(
                 method = icon.method,
             ),
             contentDescription = icon.contentDescription,
-            tint = ComposeColor.Unspecified,
+            tint = if (icon.neutral) {
+                ComposeColor(LocalContext.current.getColor(R.color.materialColorOnSurfaceVariant))
+            } else {
+                ComposeColor.Unspecified
+            },
             modifier = Modifier.fillMaxSize(),
         )
     }

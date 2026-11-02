@@ -175,13 +175,18 @@ class AllAppsSearchInput(context: Context, attrs: AttributeSet?) :
                     if (supportsLens) getLensIntent(context) else null
                 }
 
-                val state = rememberAllAppsQsbState(
+                val providerState = rememberAllAppsQsbState(
                     searchProvider = searchProvider,
                     themed = themedQsb,
                     shouldShowIcons = shouldShowIcons,
                     queryEmpty = queryEmpty,
                     showMic = voiceIntent != null,
                     showLens = lensIntent != null,
+                )
+                // Graphite: neutral icons, as on the Pixel launcher
+                val state = providerState.copy(
+                    startIcon = providerState.startIcon.copy(neutral = true),
+                    endIcons = providerState.endIcons.map { it.copy(neutral = true) },
                 )
 
                 val backgroundColor = if (supportBlur) {
@@ -392,8 +397,7 @@ class AllAppsSearchInput(context: Context, attrs: AttributeSet?) :
     }
 
     override fun setFocusedResultTitle(title: CharSequence?, sub: CharSequence?, showArrow: Boolean) {
-        focusedResultTitle = title?.toString().orEmpty()
-        updateHint()
+        // Graphite: no inline autocomplete of the top result, as on the Pixel launcher
     }
 
     override fun refreshResults() {

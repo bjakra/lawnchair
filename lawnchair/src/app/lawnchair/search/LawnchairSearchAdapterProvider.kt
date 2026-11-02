@@ -25,6 +25,7 @@ class LawnchairSearchAdapterProvider(
     private val decorator = SearchItemDecorator(appsView)
     private val layoutIdMap = SparseIntArray().apply {
         append(SEARCH_RESULT_ICON, R.layout.search_result_icon)
+        append(SEARCH_RESULT_QUICK_TOGGLES, R.layout.search_result_quick_toggles)
         append(SEARCH_RESULT_ICON_ROW, R.layout.search_result_tall_icon_row)
         append(SEARCH_RESULT_SMALL_ICON_ROW, R.layout.search_result_small_icon_row)
         append(SEARCH_RESULT_DIVIDER, R.layout.search_result_divider)
@@ -117,8 +118,13 @@ class LawnchairSearchAdapterProvider(
         private const val SEARCH_RESULT_CALCULATOR = 1 shl 20
         private const val SEARCH_RESULT_EMPTY_STATE = 1 shl 21
         private const val SEARCH_RESULT_SEARCH_SETTINGS = 1 shl 22
+        private const val SEARCH_RESULT_QUICK_TOGGLES = 1 shl 23
+
+        /** Graphite: a row of quick setting tiles. */
+        const val QUICK_TOGGLES_LAYOUT = "graphite_quick_toggles"
 
         val viewTypeMap = mapOf(
+            QUICK_TOGGLES_LAYOUT to SEARCH_RESULT_QUICK_TOGGLES,
             LayoutType.ICON_SINGLE_VERTICAL_TEXT to SEARCH_RESULT_ICON,
             LayoutType.ICON_HORIZONTAL_TEXT to SEARCH_RESULT_ICON_ROW,
             LayoutType.SMALL_ICON_HORIZONTAL_TEXT to SEARCH_RESULT_SMALL_ICON_ROW,

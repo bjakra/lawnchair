@@ -26,7 +26,8 @@ fun createFilePreviewFallbackBitmap(context: Context, @DrawableRes drawable: Int
     val bitmap = createBitmap(width, height)
     val canvas = Canvas(bitmap)
 
-    val backgroundColor = ColorTokens.SearchResultSmallIcon.resolveColor(context)
+    // Graphite: a neutral circle, as on the Pixel launcher
+    val backgroundColor = context.getColor(R.color.materialColorSurfaceContainerLowest)
     canvas.drawColor(backgroundColor)
 
     val iconDrawable = ContextCompat.getDrawable(context, drawable)
@@ -50,7 +51,8 @@ fun createSmallSearchResultBitmap(context: Context, @DrawableRes drawable: Int):
     val bitmap = createBitmap(iconSize, iconSize)
     val canvas = Canvas(bitmap)
 
-    val backgroundColor = ColorTokens.SearchResultSmallIcon.resolveColor(context)
+    // Graphite: a neutral circle, as on the Pixel launcher
+    val backgroundColor = context.getColor(R.color.materialColorSurfaceContainerLowest)
     canvas.drawColor(backgroundColor)
 
     val iconDrawable = ContextCompat.getDrawable(context, drawable)
@@ -70,7 +72,8 @@ fun createTextBitmap(context: Context, text: String): Bitmap {
     val bitmap = createBitmap(iconSize, iconSize)
     val canvas = Canvas(bitmap)
 
-    val backgroundColor = ColorTokens.SearchResultSmallIcon.resolveColor(context)
+    // Graphite: a neutral circle, as on the Pixel launcher
+    val backgroundColor = context.getColor(R.color.materialColorSurfaceContainerLowest)
     canvas.drawColor(backgroundColor)
 
     // Set up paint for drawing text

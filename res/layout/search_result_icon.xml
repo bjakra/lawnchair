@@ -2,4 +2,5 @@
 <app.lawnchair.allapps.views.SearchResultIcon xmlns:launcher="http://schemas.android.com/apk/res-auto"
     style="@style/BaseIcon.AllApps"
     launcher:centerVertically="true"
-    launcher:iconDisplay="all_apps" />
+    launcher:iconDisplay="all_apps"
+    launcher:iconSizeOverride="@dimen/search_result_app_icon_size" />

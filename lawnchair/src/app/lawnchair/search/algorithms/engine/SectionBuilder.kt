@@ -93,8 +93,7 @@ data object QuickToggleSectionBuilder : SectionBuilder {
             return emptyList()
         }
         val targets = mutableListOf<SearchTargetCompat>()
-        targets.add(factory.createHeaderTarget(context.getString(R.string.search_section_quick_toggles)))
-        targets.addAll(toggles.map { factory.createQuickToggleTarget(it.toggle, it.isActive) })
+        targets.addAll(toggles.chunked(2).map { factory.createQuickToggleRowTarget(it) })
         targets.add(factory.createHeaderTarget(SPACE_MINI))
         return targets
     }

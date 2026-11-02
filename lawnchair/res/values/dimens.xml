@@ -48,7 +48,9 @@
     <dimen name="qsb_widget_vertical_padding">6dp</dimen>
 
     <!-- search -->
-    <dimen name="search_box_container_height">60dp</dimen>
+    <dimen name="search_box_container_height">89dp</dimen>
+    <!-- Graphite: larger app icons in search results, as on the Pixel launcher -->
+    <dimen name="search_result_app_icon_size">64dp</dimen>
     <dimen name="search_box_height">52dp</dimen>
     <dimen name="search_decoration_padding">1dp</dimen>
     <dimen name="search_group_radius">20dp</dimen>
@@ -68,9 +70,9 @@
     <dimen name="search_result_text_height">52dp</dimen>
     <dimen name="search_result_subtitle_padding_start">4dp</dimen>
 
-    <!-- Header is aligned to the search container top with this margin. 60dp search
+    <!-- Header is aligned to the search container top with this margin. 89dp search
          container + a small gap; keep in sync with search_box_container_height. -->
-    <dimen name="all_apps_header_top_margin">64dp</dimen>
+    <dimen name="all_apps_header_top_margin">93dp</dimen>
     <!-- AOSP uses 36dp to clear an overlapping search bar; Lawnchair's larger
          top_margin already clears the search, so keep this tight. -->
     <dimen name="all_apps_header_top_padding">4dp</dimen>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Graphite: a row of up to two quick setting tiles in search -->
+<app.lawnchair.allapps.views.SearchResultQuickToggles xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/search_result_padding"
+    android:paddingEnd="@dimen/search_result_padding"
+    android:paddingBottom="6dp">
+
+    <include
+        android:id="@+id/quick_toggle_first"
+        layout="@layout/search_result_quick_toggle_tile" />
+
+    <Space
+        android:layout_width="6dp"
+        android:layout_height="0dp" />
+
+    <include
+        android:id="@+id/quick_toggle_second"
+        layout="@layout/search_result_quick_toggle_tile" />
+</app.lawnchair.allapps.views.SearchResultQuickToggles>
