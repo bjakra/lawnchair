@@ -66,14 +66,52 @@ data object SettingsSectionBuilder : SectionBuilder {
         results: List<SearchResult>,
     ): List<SearchTargetCompat> {
         val settings = results.filterIsInstance<SearchResult.Setting>()
+        val pages = results.filterIsInstance<SearchResult.SettingsPage>()
 
-        if (settings.isEmpty()) {
+        if (settings.isEmpty() && pages.isEmpty()) {
             return emptyList()
         }
 
         val targets = mutableListOf<SearchTargetCompat>()
         targets.add(factory.createHeaderTarget(context.getString(R.string.all_apps_search_result_settings_entry_from_device)))
+        targets.addAll(pages.map { factory.createSettingsPageTarget(it.page) })
         targets.addAll(settings.mapNotNull { factory.createSettingsTarget(it.data) })
+        targets.add(factory.createHeaderTarget(SPACE))
+        return targets
+    }
+}
+
+data object QuickToggleSectionBuilder : SectionBuilder {
+    override fun build(
+        context: Context,
+        factory: SearchTargetFactory,
+        results: List<SearchResult>,
+    ): List<SearchTargetCompat> {
+        val toggles = results.filterIsInstance<SearchResult.QuickToggleResult>()
+        if (toggles.isEmpty()) {
+            return emptyList()
+        }
+        val targets = mutableListOf<SearchTargetCompat>()
+        targets.add(factory.createHeaderTarget(context.getString(R.string.search_section_quick_toggles)))
+        targets.addAll(toggles.map { factory.createQuickToggleTarget(it.toggle, it.isActive) })
+        targets.add(factory.createHeaderTarget(SPACE))
+        return targets
+    }
+}
+
+data object CalendarSectionBuilder : SectionBuilder {
+    override fun build(
+        context: Context,
+        factory: SearchTargetFactory,
+        results: List<SearchResult>,
+    ): List<SearchTargetCompat> {
+        val events = results.filterIsInstance<SearchResult.CalendarEvent>()
+        if (events.isEmpty()) {
+            return emptyList()
+        }
+        val targets = mutableListOf<SearchTargetCompat>()
+        targets.add(factory.createHeaderTarget(context.getString(R.string.search_section_calendar)))
+        targets.addAll(events.map { factory.createCalendarTarget(it) })
         targets.add(factory.createHeaderTarget(SPACE))
         return targets
     }

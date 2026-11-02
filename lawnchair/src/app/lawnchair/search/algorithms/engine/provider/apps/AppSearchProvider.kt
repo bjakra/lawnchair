@@ -27,21 +27,22 @@ object AppSearchProvider {
         val appResults = if (enableFuzzySearch) {
             fuzzySearch(allApps.data, queryNormalized, maxAppResults, hiddenApps, hiddenAppsInSearch)
         } else {
-            normalSearch(allApps.data, queryNormalized, maxAppResults, hiddenApps, hiddenAppsInSearch)
+            normalSearch(context, allApps.data, queryNormalized, maxAppResults, hiddenApps, hiddenAppsInSearch)
         }
 
         return appResults.map { SearchResult.App(data = it) }
     }
 
-    private fun normalSearch(apps: List<AppInfo>, query: String, maxResultsCount: Int, hiddenApps: Set<String>, hiddenAppsInSearch: String): List<AppInfo> {
+    private fun normalSearch(context: Context, apps: List<AppInfo>, query: String, maxResultsCount: Int, hiddenApps: Set<String>, hiddenAppsInSearch: String): List<AppInfo> {
         // Do an intersection of the words in the query and each title, and filter out all the
         // apps that don't match all of the words in the query.
         val matcher = StringMatcherUtility.StringMatcher.getInstance()
         return apps.asSequence()
             .filter { StringMatcherUtility.matches(query, stripDiacritics(it.title.toString()), matcher) }
             .filterHiddenApps(query, hiddenApps, hiddenAppsInSearch)
-            .take(maxResultsCount)
             .toList()
+            .let { AppUsageRanking.rank(context, it, query) }
+            .take(maxResultsCount)
     }
 
     private fun fuzzySearch(apps: List<AppInfo>, query: String, maxResultsCount: Int, hiddenApps: Set<String>, hiddenAppsInSearch: String): List<AppInfo> {

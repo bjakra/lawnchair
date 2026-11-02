@@ -1,5 +1,6 @@
 package app.lawnchair.ui.preferences.components.search
 
+import android.Manifest
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -212,5 +213,31 @@ private fun LocalSearchSettings(
     SwitchPreference(
         adapter = prefs.searchResultCalculator.getAdapter(),
         label = stringResource(R.string.all_apps_search_result_calculator),
+    )
+    SwitchPreference(
+        adapter = prefs.searchResultQuickToggles.getAdapter(),
+        label = stringResource(R.string.search_pref_result_quick_toggles_title),
+    )
+    CalendarSearchPreference()
+}
+
+/** Graphite: turning this on asks for the calendar permission, and it reads as off without it. */
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+private fun CalendarSearchPreference() {
+    val adapter = preferenceManager().searchResultCalendar.getAdapter()
+    val permission = rememberPermissionState(Manifest.permission.READ_CALENDAR) { granted ->
+        adapter.onChange(granted)
+    }
+    SwitchPreference(
+        checked = adapter.state.value && permission.status.isGranted,
+        onCheckedChange = { checked ->
+            if (checked && !permission.status.isGranted) {
+                permission.launchPermissionRequest()
+            } else {
+                adapter.onChange(checked)
+            }
+        },
+        label = stringResource(R.string.search_pref_result_calendar_title),
     )
 }

@@ -1,5 +1,12 @@
 package app.lawnchair.search.adapter
 
+import android.content.ContentUris
+import android.provider.CalendarContract
+import android.text.format.DateUtils
+import app.lawnchair.search.QuickToggleActivity
+import app.lawnchair.search.algorithms.engine.SearchResult
+import app.lawnchair.search.algorithms.engine.provider.QuickToggle
+import app.lawnchair.search.algorithms.engine.provider.SettingsPageIndex
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -284,6 +291,51 @@ class SearchTargetFactory(
             SearchTargetCompat.RESULT_TYPE_CONTACT_TILE,
             CONTACT,
         )
+    }
+
+    /** Graphite: a real Settings screen, opened directly. */
+    fun createSettingsPageTarget(page: SettingsPageIndex.Page): SearchTargetCompat {
+        val id = "settings_page_${page.component.flattenToShortString()}"
+        val action = SearchActionCompat.Builder(id, page.label)
+            .setIcon(Icon.createWithAdaptiveBitmap(createSmallSearchResultBitmap(context, R.drawable.ic_setting)))
+            .setIntent(Intent(Intent.ACTION_MAIN).setComponent(page.component))
+            .build()
+        return createSearchTarget(id, action, LayoutType.ICON_SLICE, SearchTargetCompat.RESULT_TYPE_SETTING_TILE, SETTINGS)
+    }
+
+    /** Graphite: a quick setting. The title shows its current state when it has one. */
+    fun createQuickToggleTarget(toggle: QuickToggle, isActive: Boolean?): SearchTargetCompat {
+        val id = "quick_toggle_${toggle.name}"
+        val label = context.getString(toggle.labelRes)
+        val title = when (isActive) {
+            null -> label
+            true -> context.getString(R.string.search_toggle_state_on, label)
+            false -> context.getString(R.string.search_toggle_state_off, label)
+        }
+        val intent = Intent(context, QuickToggleActivity::class.java)
+            .putExtra(QuickToggleActivity.EXTRA_TOGGLE, toggle.name)
+        val action = SearchActionCompat.Builder(id, title)
+            .setIcon(Icon.createWithAdaptiveBitmap(createSmallSearchResultBitmap(context, toggle.iconRes)))
+            .setIntent(intent)
+            .build()
+        return createSearchTarget(id, action, LayoutType.ICON_SLICE, SearchTargetCompat.RESULT_TYPE_SETTING_TILE, SETTINGS)
+    }
+
+    /** Graphite: an upcoming calendar event. */
+    fun createCalendarTarget(event: SearchResult.CalendarEvent): SearchTargetCompat {
+        val id = "calendar_${event.id}_${event.begin}"
+        val flags = DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL or
+            if (event.allDay) 0 else DateUtils.FORMAT_SHOW_TIME
+        val whenText = DateUtils.formatDateTime(context, event.begin, flags)
+        val intent = Intent(Intent.ACTION_VIEW)
+            .setData(ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, event.id))
+            .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.begin)
+            .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.end)
+        val action = SearchActionCompat.Builder(id, context.getString(R.string.search_calendar_event, event.title, whenText))
+            .setIcon(Icon.createWithAdaptiveBitmap(createSmallSearchResultBitmap(context, R.drawable.ic_search_toggle_event)))
+            .setIntent(intent)
+            .build()
+        return createSearchTarget(id, action, LayoutType.ICON_SLICE, SearchTargetCompat.RESULT_TYPE_SETTING_TILE, SETTINGS)
     }
 
     fun createFilesTarget(info: IFileInfo): SearchTargetCompat {

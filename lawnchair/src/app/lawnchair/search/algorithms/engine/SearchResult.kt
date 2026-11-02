@@ -7,6 +7,8 @@ import app.lawnchair.search.algorithms.data.ContactInfo
 import app.lawnchair.search.algorithms.data.IFileInfo
 import app.lawnchair.search.algorithms.data.RecentKeyword
 import app.lawnchair.search.algorithms.data.SettingInfo
+import app.lawnchair.search.algorithms.engine.provider.QuickToggle
+import app.lawnchair.search.algorithms.engine.provider.SettingsPageIndex
 import com.android.launcher3.model.data.AppInfo
 
 /**
@@ -21,6 +23,15 @@ sealed interface SearchResult {
     data class Shortcut(val data: ShortcutInfo) : SearchResult
     data class WebSuggestion(val suggestion: String, val provider: String) : SearchResult
     data class History(val data: RecentKeyword) : SearchResult
+    data class CalendarEvent(
+        val id: Long,
+        val title: String,
+        val begin: Long,
+        val end: Long,
+        val allDay: Boolean,
+    ) : SearchResult
+    data class QuickToggleResult(val toggle: QuickToggle, val isActive: Boolean?) : SearchResult
+    data class SettingsPage(val page: SettingsPageIndex.Page) : SearchResult
     data class Calculation(val data: app.lawnchair.search.algorithms.data.Calculation) : SearchResult
     sealed interface Action : SearchResult {
         data class MarketSearch(val query: String) : Action

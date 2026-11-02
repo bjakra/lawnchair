@@ -158,8 +158,11 @@ class PreferenceManager @Inject constructor(
     val searchResultAllFiles = BoolPref("pref_searchResultAllFiles", false, recreate)
     val searchResultAudio = BoolPref("pref_searchResultAudio", false, recreate)
     val searchResultVisualMedia = BoolPref("pref_searchResultVisualMedia", false, recreate)
-    val searchResultStartPageSuggestion = BoolPref("pref_searchResultStartPageSuggestion", true, recreate)
-    val searchResultSettingsEntry = BoolPref("pref_searchResultSettingsEntry", false, recreate)
+    // Graphite: off by default, as it sends what you type to the provider
+    val searchResultStartPageSuggestion = BoolPref("pref_searchResultStartPageSuggestion", false, recreate)
+    val searchResultQuickToggles = BoolPref("pref_searchResultQuickToggles", true)
+    val searchResultCalendar = BoolPref("pref_searchResultCalendar", false, recreate)
+    val searchResultSettingsEntry = BoolPref("pref_searchResultSettingsEntry", true, recreate)
     val searchResulRecentSuggestion = BoolPref("pref_searchResultRecentSuggestion", false, recreate)
 
     val themedIcons = BoolPref("themed_icons", false, reloadIcons)

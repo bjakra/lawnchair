@@ -119,7 +119,6 @@ sealed class QsbSearchProvider(
             Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
 
         fun values() = listOf(
-            GraphiteSearch,
             AppSearch,
             Google,
             GoogleGo,

@@ -62,7 +62,7 @@
     <dimen name="page_indicator_dot_size_v2">6dp</dimen>
 
     <!-- Which QSB search provider to use by default -->
-    <string name="config_default_qsb_search_provider_id" translatable="false">graphite_search</string>
+    <string name="config_default_qsb_search_provider_id" translatable="false">app_search</string>
 
     <!-- Which icon shape for application to use by default -->
     <string name="config_default_icon_shape" translatable="false">system</string>
@@ -100,7 +100,7 @@
     <string name="config_default_hotseat_mode" translatable="false">lawnchair</string>
 
     <!-- which web search provider to use by default -->
-    <string name="config_default_web_suggestion_provider" translatable="false">google</string>
+    <string name="config_default_web_suggestion_provider" translatable="false">duckduckgo</string>
 
     <!-- which overlay to use by default -->
     <string name="config_default_overlay" translatable="false">none</string>
@@ -154,7 +154,7 @@
     <bool name="config_default_smartspace_show_date">true</bool>
     <bool name="config_default_smartspace_show_time">false</bool>
     <bool name="config_default_perform_wide_search">true</bool>
-    <bool name="config_default_live_information_enabled">true</bool>
+    <bool name="config_default_live_information_enabled">false</bool>
     <bool name="config_default_live_information_show_announcements">true</bool>
     <bool name="config_default_enable_dot_pagination">true</bool>
     <bool name="config_default_enable_material_u_popup">true</bool>

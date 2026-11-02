@@ -306,6 +306,9 @@ public class GridCustomizationsProxy implements ProxyProvider {
                 if (match == null) {
                     return UPDATE_SETTING_FAILURE;
                 }
+                // Graphite: Lawnchair takes rows, columns and dock size from its own settings, so the
+                // grid name alone wouldn't change anything
+                app.lawnchair.DeviceProfileOverrides.INSTANCE.get(mContext).setCurrentGrid(gridName);
                 mIdp.setCurrentGrid(gridName);
 
                 LauncherModel launcherModel = LauncherAppState.getInstance(mContext).getModel();

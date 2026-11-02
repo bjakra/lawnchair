@@ -3,6 +3,7 @@ package app.lawnchair.search.algorithms.engine.provider
 import android.content.Context
 import android.provider.Settings
 import android.util.Log
+import app.lawnchair.search.adapter.SettingsTarget
 import app.lawnchair.preferences.PreferenceManager
 import app.lawnchair.preferences2.PreferenceManager2
 import app.lawnchair.preferences2.firstCached
@@ -34,11 +35,14 @@ object SettingsSearchProvider : SearchProvider {
         }
 
         val maxResults = prefs2.maxSettingsEntryResultCount.firstCached()
-        val settingsInfoList = findSettingsByNameAndAction(query, maxResults)
+        // Graphite: real screens by their visible name first, Android's action names fill the rest
+        val pages = SettingsPageIndex.search(context, query, maxResults)
+        val pageNames = pages.map { it.label.lowercase() }.toSet()
+        val settingsInfoList = findSettingsByNameAndAction(query, maxResults - pages.size)
+            .filter { SettingsTarget.formatSettingTitle(it.name).lowercase() !in pageNames }
 
-        val searchResults = settingsInfoList.map { settingInfo ->
-            SearchResult.Setting(data = settingInfo)
-        }
+        val searchResults = pages.map { SearchResult.SettingsPage(it) } +
+            settingsInfoList.map { settingInfo -> SearchResult.Setting(data = settingInfo) }
         emit(searchResults)
     }
 }
