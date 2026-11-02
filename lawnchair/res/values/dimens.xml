@@ -82,6 +82,12 @@
     <dimen name="all_apps_header_bottom_padding">4dp</dimen>
 
     <!-- smartspace -->
+    <!-- Graphite: sizes of Google's At a Glance, overriding Smartspacer's client library -->
+    <!-- Below any workspace row, so the card fills its row rather than being scaled and clipped -->
+    <dimen name="smartspace_height">48dp</dimen>
+    <dimen name="smartspace_page_title_size">24sp</dimen>
+    <dimen name="smartspace_page_subtitle_size">16sp</dimen>
+    <dimen name="smartspace_page_icon_size">20sp</dimen>
     <dimen name="smartspaceAmbientShadowBlur">1.5dp</dimen>
     <dimen name="smartspaceKeyShadowBlur">2dp</dimen>
     <dimen name="smartspaceKeyShadowOffset">0.5dp</dimen>
