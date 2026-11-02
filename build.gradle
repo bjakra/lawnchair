@@ -23,10 +23,10 @@ allprojects {
     plugins.withType(AndroidBasePlugin).configureEach {
         android {
             buildToolsVersion "37.0.0"
+            // Graphite: the platform the device runs. tools/apps/sdk-use-tree-framework.py gives this
+            // SDK the tree's framework resources, so framework references get the device's real IDs.
             compileSdk {
-                version = release(37) {
-                    minorApiLevel = 2
-                }
+                version = release(37)
             }
             defaultConfig {
                 minSdk = 26

@@ -84,9 +84,11 @@
          android:restoreAnyVersion="true"
          android:supportsRtl="true">
 
+        <!-- Graphite: not direct boot aware. Lawnchair keeps its settings in credential encrypted
+             storage, so its process must not start before the first unlock. -->
         <service android:name="com.android.quickstep.TouchInteractionService"
              android:permission="android.permission.STATUS_BAR_SERVICE"
-             android:directBootAware="true"
+             android:directBootAware="false"
              android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.QUICKSTEP_SERVICE"/>
