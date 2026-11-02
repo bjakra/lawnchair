@@ -250,7 +250,9 @@ public class GridCustomizationsProxy implements ProxyProvider {
             case GET_ICON_THEMED:
             case ICON_THEMED: {
                 MatrixCursor cursor = new MatrixCursor(new String[]{BOOLEAN_VALUE});
-                boolean monoThemeEnabled = MONO_THEME_VALUE.equals(mThemePreference.getValue());
+                // Graphite: Lawnchair's icon provider reads its own setting, not ThemePreference
+                boolean monoThemeEnabled = app.lawnchair.preferences.PreferenceManager
+                        .getInstance(mContext).getThemedIcons().get();
                 cursor.newRow().add(BOOLEAN_VALUE, monoThemeEnabled ? 1 : 0);
                 Log.d(TAG, "query: path=" + path + ", isMonoThemeEnabled=" + monoThemeEnabled);
                 return cursor;
@@ -326,6 +328,11 @@ public class GridCustomizationsProxy implements ProxyProvider {
                 } else {
                     mThemePreference.setValue(null, MONO_THEME_VALUE::equals);
                 }
+                // Graphite: this is what actually themes Lawnchair's icons
+                boolean themed = values.getAsBoolean(BOOLEAN_VALUE);
+                var lawnchairPrefs = app.lawnchair.preferences.PreferenceManager.getInstance(mContext);
+                lawnchairPrefs.getThemedIcons().set(themed);
+                lawnchairPrefs.getDrawerThemedIcons().set(themed);
                 return UPDATE_SETTING_SUCCESS;
             }
             case SET_WORKSPACE_ITEMS_LABEL_HIDDEN: {

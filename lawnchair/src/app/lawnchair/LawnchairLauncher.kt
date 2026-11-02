@@ -234,13 +234,8 @@ class LawnchairLauncher : QuickstepLauncher() {
         LauncherOptionsPopup.restoreMissingPopupOptions(launcher)
         LauncherOptionsPopup.migrateLegacyPreferences(launcher)
 
-        // Handle update from version 12 Alpha 4 to version 12 Alpha 5.
-        if (
-            prefs.themedIcons.get() &&
-            packageManager.getThemedIconPacksInstalled(this).isEmpty()
-        ) {
-            prefs.themedIcons.set(newValue = false)
-        }
+        // Graphite: dropped Lawnchair's migration that turned themed icons off when no themed icon
+        // pack is installed. Apps' own monochrome icons work without one, and it undid the setting.
 
         colorScheme = themeProvider.colorScheme
 
