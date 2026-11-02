@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.SparseIntArray;
 import android.view.ContextThemeWrapper;
+import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.SurfaceControlViewHost;
@@ -67,6 +68,8 @@ import java.util.concurrent.TimeUnit;
 /** Render preview using surface view. */
 @SuppressWarnings("NewApi")
 public class PreviewSurfaceRenderer {
+
+    private static final String TAG = "PreviewSurfaceRenderer";
 
     public static final long FADE_IN_ANIMATION_DURATION = 200;
     public static final String KEY_HOST_TOKEN = "host_token";
@@ -195,6 +198,10 @@ public class PreviewSurfaceRenderer {
         }
 
         MAIN_EXECUTOR.submit(() -> {
+            // Graphite: Lawnchair's search bar is a ComposeView, which needs these owners
+            PreviewComposeOwner composeOwner = new PreviewComposeOwner();
+            composeOwner.attachTo(mViewRoot);
+            mLifeCycleTracker.add(() -> MAIN_EXECUTOR.execute(composeOwner::destroy));
             mSurfaceControlViewHost.setView(mViewRoot, mWidth, mHeight);
             if (!skipAnimations) mViewRoot.setAlpha(0);
 
@@ -347,7 +354,13 @@ public class PreviewSurfaceRenderer {
         renderer.hideBottomRow(mHideQsb);
 
         CompletableFuture<Void> renderTask = renderer.initialRender
-                .thenAcceptAsync(this::setContentRoot, MAIN_EXECUTOR);
+                .thenAcceptAsync(this::setContentRoot, MAIN_EXECUTOR)
+                // Graphite: otherwise a failure here is silent and the preview just stays black
+                .whenComplete((unused, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, "Failed to show the preview", error);
+                    }
+                });
         if (oldRenderer != null) {
             Future<?> unused = CompletableFuture.anyOf(renderTask)
                     .completeOnTimeout(null, 10, TimeUnit.SECONDS)
