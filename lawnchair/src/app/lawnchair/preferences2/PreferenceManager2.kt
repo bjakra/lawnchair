@@ -301,6 +301,14 @@ class PreferenceManager2 @Inject constructor(
         onSet = { reloadHelper.reloadGrid() },
     )
 
+    /** Graphite: Material You colours for both search bars, see [app.lawnchair.qsb.QsbColorStyle] */
+    val qsbColorStyle = preference(
+        key = stringPreferencesKey(name = "graphite_qsb_color_style"),
+        defaultValue = app.lawnchair.qsb.QsbColorStyle.NEUTRAL,
+        parse = { app.lawnchair.qsb.QsbColorStyle.fromString(it) },
+        save = { it.name },
+    )
+
     val themedHotseatQsb = preference(
         key = booleanPreferencesKey(name = "themed_hotseat_qsb"),
         defaultValue = context.resources.getBoolean(R.bool.config_default_themed_hotseat_qsb),

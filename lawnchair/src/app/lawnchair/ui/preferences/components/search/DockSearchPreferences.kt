@@ -29,6 +29,7 @@ import app.lawnchair.preferences.PreferenceAdapter
 import app.lawnchair.preferences.getAdapter
 import app.lawnchair.preferences.preferenceManager
 import app.lawnchair.preferences2.preferenceManager2
+import app.lawnchair.qsb.withColorStyle
 import app.lawnchair.qsb.LawnQsbLayout
 import app.lawnchair.qsb.LawnQsbUi
 import app.lawnchair.qsb.QsbActions
@@ -110,10 +111,21 @@ fun DockSearchPreference(
                         PreferenceGroup(
                             heading = stringResource(R.string.style),
                         ) {
-                            SwitchPreference(
-                                adapter = themeQsbAdapter,
-                                label = stringResource(id = R.string.apply_accent_color_label),
+                            // Graphite: Material You colours for both search bars
+                            val colorStyleAdapter = prefs2.qsbColorStyle.getAdapter()
+                            ListPreference(
+                                adapter = colorStyleAdapter,
+                                entries = app.lawnchair.qsb.QsbColorStyle.entries.map { option ->
+                                    ListPreferenceEntry(option) { stringResource(option.labelRes) }
+                                },
+                                label = stringResource(id = R.string.qsb_color_label),
                             )
+                            ExpandAndShrink(visible = !colorStyleAdapter.state.value.isMaterialYou) {
+                                SwitchPreference(
+                                    adapter = themeQsbAdapter,
+                                    label = stringResource(id = R.string.apply_accent_color_label),
+                                )
+                            }
                             SliderPreference(
                                 label = stringResource(id = R.string.corner_radius_label),
                                 adapter = qsbCornerAdapter,
@@ -199,21 +211,23 @@ private fun DockSearchBarPreview(
                 .height(dimensionResource(id = R.dimen.qsb_widget_height) + 24.dp),
             contentAlignment = Alignment.Center,
         ) {
+            // Graphite: the preview follows the Material You colour option too
+            val colorStyle = preferenceManager2().qsbColorStyle.getAdapter().state.value
             LawnQsbUi(
                 state = rememberHotseatQsbState(
                     searchProvider,
                     themed,
                     showMic = voiceIntent != null,
                     showLens = lensIntent != null,
-                ),
+                ).withColorStyle(context, colorStyle),
                 style = buildQsbStyle(
                     context = context,
                     themed = themed,
-                    backgroundColor = getHotseatBackgroundColor(
-                        context,
-                        themed,
-                        getThemedQsbBackgroundColor(),
-                    ),
+                    backgroundColor = if (colorStyle.isMaterialYou) {
+                        colorStyle.background(context)
+                    } else {
+                        getHotseatBackgroundColor(context, themed, getThemedQsbBackgroundColor())
+                    },
                     cornerRadius = cornerRadiusFactor,
                     backgroundAlpha = transparency,
                     strokeWidth = strokeWidth,

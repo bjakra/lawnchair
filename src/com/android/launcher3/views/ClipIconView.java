@@ -242,10 +242,11 @@ public class ClipIconView extends View implements ClipPathView {
             final ThemeManager themeManager = ThemeManager.INSTANCE.get(getContext());
             if (mIsFolderIcon) {
                 mCurrentShape = themeManager.getFolderShape();
-            } else if (usingCustomShape) {
-                mCurrentShape = themeManager.getIconShape();
             } else {
-                mCurrentShape = ThemeManager.DEFAULT_SHAPE_DELEGATE;
+                // Graphite: Lawnchair masks every icon with its own icon shape, so the window must
+                // morph into that shape too. The default shape made it turn into a rounded square
+                // and then jump to the real (for example round) icon at the end of the animation.
+                mCurrentShape = themeManager.getIconShape();
             }
 
             AdaptiveIconDrawable adaptiveIcon = (AdaptiveIconDrawable) drawable;

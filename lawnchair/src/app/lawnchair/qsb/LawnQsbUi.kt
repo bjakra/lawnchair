@@ -86,6 +86,8 @@ data class QsbIconState(
     val visible: Boolean = true,
     /** Graphite: draw it in a neutral colour, ignoring the provider's colours. */
     val neutral: Boolean = false,
+    /** Graphite: draw it in this colour, from the search bar's Material You colour style. */
+    @param:androidx.annotation.ColorInt val tintColor: Int? = null,
 )
 
 /**
@@ -385,15 +387,26 @@ fun LawnQsbUi(
                 ),
             contentAlignment = Alignment.Center,
         ) {
-            Image(
-                painter = rememberThemedIconPainter(
-                    resId = state.startIcon.resId,
-                    themed = state.startIcon.themed,
-                    method = state.startIcon.method,
-                ),
-                contentDescription = state.startIcon.contentDescription,
-                modifier = Modifier.size(24.dp),
+            val startPainter = rememberThemedIconPainter(
+                resId = state.startIcon.resId,
+                themed = state.startIcon.themed,
+                method = state.startIcon.method,
             )
+            val startTint = state.startIcon.tintColor
+            if (startTint != null) {
+                Icon(
+                    painter = startPainter,
+                    contentDescription = state.startIcon.contentDescription,
+                    tint = ComposeColor(startTint),
+                    modifier = Modifier.size(24.dp),
+                )
+            } else {
+                Image(
+                    painter = startPainter,
+                    contentDescription = state.startIcon.contentDescription,
+                    modifier = Modifier.size(24.dp),
+                )
+            }
         }
 
         Spacer(Modifier.weight(1f))
@@ -458,7 +471,9 @@ fun QsbIcon(
                 method = icon.method,
             ),
             contentDescription = icon.contentDescription,
-            tint = if (icon.neutral) {
+            tint = if (icon.tintColor != null) {
+                ComposeColor(icon.tintColor)
+            } else if (icon.neutral) {
                 ComposeColor(LocalContext.current.getColor(R.color.materialColorOnSurfaceVariant))
             } else {
                 ComposeColor.Unspecified
@@ -531,4 +546,14 @@ private fun LawnQsbUiPreview() {
                 .height(52.dp),
         )
     }
+}
+
+/** Graphite: applies a Material You colour style's icon colour to every icon of a search bar. */
+fun QsbState.withColorStyle(context: Context, colorStyle: QsbColorStyle): QsbState {
+    if (!colorStyle.isMaterialYou) return this
+    val tint = colorStyle.foreground(context)
+    return copy(
+        startIcon = startIcon.copy(tintColor = tint),
+        endIcons = endIcons.map { it.copy(tintColor = tint) },
+    )
 }

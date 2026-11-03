@@ -48,6 +48,7 @@ import app.lawnchair.qsb.LawnQsbUi
 import app.lawnchair.qsb.QsbActions
 import app.lawnchair.qsb.QsbIconId
 import app.lawnchair.qsb.buildQsbStyle
+import app.lawnchair.qsb.withColorStyle
 import app.lawnchair.qsb.providers.Google
 import app.lawnchair.qsb.providers.PixelSearch
 import app.lawnchair.qsb.rememberAllAppsQsbState
@@ -189,7 +190,10 @@ class AllAppsSearchInput(context: Context, attrs: AttributeSet?) :
                     endIcons = providerState.endIcons.map { it.copy(neutral = true) },
                 )
 
-                val backgroundColor = if (supportBlur) {
+                val colorStyle = prefs2.qsbColorStyle.asState().value
+                val backgroundColor = if (colorStyle.isMaterialYou) {
+                    colorStyle.background(context)
+                } else if (supportBlur) {
                     ColorTokens.SearchboxHighlightBlur.resolveColor(context)
                 } else {
                     ColorTokens.SearchboxHighlight.resolveColor(context)
@@ -248,7 +252,7 @@ class AllAppsSearchInput(context: Context, attrs: AttributeSet?) :
                 LawnchairTheme {
                     ProvideLifecycleState {
                         LawnQsbUi(
-                            state = state,
+                            state = state.withColorStyle(context, colorStyle),
                             style = style,
                             actions = actions,
                         )

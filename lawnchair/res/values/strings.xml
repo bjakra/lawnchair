@@ -1113,4 +1113,10 @@
     <string name="smartspace_next_alarm">Next alarm</string>
     <string name="smartspace_next_alarm_title">Alarm</string>
     <string name="smartspace_calendar_events">Upcoming events</string>
+    <string name="qsb_color_label">Colour</string>
+    <string name="qsb_color_neutral">Material You, neutral</string>
+    <string name="qsb_color_primary">Material You, primary</string>
+    <string name="qsb_color_secondary">Material You, secondary</string>
+    <string name="qsb_color_tertiary">Material You, tertiary</string>
+    <string name="qsb_color_lawnchair">Lawnchair</string>
 </resources>

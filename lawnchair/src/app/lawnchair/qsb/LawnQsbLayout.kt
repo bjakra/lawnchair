@@ -90,10 +90,15 @@ class LawnQsbLayout(context: Context, attrs: AttributeSet?) : FrameLayout(contex
                             showLens = lensIntent != null,
                         )
 
+                        val colorStyle = prefs2.qsbColorStyle.asState().value
                         val style = buildQsbStyle(
                             context = LocalContext.current,
                             themed = themed,
-                            backgroundColor = getHotseatBackgroundColor(context, themed),
+                            backgroundColor = if (colorStyle.isMaterialYou) {
+                                colorStyle.background(context)
+                            } else {
+                                getHotseatBackgroundColor(context, themed)
+                            },
                             backgroundAlpha = prefs.hotseatQsbAlpha.observeAsState().value,
                             cornerRadius = prefs.hotseatQsbCornerRadius.observeAsState().value,
                             // Use light color as strokeColor is a static color that doesn't use darkColor
@@ -130,7 +135,7 @@ class LawnQsbLayout(context: Context, attrs: AttributeSet?) : FrameLayout(contex
                         )
 
                         LawnQsbUi(
-                            state = state,
+                            state = state.withColorStyle(context, colorStyle),
                             style = style,
                             actions = actions,
                         )
