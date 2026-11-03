@@ -212,7 +212,7 @@ private fun DockSearchBarPreview(
             contentAlignment = Alignment.Center,
         ) {
             // Graphite: the preview follows the Material You colour option too
-            val colorStyle = preferenceManager2().qsbColorStyle.getAdapter().state.value
+            val colorStyle = app.lawnchair.qsb.rememberQsbColorStyle()
             LawnQsbUi(
                 state = rememberHotseatQsbState(
                     searchProvider,

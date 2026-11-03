@@ -90,7 +90,7 @@ class LawnQsbLayout(context: Context, attrs: AttributeSet?) : FrameLayout(contex
                             showLens = lensIntent != null,
                         )
 
-                        val colorStyle = prefs2.qsbColorStyle.asState().value
+                        val colorStyle = rememberQsbColorStyle()
                         val style = buildQsbStyle(
                             context = LocalContext.current,
                             themed = themed,

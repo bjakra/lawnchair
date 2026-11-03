@@ -190,7 +190,7 @@ class AllAppsSearchInput(context: Context, attrs: AttributeSet?) :
                     endIcons = providerState.endIcons.map { it.copy(neutral = true) },
                 )
 
-                val colorStyle = prefs2.qsbColorStyle.asState().value
+                val colorStyle = app.lawnchair.qsb.rememberQsbColorStyle()
                 val backgroundColor = if (colorStyle.isMaterialYou) {
                     colorStyle.background(context)
                 } else if (supportBlur) {
