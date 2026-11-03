@@ -177,8 +177,10 @@ public class OverviewState extends LauncherState {
     public ScrimColors getWorkspaceScrimColor(Launcher launcher) {
         // Lawnchair-TODO-Colour: Check overviewScrimForegroundPrimary and overviewScrimForegroundSecondary
         // Lawnchair-TODO-Colour: Move to OverviewScrim
+        // Graphite: Lawnchair's colour token, which applies the translucent background settings
         return new ScrimColors(
-                /* backgroundColor= */ Themes.getAttrColor(launcher, R.attr.overviewScrimColor),
+                /* backgroundColor= */ app.lawnchair.theme.color.tokens.ColorTokens.OverviewScrim
+                        .resolveColor(launcher),
                 /* foregroundColor= */ Color.TRANSPARENT);
     }
 

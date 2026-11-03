@@ -73,8 +73,14 @@ class LawnchairLocalSearchAlgorithm(context: Context) : LawnchairSearchAlgorithm
     override fun doSearch(query: String, callback: SearchCallback<BaseAllAppsAdapter.AdapterItem>) {
         modelRetryJob?.cancel()
         modelRetryJob = appState.model.runWhenModelLoaded(coroutineScope) { apps ->
-            val appResults = appSearchProvider.search(context, query, apps)
-            val shortcutResults = shortcutSearchProvider.search(context, appResults)
+            // Graphite: the "Apps and shortcuts" switch wasn't read at all. The Settings app's own
+            // shortcuts (Wi-Fi, Battery, ...) count as Android settings results, so that switch hides them too.
+            val legacyPrefs = PreferenceManager.getInstance(context)
+            val appsEnabled = legacyPrefs.searchResultApps.get()
+            val appResults = if (appsEnabled) appSearchProvider.search(context, query, apps) else emptyList()
+            val shortcutResults = shortcutSearchProvider.search(context, appResults).filter {
+                legacyPrefs.searchResultSettingsEntry.get() || !it.isSettingsAppShortcut()
+            }
 
             currentJob?.cancel()
             currentJob = coroutineScope.launch {
@@ -232,3 +238,7 @@ private const val ZERO_STATE_APP_COUNT = 4
 
 /** How long a search waits for slow providers before showing what it has. */
 private const val SETTLE_MILLIS = 250L
+
+/** Graphite: a launcher shortcut published by the Settings app, such as Wi-Fi or Battery. */
+private fun SearchResult.isSettingsAppShortcut(): Boolean =
+    this is SearchResult.Shortcut && data.`package` == "com.android.settings"

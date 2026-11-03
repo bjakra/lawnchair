@@ -90,7 +90,8 @@ open class RecentsState(@JvmField val ordinal: Int, private val mFlags: Int) :
     fun getScrimColor(context: Context) =
         ScrimColors(
             backgroundColor =
-                if (hasFlag(FLAG_SCRIM)) Themes.getAttrColor(context, R.attr.overviewScrimColor)
+                // Graphite: Lawnchair's colour token, which applies the translucent background settings
+                if (hasFlag(FLAG_SCRIM)) app.lawnchair.theme.color.tokens.ColorTokens.OverviewScrim.resolveColor(context)
                 else Color.TRANSPARENT,
             foregroundColor = Color.TRANSPARENT,
         )
