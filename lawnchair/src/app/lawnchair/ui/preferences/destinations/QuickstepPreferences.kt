@@ -15,7 +15,6 @@ import app.lawnchair.animation.AnimationTuning
 import app.lawnchair.preferences.getAdapter
 import app.lawnchair.preferences.observeAsState
 import app.lawnchair.preferences.preferenceManager
-import app.lawnchair.preferences2.preferenceManager2
 import app.lawnchair.ui.preferences.components.QuickActionsPreferences
 import app.lawnchair.ui.preferences.components.RecentsQuickAction
 import app.lawnchair.ui.preferences.components.controls.ListPreference
@@ -31,14 +30,12 @@ import app.lawnchair.ui.util.preview.PreferenceGroupPreviewContainer
 import app.lawnchair.ui.util.preview.PreviewLawnchair
 import app.lawnchair.util.isOnePlusStock
 import com.android.launcher3.R
-import com.android.launcher3.Utilities
 
 @Composable
 fun QuickstepPreferences(
     modifier: Modifier = Modifier,
 ) {
     val prefs = preferenceManager()
-    val prefs2 = preferenceManager2()
     val context = LocalContext.current
     val lensAvailable = remember {
         context.packageManager.getLaunchIntentForPackage("com.google.ar.lens") != null
@@ -142,16 +139,7 @@ fun QuickstepPreferences(
             )
         }
 
-        if (Utilities.ATLEAST_S_V2) {
-            PreferenceGroup(
-                heading = stringResource(id = R.string.taskbar_label),
-            ) {
-                SwitchPreference(
-                    adapter = prefs2.enableTaskbarOnPhone.getAdapter(),
-                    label = stringResource(id = R.string.enable_taskbar_experimental),
-                )
-            }
-        }
+        // Graphite: no "Show taskbar" switch; phones keep SystemUI's navigation bar.
     }
 }
 
