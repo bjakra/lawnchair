@@ -69,6 +69,8 @@ import static com.android.systemui.shared.Flags.enableRecentsInTaskbar;
 import static com.android.systemui.shared.system.QuickStepContract.getWindowCornerRadius;
 import static com.android.systemui.shared.system.QuickStepContract.supportsRoundedCornersOnWindows;
 
+import app.lawnchair.animation.AnimationTuning;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -466,9 +468,9 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
         // Note that this duration is a guess as we do not know if the animation will be a
         // recents launch or not for sure until we know the opening app targets.
-        long duration = fromRecents
+        long duration = AnimationTuning.duration(mLauncher, fromRecents
                 ? RECENTS_LAUNCH_DURATION
-                : APP_LAUNCH_DURATION;
+                : APP_LAUNCH_DURATION);
 
         long statusBarTransitionDelay = duration - STATUS_BAR_TRANSITION_DURATION
                 - STATUS_BAR_TRANSITION_PRE_DELAY;
@@ -922,7 +924,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
         AnimatorSet animatorSet = new AnimatorSet();
         ValueAnimator appAnimator = ValueAnimator.ofFloat(0, 1);
-        appAnimator.setDuration(APP_LAUNCH_DURATION);
+        appAnimator.setDuration(AnimationTuning.duration(mLauncher, APP_LAUNCH_DURATION));
         appAnimator.setInterpolator(LINEAR);
         appAnimator.addListener(floatingView);
         appAnimator.addListener(new AnimatorListenerAdapter() {
@@ -962,7 +964,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 : 0f;
         final float finalShadowRadius = appTargetsAreTranslucent ? 0 : mMaxShadowRadius;
 
-        MultiValueUpdateListener listener = new MultiValueUpdateListener(mOpeningInterpolator) {
+        MultiValueUpdateListener listener = new MultiValueUpdateListener(
+                AnimationTuning.openInterpolator(mLauncher, mOpeningInterpolator)) {
             FloatProp mDx = new FloatProp(0, prop.dX, mOpeningXInterpolator);
             FloatProp mDy = new FloatProp(0, prop.dY);
 
@@ -1210,7 +1213,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
         AnimatorSet animatorSet = new AnimatorSet();
         ValueAnimator appAnimator = ValueAnimator.ofFloat(0, 1);
-        appAnimator.setDuration(APP_LAUNCH_DURATION);
+        appAnimator.setDuration(AnimationTuning.duration(mLauncher, APP_LAUNCH_DURATION));
         appAnimator.setInterpolator(LINEAR);
         appAnimator.addListener(floatingView);
         appAnimator.addListener(new AnimatorListenerAdapter() {
@@ -1864,7 +1867,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         Point tmpPos = new Point();
         Rect tmpRect = new Rect();
         ValueAnimator closingAnimator = ValueAnimator.ofFloat(0, 1);
-        int duration = CLOSING_TRANSITION_DURATION_MS;
+        int duration = AnimationTuning.duration(mLauncher, CLOSING_TRANSITION_DURATION_MS);
         float windowCornerRadius = getWindowCornerRadius(mLauncher);
         float startShadowRadius = areAllSurfacesTranslucent(appSurfaces) ? 0 : mMaxShadowRadius;
         closingAnimator.setDuration(duration);

@@ -1119,4 +1119,11 @@
     <string name="qsb_color_secondary">Material You, secondary</string>
     <string name="qsb_color_tertiary">Material You, tertiary</string>
     <string name="qsb_color_lawnchair">Lawnchair</string>
+    <string name="app_animations_label">App animations</string>
+    <string name="app_animations_description">Opening, closing and swiping home from apps</string>
+    <string name="app_animation_speed_label">Animation speed</string>
+    <string name="app_animation_style_label">Animation style</string>
+    <string name="app_animation_style_standard">Standard</string>
+    <string name="app_animation_style_smooth">Smooth (soft, no bounce)</string>
+    <string name="app_animation_style_bouncy">Bouncy</string>
 </resources>

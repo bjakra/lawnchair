@@ -119,6 +119,8 @@ class PreferenceManager @Inject constructor(
     val launcherTheme = StringPref("pref_launcherTheme", "system")
     val overrideWindowCornerRadius = BoolPref("pref_overrideWindowCornerRadius", false, recreate)
     val windowCornerRadius = IntPref("pref_windowCornerRadius", 80, recreate)
+    val appAnimationSpeed = IntPref("pref_appAnimationSpeed", 100)
+    val appAnimationStyle = StringPref("pref_appAnimationStyle", "standard")
     val autoLaunchRoot = BoolPref("pref_autoLaunchRoot", false)
     val wallpaperScrolling = BoolPref("pref_wallpaperScrolling", true)
     val infiniteScrolling = BoolPref("pref_infiniteScrolling", false)

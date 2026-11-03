@@ -18,6 +18,8 @@ package com.android.quickstep.util;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import app.lawnchair.animation.AnimationTuning;
+
 import android.animation.Animator;
 import android.content.Context;
 import android.graphics.PointF;
@@ -257,7 +259,8 @@ public class RectFSpringAnim extends SurfaceReleaseCheck {
                         .setStartVelocity(yVelocityPxPerS)
                         .addEndListener(onYEndListener);
 
-        float dampingZ = rp.getFloat(R.dimen.swipe_up_rect_scale_damping_ratio_v2);
+        float dampingZ = AnimationTuning.damping(context,
+                rp.getFloat(R.dimen.swipe_up_rect_scale_damping_ratio_v2));
         mRectScaleAnim =
                 new SpringAnimation(this, RECT_SCALE_PROGRESS)
                         .setSpring(
@@ -446,6 +449,11 @@ public class RectFSpringAnim extends SurfaceReleaseCheck {
             dampingX = rp.getFloat(R.dimen.swipe_up_rect_x_damping_ratio);
             dampingY = rp.getFloat(R.dimen.swipe_up_rect_y_damping_ratio);
             rectStiffness = rp.getFloat(R.dimen.swipe_up_rect_scale_stiffness_v2);
+            stiffnessX = AnimationTuning.stiffness(context, stiffnessX);
+            stiffnessY = AnimationTuning.stiffness(context, stiffnessY);
+            dampingX = AnimationTuning.damping(context, dampingX);
+            dampingY = AnimationTuning.damping(context, dampingY);
+            rectStiffness = AnimationTuning.stiffness(context, rectStiffness);
 
             this.startRect = startRect;
             this.targetRect = targetRect;

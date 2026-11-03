@@ -11,12 +11,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.lawnchair.LawnchairApp
+import app.lawnchair.animation.AnimationTuning
 import app.lawnchair.preferences.getAdapter
 import app.lawnchair.preferences.observeAsState
 import app.lawnchair.preferences.preferenceManager
 import app.lawnchair.preferences2.preferenceManager2
 import app.lawnchair.ui.preferences.components.QuickActionsPreferences
 import app.lawnchair.ui.preferences.components.RecentsQuickAction
+import app.lawnchair.ui.preferences.components.controls.ListPreference
+import app.lawnchair.ui.preferences.components.controls.ListPreferenceEntry
 import app.lawnchair.ui.preferences.components.controls.SliderPreference
 import app.lawnchair.ui.preferences.components.controls.SwitchPreference
 import app.lawnchair.ui.preferences.components.controls.WarningPreference
@@ -115,6 +118,28 @@ fun QuickstepPreferences(
                     valueRange = 70..150,
                 )
             }
+        }
+
+        PreferenceGroup(
+            heading = stringResource(id = R.string.app_animations_label),
+            description = stringResource(id = R.string.app_animations_description),
+        ) {
+            SliderPreference(
+                label = stringResource(id = R.string.app_animation_speed_label),
+                adapter = prefs.appAnimationSpeed.getAdapter(),
+                step = 10,
+                valueRange = 50..200,
+                showUnit = "%",
+            )
+            ListPreference(
+                adapter = prefs.appAnimationStyle.getAdapter(),
+                entries = listOf(
+                    AnimationTuning.STYLE_STANDARD to R.string.app_animation_style_standard,
+                    AnimationTuning.STYLE_SMOOTH to R.string.app_animation_style_smooth,
+                    AnimationTuning.STYLE_BOUNCY to R.string.app_animation_style_bouncy,
+                ).map { (value, label) -> ListPreferenceEntry(value) { stringResource(label) } },
+                label = stringResource(id = R.string.app_animation_style_label),
+            )
         }
 
         if (Utilities.ATLEAST_S_V2) {
