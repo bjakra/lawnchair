@@ -61,6 +61,8 @@ class ThemeProvider @Inject constructor(
                 if (accentColor is ColorOption.WallpaperPrimary) {
                     notifyColorSchemeChanged()
                 }
+                // The system palette follows the wallpaper shortly after
+                notifySystemSchemeChangedLater()
             }
         }
 
@@ -69,7 +71,6 @@ class ThemeProvider @Inject constructor(
 
     init {
         if (Utilities.ATLEAST_S) {
-            colorSchemeMap[Pair(0, Style.TONAL_SPOT)] = SystemColorScheme(context)
             registerOverlayChangedListener()
         }
         wallpaperManager.addOnChangeListener(wallpaperColorsChangedListener)
@@ -90,9 +91,9 @@ class ThemeProvider @Inject constructor(
         packageFilter.addDataSchemeSpecificPart("android", PatternMatcher.PATTERN_LITERAL)
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                colorSchemeMap[Pair(0, Style.TONAL_SPOT)] = SystemColorScheme(context)
                 if (accentColor is ColorOption.SystemAccent) {
                     notifyColorSchemeChanged()
+                    notifySystemSchemeChangedLater()
                 }
             }
         }
@@ -113,9 +114,37 @@ class ThemeProvider @Inject constructor(
         else -> getColorScheme(ColorOption.LawnchairBlue.color, colorStyle.style)
     }
 
+    // Graphite: the system scheme was cached under seed 0 and only refreshed for TONAL_SPOT on
+    // OVERLAY_CHANGED, which can arrive before the app's resources have the new palette, so the
+    // drawer kept the old Material You colours until a restart. Now the cache follows the system
+    // accent colour as the resources report it, so a new wallpaper palette is always picked up.
+    @Volatile private var systemScheme: ColorScheme? = null
+    @Volatile private var systemSeed: Int? = null
+
     private val systemColorScheme get() = when {
-        Utilities.ATLEAST_S -> getColorScheme(0, colorStyle.style)
+        Utilities.ATLEAST_S -> {
+            val seed = context.resources.getColor(android.R.color.system_accent1_500, null)
+            if (colorStyle.style == Style.TONAL_SPOT) {
+                systemScheme?.takeIf { systemSeed == seed }
+                    ?: SystemColorScheme(context).also {
+                        systemScheme = it
+                        systemSeed = seed
+                    }
+            } else {
+                getColorScheme(seed, colorStyle.style)
+            }
+        }
         else -> getColorScheme(context.getSystemAccent(darkTheme = false), colorStyle.style)
+    }
+
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    /** Notify again once the resources have caught up with a new system palette */
+    private fun notifySystemSchemeChangedLater() {
+        if (accentColor !is ColorOption.SystemAccent) return
+        listOf(500L, 2000L).forEach { delay ->
+            mainHandler.postDelayed({ notifyColorSchemeChanged() }, delay)
+        }
     }
 
     private fun getColorScheme(
