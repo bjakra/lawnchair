@@ -227,6 +227,7 @@ public class NotificationListener extends NotificationListenerService {
                 });
 
         onNotificationFullRefresh();
+        app.lawnchair.smartspace.provider.ActiveNotifications.onChanged();
     }
 
     private void onNotificationSettingsChanged(boolean areNotificationDotsEnabled) {
@@ -258,6 +259,7 @@ public class NotificationListener extends NotificationListenerService {
         if (sbn != null) {
             mWorkerHandler.obtainMessage(MSG_NOTIFICATION_POSTED, sbn).sendToTarget();
             mNotificationManager.onNotificationPosted(sbn);
+            app.lawnchair.smartspace.provider.ActiveNotifications.onChanged();
         }
     }
 
@@ -266,6 +268,7 @@ public class NotificationListener extends NotificationListenerService {
         if (sbn != null) {
             mWorkerHandler.obtainMessage(MSG_NOTIFICATION_REMOVED, sbn).sendToTarget();
             mNotificationManager.onNotificationRemoved(sbn);
+            app.lawnchair.smartspace.provider.ActiveNotifications.onChanged();
         }
     }
 

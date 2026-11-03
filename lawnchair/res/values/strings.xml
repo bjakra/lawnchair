@@ -1112,6 +1112,15 @@
     <string name="search_toggle_location">Location</string>
     <string name="smartspace_next_alarm">Next alarm</string>
     <string name="smartspace_next_alarm_title">Alarm</string>
+    <string name="smartspace_dnd">Do Not Disturb</string>
+    <string name="smartspace_dnd_on">On</string>
+    <string name="smartspace_bluetooth_battery">Bluetooth device battery</string>
+    <string name="smartspace_timer">Timers and stopwatch</string>
+    <string name="smartspace_timer_title">Timer</string>
+    <string name="smartspace_timer_ends">Ends at %1$s</string>
+    <string name="smartspace_stopwatch_title">Stopwatch</string>
+    <string name="smartspace_stopwatch_running">Running</string>
+    <string name="smartspace_missed_call">Missed call</string>
     <string name="smartspace_calendar_events">Upcoming events</string>
     <string name="qsb_color_label">Colour</string>
     <string name="qsb_color_auto">Automatic (Material You with themed icons)</string>

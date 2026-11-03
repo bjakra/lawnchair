@@ -783,6 +783,26 @@ class PreferenceManager2 @Inject constructor(
         defaultValue = true,
     )
 
+    val smartspaceDoNotDisturb = preference(
+        key = booleanPreferencesKey("enable_smartspace_graphite_dnd"),
+        defaultValue = true,
+    )
+
+    val smartspaceBluetoothBattery = preference(
+        key = booleanPreferencesKey("enable_smartspace_graphite_bluetooth"),
+        defaultValue = true,
+    )
+
+    val smartspaceTimer = preference(
+        key = booleanPreferencesKey("enable_smartspace_graphite_timer"),
+        defaultValue = true,
+    )
+
+    val smartspaceMissedCalls = preference(
+        key = booleanPreferencesKey("enable_smartspace_graphite_missed_calls"),
+        defaultValue = true,
+    )
+
     val smartspaceTorch = preference(
         key = booleanPreferencesKey("enable_smartspace_torch"),
         defaultValue = true,

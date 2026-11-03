@@ -30,6 +30,10 @@ class SmartspaceProvider @Inject constructor(
         GraphiteWeatherProvider(context),
         CalendarEventProvider(context),
         NextAlarmProvider(context),
+        ClockTimerProvider(context),
+        MissedCallProvider(context),
+        DoNotDisturbProvider(context),
+        BluetoothBatteryProvider(context),
         BatteryStatusProvider(context),
         TorchProvider(context),
         NowPlayingProvider(context),
@@ -46,14 +50,26 @@ class SmartspaceProvider @Inject constructor(
         )
     val targets = state
         .map {
+            val targets = singleDateCard(it.targets)
             if (it.requiresSetup.isNotEmpty()) {
-                listOf(setupTarget) + it.targets
+                listOf(setupTarget) + targets
             } else {
-                it.targets
+                targets
             }
         }
     val previewTargets = state
-        .map { it.targets }
+        .map { singleDateCard(it.targets) }
+
+    /**
+     * Graphite: weather targets are drawn as the date card. Keep one: the first with weather data,
+     * else a single plain date card, so there's no second page with just the date again.
+     */
+    private fun singleDateCard(targets: List<SmartspaceTarget>): List<SmartspaceTarget> {
+        val dateCards = targets.filter { it.featureType == SmartspaceTarget.FeatureType.FEATURE_WEATHER }
+        if (dateCards.size <= 1) return targets
+        val keep = dateCards.firstOrNull { it.headerAction?.subtitle?.isNotEmpty() == true } ?: dateCards.first()
+        return targets.filter { it.featureType != SmartspaceTarget.FeatureType.FEATURE_WEATHER || it === keep }
+    }
 
     private val setupTarget = SmartspaceTarget(
         id = "smartspaceSetup",

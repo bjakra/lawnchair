@@ -106,7 +106,11 @@ class BcSmartspaceView @JvmOverloads constructor(
             return
         }
 
-        val sortedTargets = targets.sortedByDescending { it.score }.toMutableList()
+        // Graphite: the date card (with weather) always comes first, as on the Pixel
+        val sortedTargets = targets.sortedWith(
+            compareByDescending<SmartspaceTarget> { it.featureType == SmartspaceTarget.FeatureType.FEATURE_WEATHER }
+                .thenByDescending { it.score },
+        ).toMutableList()
         val isRtl = layoutDirection == LAYOUT_DIRECTION_RTL
         val currentItem = viewPager.currentItem
         val index = if (isRtl) adapter.count - currentItem else currentItem
