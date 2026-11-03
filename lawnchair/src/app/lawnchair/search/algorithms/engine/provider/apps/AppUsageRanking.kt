@@ -32,9 +32,46 @@ object AppUsageRanking {
         )
     }
 
+    @Volatile
+    private var refreshing = false
+
+    /**
+     * The last scores at once, refreshed in the background when older than a minute, so opening search
+     * never waits for the usage statistics query. Only the very first search computes them inline.
+     */
     private fun scores(context: Context): Map<String, Double> {
         val time = SystemClock.elapsedRealtime()
-        if (loadedAt != 0L && time - loadedAt < CACHE_MILLIS) return scores
+        if (loadedAt == 0L) return load(context)
+        if (time - loadedAt >= CACHE_MILLIS && !refreshing) {
+            refreshing = true
+            val appContext = context.applicationContext
+            Thread({
+                try {
+                    load(appContext)
+                } finally {
+                    refreshing = false
+                }
+            }, "AppUsageRanking").start()
+        }
+        return scores
+    }
+
+    /** Loads the scores ahead of the first search. */
+    fun warmUp(context: Context) {
+        if (loadedAt != 0L || refreshing) return
+        refreshing = true
+        val appContext = context.applicationContext
+        Thread({
+            try {
+                load(appContext)
+            } finally {
+                refreshing = false
+            }
+        }, "AppUsageRanking").start()
+    }
+
+    private fun load(context: Context): Map<String, Double> {
+        val time = SystemClock.elapsedRealtime()
         val now = System.currentTimeMillis()
         scores = try {
             context.getSystemService(UsageStatsManager::class.java)

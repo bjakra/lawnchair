@@ -41,8 +41,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -84,13 +86,19 @@ class LawnchairLocalSearchAlgorithm(context: Context) : LawnchairSearchAlgorithm
                 // See issue #7325 (symptom 1: results gated behind the slowest provider).
                 val nonAppProvidersFlow = combine(
                     searchProviders.map { provider ->
-                        provider.search(context, query).onStart { emit(emptyList()) }
+                        provider.search(context, query).map { it to true }
+                            .onStart { emit(emptyList<SearchResult>() to false) }
                     },
                 ) { resultsArray ->
-                    resultsArray.toList().flatten()
+                    resultsArray.all { it.second } to resultsArray.flatMap { it.first }
                 }
 
-                nonAppProvidersFlow.collect { nonAppResults ->
+                // Graphite: results used to be shown as soon as any provider answered, so rows such as
+                // "Search on Play Store" appeared and were then pushed down by slower sections. Wait until
+                // every provider has answered, or a short settle time has passed, then show them together.
+                var latest: List<SearchResult> = emptyList()
+                var shown = false
+                suspend fun show(nonAppResults: List<SearchResult>) {
                     val calcResult = CalculatorSearchProvider.search(context, query)
                         .firstOrNull()
 
@@ -101,6 +109,21 @@ class LawnchairLocalSearchAlgorithm(context: Context) : LawnchairSearchAlgorithm
                     val adapterItems = transformSearchResults(searchTargets)
                     withContext(Dispatchers.Main) {
                         callback.onSearchResult(query, ArrayList(adapterItems))
+                    }
+                }
+                val settle = launch {
+                    delay(SETTLE_MILLIS)
+                    if (!shown) {
+                        shown = true
+                        show(latest)
+                    }
+                }
+                nonAppProvidersFlow.collect { (allAnswered, nonAppResults) ->
+                    latest = nonAppResults
+                    if (allAnswered || shown) {
+                        settle.cancel()
+                        shown = true
+                        show(nonAppResults)
                     }
                 }
             }
@@ -206,3 +229,6 @@ class LawnchairLocalSearchAlgorithm(context: Context) : LawnchairSearchAlgorithm
 }
 
 private const val ZERO_STATE_APP_COUNT = 4
+
+/** How long a search waits for slow providers before showing what it has. */
+private const val SETTLE_MILLIS = 250L

@@ -68,8 +68,9 @@ private constructor(
             currentValue = oldValue
         }
         // Delete old keys from preference, after the one-time migration is complete
+        // Graphite: "themed_icons" is also Lawnchair's live home screen switch, so it stays
         if (oldValue != null)
-            prefs.remove(*(legacyThemeKeys.values + LEGACY_MONO_THEME_ICON).toTypedArray())
+            prefs.remove(*legacyThemeKeys.values.toTypedArray())
         themePref.dispatchValue(currentValue)
     }
 

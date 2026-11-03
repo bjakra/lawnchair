@@ -31,6 +31,13 @@
     Refer comments around specific entries on how to extend individual components.
     -->
 
+    <!-- Graphite: for notification dots without a permission screen (granted to the platform signature) -->
+    <uses-permission android:name="android.permission.MANAGE_NOTIFICATION_LISTENERS" />
+    <!-- Graphite: double tap to sleep without an accessibility service -->
+    <uses-permission android:name="android.permission.DEVICE_POWER" />
+    <!-- Graphite: reading Graphite Weather, which only SystemUI and the launcher may read -->
+    <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
+
     <application
         android:name="app.lawnchair.LawnchairApp"
         android:backupAgent="com.android.launcher3.LauncherBackupAgent"

@@ -409,12 +409,18 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
                         mContent.getCurrentPage() - 1));
             }
         }
+        // Graphite: not every folder layout has page arrows (the app drawer's Caddy folders don't),
+        // so they are optional; this crashed the drawer as soon as it held a folder
         mLeftArrow = findViewById(R.id.left_indicator_arrow);
         mRightArrow = findViewById(R.id.right_indicator_arrow);
-        mRightArrow.setOnClickListener(
-                v -> mContent.snapToPage(mContent.getCurrentPage() + 1));
-        mLeftArrow.setOnClickListener(
-                v -> mContent.snapToPage(mContent.getCurrentPage() - 1));
+        if (mRightArrow != null) {
+            mRightArrow.setOnClickListener(
+                    v -> mContent.snapToPage(mContent.getCurrentPage() + 1));
+        }
+        if (mLeftArrow != null) {
+            mLeftArrow.setOnClickListener(
+                    v -> mContent.snapToPage(mContent.getCurrentPage() - 1));
+        }
     }
 
     /**
@@ -422,8 +428,8 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
      * arrows if pointer is enabled and indicator is visible.
      */
     public void onIndicatorVisibilityChanged() {
-        mLeftArrow.setVisibility(mPageIndicator.getVisibility());
-        mRightArrow.setVisibility(mPageIndicator.getVisibility());
+        if (mLeftArrow != null) mLeftArrow.setVisibility(mPageIndicator.getVisibility());
+        if (mRightArrow != null) mRightArrow.setVisibility(mPageIndicator.getVisibility());
 
         if (mPageIndicator.getVisibility() == View.VISIBLE) {
             ((MarginLayoutParams) mFolderName.getLayoutParams()).setMarginEnd(
@@ -451,6 +457,7 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
      * one end or the other.
      */
     public void updateArrowAlphas() {
+        if (mLeftArrow == null || mRightArrow == null) return;
         mLeftArrow.setAlpha(
                 0 == mContent.getCurrentPage() ? DISABLED_ARROW_OPACITY : FULLY_OPAQUE);
         mRightArrow.setAlpha(mContent.getPageCount() == mContent.getCurrentPage() + 1

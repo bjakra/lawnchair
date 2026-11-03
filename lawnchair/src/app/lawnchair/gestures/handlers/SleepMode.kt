@@ -11,6 +11,9 @@ enum class SleepMode(
     AUTO(
         labelResourceId = R.string.sleep_mode_auto,
     ),
+    SYSTEM(
+        labelResourceId = R.string.sleep_mode_system,
+    ),
     ROOT(
         labelResourceId = R.string.sleep_mode_root,
     ),

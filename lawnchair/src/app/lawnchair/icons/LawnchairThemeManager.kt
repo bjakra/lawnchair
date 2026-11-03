@@ -69,6 +69,9 @@ constructor(
         prefs1.coloredBackgroundLightness,
         prefs1.forceIconMonochrome,
         prefs1.launcherTheme,
+        // Graphite: Lawnchair's own themed icon switches, which Wallpaper & style also writes
+        prefs1.themedIcons,
+        prefs1.drawerThemedIcons,
     )
 
     private val prefListener = PreferenceChangeListener {
@@ -165,7 +168,10 @@ constructor(
         val currentPrefs1State = prefs1State()
         val appShapeKey = currentAppShape.getHashString() + currentPrefs1State
         val folderShapeKey = currentFolderShape.getHashString() + currentPrefs1State
-        val themeController = themePreference.value?.let {
+        // Graphite: one themed icons setting. Wallpaper & style writes Lawnchair's own switches, so those
+        // decide; Launcher3's separate theme value could otherwise keep icons themed after switching off.
+        val themedIconsOn = prefs1.themedIcons.get() || prefs1.drawerThemedIcons.get()
+        val themeController = themedIconsOn.takeIf { it }?.let {
             if (prefs1.forceIconMonochrome.get()) {
                 FORCED_MONO_THEME_CONTROLLER
             } else {

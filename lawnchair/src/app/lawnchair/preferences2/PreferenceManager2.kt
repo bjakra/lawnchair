@@ -760,6 +760,21 @@ class PreferenceManager2 @Inject constructor(
         defaultValue = true,
     )
 
+    val smartspaceWeather = preference(
+        key = booleanPreferencesKey("enable_smartspace_graphite_weather"),
+        defaultValue = true,
+    )
+
+    val smartspaceCalendarEvents = preference(
+        key = booleanPreferencesKey("enable_smartspace_graphite_calendar"),
+        defaultValue = true,
+    )
+
+    val smartspaceNextAlarm = preference(
+        key = booleanPreferencesKey("enable_smartspace_graphite_alarm"),
+        defaultValue = true,
+    )
+
     val smartspaceTorch = preference(
         key = booleanPreferencesKey("enable_smartspace_torch"),
         defaultValue = true,

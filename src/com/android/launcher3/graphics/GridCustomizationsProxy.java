@@ -251,8 +251,9 @@ public class GridCustomizationsProxy implements ProxyProvider {
             case ICON_THEMED: {
                 MatrixCursor cursor = new MatrixCursor(new String[]{BOOLEAN_VALUE});
                 // Graphite: Lawnchair's icon provider reads its own setting, not ThemePreference
-                boolean monoThemeEnabled = app.lawnchair.preferences.PreferenceManager
-                        .getInstance(mContext).getThemedIcons().get();
+                var lawnchairPrefs = app.lawnchair.preferences.PreferenceManager.getInstance(mContext);
+                boolean monoThemeEnabled = lawnchairPrefs.getThemedIcons().get()
+                        || lawnchairPrefs.getDrawerThemedIcons().get();
                 cursor.newRow().add(BOOLEAN_VALUE, monoThemeEnabled ? 1 : 0);
                 Log.d(TAG, "query: path=" + path + ", isMonoThemeEnabled=" + monoThemeEnabled);
                 return cursor;

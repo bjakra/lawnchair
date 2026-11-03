@@ -70,6 +70,24 @@ class LawnchairApp : LauncherApplication() {
         QuickStepContract.sRecentsDisabled = !recentsEnabled
         Flowerpot.Manager.getInstance(this)
         registerActivityLifecycleCallbacks(activityHandler)
+        grantNotificationListenerAccess()
+        app.lawnchair.search.algorithms.engine.provider.apps.AppUsageRanking.warmUp(this)
+    }
+
+    /**
+     * Graphite: as the ROM's platform-signed launcher, Lawnchair gives itself notification access for
+     * notification dots, instead of sending the user to a permission screen.
+     */
+    private fun grantNotificationListenerAccess() {
+        try {
+            val manager = getSystemService(android.app.NotificationManager::class.java)
+            val listener = android.content.ComponentName(this, com.android.launcher3.notification.NotificationListener::class.java)
+            if (!manager.isNotificationListenerAccessGranted(listener)) {
+                manager.setNotificationListenerAccessGranted(listener, true)
+            }
+        } catch (e: SecurityException) {
+            android.util.Log.w("LawnchairApp", "Could not grant notification access", e)
+        }
     }
 
     fun hideClockInStatusBar() {

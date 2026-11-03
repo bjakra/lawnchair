@@ -27,6 +27,9 @@ class SmartspaceProvider @Inject constructor(
 
     val dataSources = listOf(
         SmartspaceWidgetReader(context),
+        GraphiteWeatherProvider(context),
+        CalendarEventProvider(context),
+        NextAlarmProvider(context),
         BatteryStatusProvider(context),
         TorchProvider(context),
         NowPlayingProvider(context),

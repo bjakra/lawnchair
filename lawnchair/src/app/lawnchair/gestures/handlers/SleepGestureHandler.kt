@@ -39,6 +39,7 @@ class SleepGestureHandler(context: Context) : GestureHandler(context) {
         val pref = PreferenceManager2.getInstance(context).sleepMode.get().first()
         val method = when (pref) {
             SleepMode.AUTO -> methods.first { it.isSupported() }
+            SleepMode.SYSTEM -> methods.filterIsInstance<SleepMethodSystem>().first()
             SleepMode.ROOT -> methods.filterIsInstance<SleepMethodRoot>().first()
             SleepMode.ACCESSIBILITY -> methods.filterIsInstance<SleepMethodPieAccessibility>().first()
             SleepMode.DEVICE_ADMIN -> methods.filterIsInstance<SleepMethodDeviceAdmin>().first()
@@ -52,7 +53,9 @@ class SleepGestureHandler(context: Context) : GestureHandler(context) {
         method.sleep(launcher)
     }
 
+    // Graphite: the system method comes first, so the gesture never asks for root or accessibility
     private val methods = listOf(
+        SleepMethodSystem(context),
         SleepMethodRoot(context),
         SleepMethodPieAccessibility(context),
         SleepMethodDeviceAdmin(context),
@@ -61,6 +64,21 @@ class SleepGestureHandler(context: Context) : GestureHandler(context) {
     sealed class SleepMethod(protected val context: Context) {
         abstract suspend fun isSupported(): Boolean
         abstract suspend fun sleep(launcher: LawnchairLauncher)
+    }
+}
+
+/**
+ * Graphite: as the ROM's platform-signed launcher, Lawnchair holds DEVICE_POWER and turns the screen off
+ * like the power button does, with no accessibility service, device admin or root.
+ */
+class SleepMethodSystem(context: Context) : SleepGestureHandler.SleepMethod(context) {
+    override suspend fun isSupported() =
+        context.checkSelfPermission("android.permission.DEVICE_POWER") == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+    override suspend fun sleep(launcher: LawnchairLauncher) {
+        val powerManager = context.getSystemService(android.os.PowerManager::class.java)
+        android.os.PowerManager::class.java.getMethod("goToSleep", Long::class.javaPrimitiveType)
+            .invoke(powerManager, android.os.SystemClock.uptimeMillis())
     }
 }
 

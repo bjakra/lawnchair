@@ -106,9 +106,10 @@ class LawnQsbLayout(context: Context, attrs: AttributeSet?) : FrameLayout(contex
                                 val launcher = context.launcher
                                 launcher.lifecycleScope.launch {
                                     if (prefs2.matchHotseatQsbStyle.firstCached()) {
+                                        // Graphite: the keyboard now rises with the drawer, as one animation
                                         val searchUiManager = launcher.appsView.searchUiManager
                                         searchUiManager.setDirectFocus(true)
-                                        searchUiManager.editText?.showKeyboard()
+                                        app.lawnchair.SearchBarStateHandler.showKeyboardOnce = true
                                         launcher.animateToAllApps()
                                     } else {
                                         searchProvider.launch(launcher)

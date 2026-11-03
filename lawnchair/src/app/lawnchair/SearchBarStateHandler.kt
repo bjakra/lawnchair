@@ -22,6 +22,15 @@ class SearchBarStateHandler(private val launcher: LawnchairLauncher) : StateMana
     private val preferenceManager2 = PreferenceManager2.getInstance(launcher)
     private var autoShowKeyboard = false
 
+    companion object {
+        /**
+         * Graphite: set by the home search bar, so the next transition to all apps raises the keyboard
+         * together with the drawer, as with the "show keyboard" setting, instead of before it.
+         */
+        @JvmStatic
+        var showKeyboardOnce = false
+    }
+
     init {
         preferenceManager2.autoShowKeyboardInDrawer.onEach(launchIn = launcher.lifecycleScope) {
             autoShowKeyboard = it
@@ -117,7 +126,9 @@ class SearchBarStateHandler(private val launcher: LawnchairLauncher) : StateMana
         }
     }
     private fun shouldAnimateKeyboardShow(toState: LauncherState): Boolean {
-        if (!autoShowKeyboard || !Utilities.ATLEAST_R) return false
+        val wanted = autoShowKeyboard || showKeyboardOnce
+        if (toState == LauncherState.ALL_APPS) showKeyboardOnce = false
+        if (!wanted || !Utilities.ATLEAST_R) return false
 
         // If you are in Workspace and going somewhere that isn't AllApps, then false!
         if (!launcher.isInState(LauncherState.NORMAL) || toState != LauncherState.ALL_APPS) return false

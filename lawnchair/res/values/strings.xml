@@ -689,6 +689,7 @@
 
     <string name="sleep_mode_label">Sleep mode</string>
     <string name="sleep_mode_auto">Automatic</string>
+    <string name="sleep_mode_system">System (no extra permission)</string>
     <string name="sleep_mode_root">Root</string>
     <string name="sleep_mode_accessibility">Accessibility service</string>
     <string name="sleep_mode_device_admin">Device admin</string>
@@ -1109,4 +1110,7 @@
     <string name="search_toggle_flashlight">Flashlight</string>
     <string name="search_toggle_cast">Cast</string>
     <string name="search_toggle_location">Location</string>
+    <string name="smartspace_next_alarm">Next alarm</string>
+    <string name="smartspace_next_alarm_title">Alarm</string>
+    <string name="smartspace_calendar_events">Upcoming events</string>
 </resources>

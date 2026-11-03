@@ -82,12 +82,6 @@
     <dimen name="all_apps_header_bottom_padding">4dp</dimen>
 
     <!-- smartspace -->
-    <!-- Graphite: sizes of Google's At a Glance, overriding Smartspacer's client library -->
-    <!-- Below any workspace row, so the card fills its row rather than being scaled and clipped -->
-    <dimen name="smartspace_height">48dp</dimen>
-    <dimen name="smartspace_page_title_size">24sp</dimen>
-    <dimen name="smartspace_page_subtitle_size">16sp</dimen>
-    <dimen name="smartspace_page_icon_size">20sp</dimen>
     <dimen name="smartspaceAmbientShadowBlur">1.5dp</dimen>
     <dimen name="smartspaceKeyShadowBlur">2dp</dimen>
     <dimen name="smartspaceKeyShadowOffset">0.5dp</dimen>
@@ -99,7 +93,7 @@
     <dimen name="enhanced_smartspace_dismiss_margin">16dp</dimen>
     <dimen name="enhanced_smartspace_height">104dp</dimen>
     <dimen name="enhanced_smartspace_icon_margin">6dp</dimen>
-    <dimen name="enhanced_smartspace_icon_size">20dp</dimen>
+    <dimen name="enhanced_smartspace_icon_size">22dp</dimen>
     <dimen name="enhanced_smartspace_margin_start_launcher">10dp</dimen>
     <dimen name="enhanced_smartspace_padding_start">16dp</dimen>
     <dimen name="enhanced_smartspace_padding_end">16dp</dimen>
@@ -108,8 +102,9 @@
     <dimen name="enhanced_smartspace_secondary_card_end_margin">1dp</dimen>
     <dimen name="enhanced_smartspace_secondary_card_start_margin">8dp</dimen>
     <dimen name="enhanced_smartspace_subtitle_margin_top">5dp</dimen>
-    <dimen name="enhanced_smartspace_subtitle_size">14sp</dimen>
-    <dimen name="enhanced_smartspace_title_size">18sp</dimen>
+    <dimen name="enhanced_smartspace_subtitle_size">18sp</dimen>
+    <!-- Graphite: Pixel At a Glance sizes -->
+    <dimen name="enhanced_smartspace_title_size">24sp</dimen>
     <dimen name="key_text_shadow_dx">0.5dp</dimen>
     <dimen name="key_text_shadow_dy">0.5dp</dimen>
     <dimen name="key_text_shadow_radius">0.5dp</dimen>
