@@ -783,6 +783,11 @@ class PreferenceManager2 @Inject constructor(
         defaultValue = true,
     )
 
+    val smartspaceRecognisedSong = preference(
+        key = booleanPreferencesKey("enable_smartspace_graphite_recognised_song"),
+        defaultValue = true,
+    )
+
     val smartspaceDoNotDisturb = preference(
         key = booleanPreferencesKey("enable_smartspace_graphite_dnd"),
         defaultValue = true,

@@ -1112,6 +1112,7 @@
     <string name="search_toggle_location">Location</string>
     <string name="smartspace_next_alarm">Next alarm</string>
     <string name="smartspace_next_alarm_title">Alarm</string>
+    <string name="smartspace_recognised_song">Now Playing (songs nearby)</string>
     <string name="smartspace_dnd">Do Not Disturb</string>
     <string name="smartspace_dnd_on">On</string>
     <string name="smartspace_bluetooth_battery">Bluetooth device battery</string>

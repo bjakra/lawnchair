@@ -30,6 +30,7 @@ class SmartspaceProvider @Inject constructor(
         GraphiteWeatherProvider(context),
         CalendarEventProvider(context),
         NextAlarmProvider(context),
+        RecognisedSongProvider(context),
         ClockTimerProvider(context),
         MissedCallProvider(context),
         DoNotDisturbProvider(context),
