@@ -1103,7 +1103,7 @@
     <string name="search_pref_result_quick_toggles_title">Quick settings</string>
     <string name="search_pref_result_calendar_title">Calendar events</string>
     <string name="search_calendar_event">%1$s · %2$s</string>
-    <string name="search_toggle_wifi">Internet</string>
+    <string name="search_toggle_wifi">Wi-Fi</string>
     <string name="search_toggle_bluetooth">Bluetooth</string>
     <string name="search_toggle_airplane">Airplane mode</string>
     <string name="search_toggle_night_light">Night Light</string>
