@@ -18,7 +18,11 @@ import com.android.launcher3.R
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
-/** Graphite: battery level of connected Bluetooth headphones and other audio devices. */
+/**
+ * Graphite: battery of connected Bluetooth headphones and other audio devices. Earbuds that report their left, right
+ * and case levels (Bluetooth metadata, set by the earbuds' LE Audio service or a companion app) show all three;
+ * others show the single level from the hands-free profile.
+ */
 class BluetoothBatteryProvider(context: Context) :
     SmartspaceDataSource(
         context,
@@ -45,17 +49,17 @@ class BluetoothBatteryProvider(context: Context) :
         return runCatching {
             adapter?.bondedDevices.orEmpty()
                 .filter { isAudio(it) && isConnected(it) }
-                .mapNotNull { device -> batteryLevel(device)?.let { target(device, it) } }
+                .mapNotNull { device -> batterySummary(device)?.let { target(device, it) } }
         }.getOrDefault(emptyList())
     }
 
-    private fun target(device: BluetoothDevice, level: Int) = SmartspaceTarget(
+    private fun target(device: BluetoothDevice, summary: String) = SmartspaceTarget(
         id = "graphiteBluetooth${device.address}",
         headerAction = SmartspaceAction(
             id = "graphiteBluetoothAction${device.address}",
             icon = Icon.createWithResource(context, R.drawable.ic_smartspace_headphones),
             title = device.alias ?: device.name ?: "",
-            subtitle = context.getString(R.string.n_percent, level),
+            subtitle = summary,
             intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
         ),
         score = SmartspaceScores.SCORE_BATTERY,
@@ -76,7 +80,28 @@ class BluetoothBatteryProvider(context: Context) :
         return level.takeIf { it in 0..100 }
     }
 
+    /** "L 80% · R 75% · Case 40%" when the earbuds report their parts, otherwise "80%". */
+    private fun batterySummary(device: BluetoothDevice): String? {
+        val parts = listOfNotNull(
+            metadataLevel(device, METADATA_UNTETHERED_LEFT_BATTERY)?.let { context.getString(R.string.bluetooth_battery_left, it) },
+            metadataLevel(device, METADATA_UNTETHERED_RIGHT_BATTERY)?.let { context.getString(R.string.bluetooth_battery_right, it) },
+            metadataLevel(device, METADATA_UNTETHERED_CASE_BATTERY)?.let { context.getString(R.string.bluetooth_battery_case, it) },
+        )
+        if (parts.isNotEmpty()) return parts.joinToString(" · ")
+        return batteryLevel(device)?.let { context.getString(R.string.n_percent, it) }
+    }
+
+    // BluetoothDevice.getMetadata needs BLUETOOTH_PRIVILEGED, which Lawnchair holds as a platform-signed app.
+    private fun metadataLevel(device: BluetoothDevice, key: Int): Int? = runCatching {
+        val value = BluetoothDevice::class.java.getMethod("getMetadata", Int::class.javaPrimitiveType)
+            .invoke(device, key) as ByteArray? ?: return null
+        String(value).trim().toInt().takeIf { it in 0..100 }
+    }.getOrNull()
+
     companion object {
         private const val ACTION_BATTERY_LEVEL_CHANGED = "android.bluetooth.device.action.BATTERY_LEVEL_CHANGED"
+        private const val METADATA_UNTETHERED_LEFT_BATTERY = 10
+        private const val METADATA_UNTETHERED_RIGHT_BATTERY = 11
+        private const val METADATA_UNTETHERED_CASE_BATTERY = 12
     }
 }

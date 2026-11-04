@@ -24,8 +24,9 @@ import com.google.android.msdl.data.model.MSDLToken
 
 /**
  * Graphite: a row of up to two quick setting tiles, styled like the Pixel launcher's search: filled
- * with the primary colour when on. The tile updates right away, since search results aren't re-read
- * after a tap.
+ * with the primary colour when on. A tile that toggles directly flips right away, since search results
+ * aren't re-read after a tap; every tile then re-reads its real state shortly after the tap and when
+ * search comes back into focus (after a settings page, or if a toggle failed).
  */
 class SearchResultQuickToggles(context: Context, attrs: AttributeSet?) :
     LinearLayout(context, attrs),
@@ -35,22 +36,46 @@ class SearchResultQuickToggles(context: Context, attrs: AttributeSet?) :
 
     override fun launch() = false
 
+    private val bound = mutableMapOf<View, QuickToggle>()
+
     override fun bind(target: SearchTargetCompat, shortcuts: List<SearchTargetCompat>) {
+        bound.clear()
         val names = target.extras.getStringArray(EXTRA_TOGGLES).orEmpty()
         val states = target.extras.getIntArray(EXTRA_STATES) ?: IntArray(names.size)
         listOf(R.id.quick_toggle_first, R.id.quick_toggle_second).forEachIndexed { index, id ->
             val tile = findViewById<View>(id)
             val toggle = names.getOrNull(index)?.let { name -> QuickToggle.entries.find { it.name == name } }
             tile.visibility = if (toggle == null) INVISIBLE else VISIBLE
-            if (toggle != null) bindTile(tile, toggle, states[index])
+            if (toggle != null) {
+                bound[tile] = toggle
+                bindTile(tile, toggle, states[index])
+            }
+        }
+    }
+
+    override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
+        super.onWindowFocusChanged(hasWindowFocus)
+        if (hasWindowFocus) bound.forEach { (tile, toggle) -> resync(tile, toggle) }
+    }
+
+    /** Shows the toggle's real state, animating if it differs from what the tile shows. */
+    private fun resync(tile: View, toggle: QuickToggle) {
+        val actual = when (toggle.isActive(context)) {
+            null -> return
+            true -> STATE_ON
+            false -> STATE_OFF
+        }
+        if (tile.getTag(R.id.quick_toggle_first) != actual) {
+            tile.setTag(R.id.quick_toggle_first, actual)
+            applyState(tile, actual == STATE_ON, animate = true)
         }
     }
 
     private fun bindTile(tile: View, toggle: QuickToggle, initialState: Int) {
         tile.findViewById<ImageView>(R.id.quick_toggle_icon).setImageResource(toggle.iconRes)
         tile.findViewById<TextView>(R.id.quick_toggle_label).setText(toggle.labelRes)
-        var state = initialState
-        applyState(tile, state == STATE_ON, animate = false)
+        tile.setTag(R.id.quick_toggle_first, initialState)
+        applyState(tile, initialState == STATE_ON, animate = false)
         tile.setOnTouchListener { view, event ->
             // SystemUI's tiles shrink slightly while pressed and spring back on release
             when (event.actionMasked) {
@@ -66,18 +91,17 @@ class SearchResultQuickToggles(context: Context, attrs: AttributeSet?) :
                 Intent(context, QuickToggleActivity::class.java)
                     .putExtra(QuickToggleActivity.EXTRA_TOGGLE, toggle.name),
             )
+            var state = tile.getTag(R.id.quick_toggle_first) as? Int ?: STATE_UNKNOWN
             if (state != STATE_UNKNOWN && toggle in DIRECT_TOGGLES) {
                 state = if (state == STATE_ON) STATE_OFF else STATE_ON
+                tile.setTag(R.id.quick_toggle_first, state)
                 applyState(tile, state == STATE_ON, animate = true)
             }
-            // The same haptics as SystemUI's quick settings tiles
+            // The same haptics as SystemUI's quick settings tiles, for every tile
             MSDLPlayerWrapper.INSTANCE.get(context).playToken(
-                when (state) {
-                    STATE_ON -> MSDLToken.SWITCH_ON
-                    STATE_OFF -> MSDLToken.SWITCH_OFF
-                    else -> MSDLToken.TAP_HIGH_EMPHASIS
-                },
+                if (state == STATE_OFF) MSDLToken.SWITCH_OFF else MSDLToken.SWITCH_ON,
             )
+            tile.postDelayed({ if (bound[tile] == toggle) resync(tile, toggle) }, RESYNC_MILLIS)
         }
     }
 
@@ -139,9 +163,13 @@ class SearchResultQuickToggles(context: Context, attrs: AttributeSet?) :
         private const val PRESS_MILLIS = 100L
         private const val RELEASE_MILLIS = 350L
         private const val STATE_MILLIS = 350L
+        private const val RESYNC_MILLIS = 1200L
 
-        /** The rest open a settings page, so their state doesn't change on tap. */
+        /** Hotspot and cast open a settings page, so their state doesn't change on tap. */
         private val DIRECT_TOGGLES = setOf(
+            QuickToggle.WIFI,
+            QuickToggle.BLUETOOTH,
+            QuickToggle.FLASHLIGHT,
             QuickToggle.AIRPLANE_MODE,
             QuickToggle.NIGHT_LIGHT,
             QuickToggle.DARK_THEME,

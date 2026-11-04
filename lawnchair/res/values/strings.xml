@@ -167,6 +167,9 @@
     <string name="iconPackPackageDefault" translatable="false">""</string>
 
     <string name="n_percent" translatable="false">%1$d%%</string>
+    <string name="bluetooth_battery_left">L %1$d%%</string>
+    <string name="bluetooth_battery_right">R %1$d%%</string>
+    <string name="bluetooth_battery_case">Case %1$d%%</string>
     <string name="x_with_y_count">%1$s (%2$d)</string>
     <string name="x_by_y">%1$d &#xd7; %2$d</string>
     <string name="x_and_y">%1$s &amp; %2$s</string>
@@ -1124,7 +1127,8 @@
     <string name="smartspace_missed_call">Missed call</string>
     <string name="smartspace_calendar_events">Upcoming events</string>
     <string name="qsb_color_label">Colour</string>
-    <string name="qsb_color_auto">Automatic (Material You with themed icons)</string>
+    <string name="qsb_color_auto">Automatic (like the icons when themed icons are on)</string>
+    <string name="qsb_color_themed_icons">Themed icon colours</string>
     <string name="qsb_color_neutral">Material You, neutral</string>
     <string name="qsb_color_primary">Material You, primary</string>
     <string name="qsb_color_secondary">Material You, secondary</string>

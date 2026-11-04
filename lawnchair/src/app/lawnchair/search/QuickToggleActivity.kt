@@ -2,6 +2,7 @@ package app.lawnchair.search
 
 import android.app.Activity
 import android.app.UiModeManager
+import android.bluetooth.BluetoothManager
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -10,6 +11,7 @@ import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.location.LocationManager
 import android.net.ConnectivityManager
+import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -60,7 +62,16 @@ class QuickToggleActivity : Activity() {
             QuickToggle.LOCATION ->
                 getSystemService(LocationManager::class.java).setLocationEnabledForUser(!on, Process.myUserHandle())
             QuickToggle.FLASHLIGHT -> return toggleFlashlight(applicationContext)
-            QuickToggle.WIFI, QuickToggle.BLUETOOTH, QuickToggle.HOTSPOT, QuickToggle.CAST -> return false
+            // Allowed for system apps; false (for example while airplane mode blocks it) opens the panel instead
+            @Suppress("DEPRECATION")
+            QuickToggle.WIFI -> return getSystemService(WifiManager::class.java).setWifiEnabled(!on)
+            // Needs BLUETOOTH_PRIVILEGED, which Lawnchair holds as a platform-signed app
+            @Suppress("DEPRECATION")
+            QuickToggle.BLUETOOTH -> {
+                val adapter = getSystemService(BluetoothManager::class.java)?.adapter ?: return false
+                return if (on) adapter.disable() else adapter.enable()
+            }
+            QuickToggle.HOTSPOT, QuickToggle.CAST -> return false
         }
         return true
     }

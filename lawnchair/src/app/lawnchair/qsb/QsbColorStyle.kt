@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import app.lawnchair.icons.lawnchairThemedColors
 import app.lawnchair.preferences.observeAsState
 import app.lawnchair.preferences.preferenceManager
 import app.lawnchair.preferences2.asState
@@ -13,8 +14,8 @@ import com.android.launcher3.R
 /**
  * Graphite: Material You colours for the search bars on the home screen and in the app drawer, like
  * the Pixel launcher's bar. [LAWNCHAIR] keeps Lawnchair's own colours and the "accent colour" switch.
- * [AUTO], the default, matches the home screen: strong Material You while themed icons are on,
- * Lawnchair's colours otherwise. Resolve it with [rememberQsbColorStyle] before drawing.
+ * [AUTO], the default, matches the home screen: the themed icons' own background and glyph colours
+ * ([THEMED_ICONS]) while themed icons are on, Lawnchair's colours otherwise. Resolve it with [rememberQsbColorStyle] before drawing.
  */
 enum class QsbColorStyle(
     @param:StringRes val labelRes: Int,
@@ -22,6 +23,7 @@ enum class QsbColorStyle(
     @param:ColorRes private val foregroundRes: Int,
 ) {
     AUTO(R.string.qsb_color_auto, 0, 0),
+    THEMED_ICONS(R.string.qsb_color_themed_icons, 0, 0),
     NEUTRAL(R.string.qsb_color_neutral, R.color.materialColorSurfaceContainerHigh, R.color.materialColorOnSurfaceVariant),
     PRIMARY(R.string.qsb_color_primary, R.color.materialColorPrimaryContainer, R.color.materialColorOnPrimaryContainer),
     SECONDARY(R.string.qsb_color_secondary, R.color.materialColorSecondaryContainer, R.color.materialColorOnSecondaryContainer),
@@ -32,14 +34,16 @@ enum class QsbColorStyle(
     val isMaterialYou get() = this != LAWNCHAIR && this != AUTO
 
     fun resolve(themedIcons: Boolean) = if (this == AUTO) {
-        if (themedIcons) PRIMARY else LAWNCHAIR
+        if (themedIcons) THEMED_ICONS else LAWNCHAIR
     } else {
         this
     }
 
-    fun background(context: Context): Int = context.getColor(backgroundRes)
+    fun background(context: Context): Int =
+        if (this == THEMED_ICONS) lawnchairThemedColors(context).iconBackgroundColor else context.getColor(backgroundRes)
 
-    fun foreground(context: Context): Int = context.getColor(foregroundRes)
+    fun foreground(context: Context): Int =
+        if (this == THEMED_ICONS) lawnchairThemedColors(context).iconForegroundColor else context.getColor(foregroundRes)
 
     companion object {
         fun fromString(value: String) = entries.firstOrNull { it.name.equals(value, ignoreCase = true) } ?: AUTO

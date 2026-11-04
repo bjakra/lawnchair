@@ -32,6 +32,11 @@
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" tools:ignore="ProtectedPermissions" />
     <!-- Graphite: At a Glance shows the battery of connected Bluetooth headphones -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!-- Graphite: left, right and case battery of earbuds (BluetoothDevice metadata) for At a Glance -->
+    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
+    <!-- Graphite: Wi-Fi and hotspot quick toggles in search -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <!-- Graphite: the song Now Playing recognised, for At a Glance -->
     <uses-permission android:name="org.graphite.nowplaying.ACCESS_SERVICE" />
     <uses-permission android:name="android.permission.MODIFY_DAY_NIGHT_MODE" tools:ignore="ProtectedPermissions" />

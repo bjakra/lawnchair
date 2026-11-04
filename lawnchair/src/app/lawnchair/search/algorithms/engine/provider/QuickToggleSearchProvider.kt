@@ -1,8 +1,15 @@
 package app.lawnchair.search.algorithms.engine.provider
 
 import android.app.UiModeManager
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.res.Configuration
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
+import android.net.wifi.WifiManager
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -32,12 +39,16 @@ enum class QuickToggle(
     LOCATION(R.string.search_toggle_location, R.drawable.ic_search_toggle_location_on, listOf("gps")),
     ;
 
-    /** Null when it has no readable on/off state, as those just open a settings page. */
+    /** On or off like SystemUI's tile; null only if the state can't be read. */
     fun isActive(context: Context): Boolean? {
         val resolver = context.contentResolver
         return when (this) {
             WIFI -> Settings.Global.getInt(resolver, Settings.Global.WIFI_ON, 0) != 0
-            BLUETOOTH -> Settings.Global.getInt(resolver, Settings.Global.BLUETOOTH_ON, 0) != 0
+            // Turning on counts as on, like SystemUI's tile
+            BLUETOOTH -> runCatching {
+                val state = context.getSystemService(BluetoothManager::class.java)!!.adapter!!.state
+                state == BluetoothAdapter.STATE_ON || state == BluetoothAdapter.STATE_TURNING_ON
+            }.getOrElse { Settings.Global.getInt(resolver, Settings.Global.BLUETOOTH_ON, 0) != 0 }
             AIRPLANE_MODE -> Settings.Global.getInt(resolver, Settings.Global.AIRPLANE_MODE_ON, 0) != 0
             NIGHT_LIGHT -> Settings.Secure.getInt(resolver, NIGHT_DISPLAY_ACTIVATED, 0) != 0
             AUTO_ROTATE -> Settings.System.getInt(resolver, Settings.System.ACCELEROMETER_ROTATION, 0) != 0
@@ -51,12 +62,50 @@ enum class QuickToggle(
                     mode == UiModeManager.MODE_NIGHT_YES
                 }
             }
-            HOTSPOT, FLASHLIGHT, CAST -> null
+            // Hidden WifiManager API; Lawnchair is platform signed, so it may call it
+            HOTSPOT -> runCatching {
+                WifiManager::class.java.getMethod("isWifiApEnabled")
+                    .invoke(context.getSystemService(WifiManager::class.java)) as Boolean
+            }.getOrDefault(false)
+            FLASHLIGHT -> TorchState.isOn(context)
+            // Only opens the cast settings; off like SystemUI's tile while nothing is cast
+            CAST -> false
         }
     }
 
     companion object {
         const val NIGHT_DISPLAY_ACTIVATED = "night_display_activated"
+    }
+}
+
+/** Graphite: the torch state, which CameraManager only reports through a callback. */
+object TorchState {
+    @Volatile private var enabled = false
+    private var registered = false
+
+    fun isOn(context: Context): Boolean {
+        register(context.applicationContext)
+        return enabled
+    }
+
+    @Synchronized
+    private fun register(context: Context) {
+        if (registered) return
+        registered = true
+        runCatching {
+            val camera = context.getSystemService(CameraManager::class.java)
+            val id = camera.cameraIdList.firstOrNull {
+                camera.getCameraCharacteristics(it).get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
+            } ?: return
+            camera.registerTorchCallback(
+                object : CameraManager.TorchCallback() {
+                    override fun onTorchModeChanged(cameraId: String, on: Boolean) {
+                        if (cameraId == id) enabled = on
+                    }
+                },
+                Handler(Looper.getMainLooper()),
+            )
+        }
     }
 }
 
